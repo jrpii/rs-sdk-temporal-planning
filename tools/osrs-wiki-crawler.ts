@@ -1010,9 +1010,15 @@ async function crawl(options: CrawlerOptions): Promise<CrawlStats> {
 try {
     const options = parseArgs(runtimeProcess.argv.slice(2));
     const stats = await crawl(options);
-    console.log(`Done. Discovered: ${stats.discovered}, fetched: ${stats.fetched}, skipped: ${stats.skipped}, errors: ${stats.errors}`);
-    console.log(`Dataset total: ${stats.totalRecords} JSONL records (${stats.totalPages} unique canonical pages), ${formatBytes(stats.outputBytes)} on disk.`);
-    console.log(`Content total: ${formatBytes(stats.htmlBytes)} html${stats.wikitextBytes > 0 ? `, ${formatBytes(stats.wikitextBytes)} wikitext` : ''}.`);
+    if (!options.redirectsOnly) {
+        console.log(`Done. Discovered: ${stats.discovered}, fetched: ${stats.fetched}, skipped: ${stats.skipped}, errors: ${stats.errors}`);
+        console.log(`Dataset total: ${stats.totalRecords} JSONL records (${stats.totalPages} unique canonical pages), ${formatBytes(stats.outputBytes)} on disk.`);
+        console.log(`Content total: ${formatBytes(stats.htmlBytes)} html${stats.wikitextBytes > 0 ? `, ${formatBytes(stats.wikitextBytes)} wikitext` : ''}.`);
+    }
+    if (options.redirectsOutput) {
+        console.log(`Redirect aliases: fetched ${stats.redirectAliasesFetched}, skipped ${stats.redirectAliasesSkipped}, errors ${stats.redirectAliasesErrors}.`);
+        console.log(`Redirect alias total: ${stats.totalRedirectAliases} JSONL records, ${formatBytes(stats.redirectsOutputBytes)} on disk.`);
+    }
 } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     runtimeProcess.exit(1);
