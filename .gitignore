@@ -21,3 +21,4 @@ bots/*/
 # SDK is copied into Docker via Dockerfile; don't duplicate it under server/
 server/sdk/
 jobs/
+data/wiki/
