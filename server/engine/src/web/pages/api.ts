@@ -2,7 +2,19 @@ import fs from 'fs';
 import * as rsmod from '@2004scape/rsmod-pathfinder';
 import { CollisionFlag, LocLayer } from '@2004scape/rsmod-pathfinder';
 import LocType from '#/cache/config/LocType.js';
+import World from '#/engine/World.js';
 import Packet from '#/io/Packet.js';
+import Environment from '#/util/Environment.js';
+
+function jsonResponse(data: unknown, status = 200): Response {
+    return new Response(JSON.stringify(data, null, 2), {
+        status,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        }
+    });
+}
 
 export async function handleScreenshotUpload(req: Request, url: URL): Promise<Response | null> {
     if (url.pathname !== '/api/screenshot' || req.method !== 'POST') {
@@ -24,6 +36,45 @@ export async function handleScreenshotUpload(req: Request, url: URL): Promise<Re
             headers: { 'Content-Type': 'application/json' }
         });
     }
+}
+
+export async function handleExperimentControlApi(req: Request, url: URL): Promise<Response | null> {
+    if (!url.pathname.startsWith('/api/experiment/')) {
+        return null;
+    }
+
+    if (!Environment.NODE_DEBUG) {
+        return jsonResponse({ success: false, error: 'Experiment controls require NODE_DEBUG=true' }, 403);
+    }
+
+    if (url.pathname === '/api/experiment/status') {
+        return jsonResponse({ success: true, ...World.getExperimentControlState() });
+    }
+
+    if (req.method !== 'POST') {
+        return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    }
+
+    if (url.pathname === '/api/experiment/pause') {
+        return jsonResponse({ success: true, ...World.setPaused(true) });
+    }
+
+    if (url.pathname === '/api/experiment/resume') {
+        return jsonResponse({ success: true, ...World.setPaused(false) });
+    }
+
+    if (url.pathname === '/api/experiment/step') {
+        let ticks = 1;
+        try {
+            const body = await req.json();
+            ticks = Number(body?.ticks ?? 1);
+        } catch {
+            ticks = 1;
+        }
+        return jsonResponse({ success: true, ...World.stepTicks(ticks) });
+    }
+
+    return jsonResponse({ success: false, error: 'Unknown experiment control endpoint' }, 404);
 }
 
 // Export collision data for SDK bundling

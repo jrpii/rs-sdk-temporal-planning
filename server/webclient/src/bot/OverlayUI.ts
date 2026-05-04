@@ -55,15 +55,18 @@ export class OverlayUI {
         this.container = document.createElement('div');
         this.container.id = 'bot-sdk-overlay';
         this.container.style.cssText = `
-            width: 100%;
-            max-width: 700px;
+            width: min(96vw, 1400px);
+            max-width: 1400px;
+            min-width: 700px;
+            min-height: 520px;
             display: flex;
             flex-direction: column;
             background: rgba(0, 0, 0, 0.85);
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 11px;
             color: #04A800;
-            overflow: hidden;
+            resize: both;
+            overflow: auto;
             margin-top: 10px;
         `;
 
@@ -73,6 +76,8 @@ export class OverlayUI {
             display: flex;
             flex-direction: row;
             flex: 1;
+            height: 700px;
+            max-height: 75vh;
             min-height: 0;
         `;
 
@@ -104,7 +109,7 @@ export class OverlayUI {
             padding: 10px;
             overflow-y: auto;
             overflow-x: hidden;
-            max-height: 350px;
+            max-height: none;
             white-space: pre-wrap;
             word-break: break-word;
             tab-size: 4;
@@ -145,7 +150,7 @@ export class OverlayUI {
             padding: 10px;
             overflow-y: auto;
             overflow-x: hidden;
-            max-height: 350px;
+            max-height: none;
             white-space: pre-wrap;
             word-break: break-word;
             color: #FFD700;
