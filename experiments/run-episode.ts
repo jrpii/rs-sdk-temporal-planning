@@ -102,6 +102,17 @@ function findCookingSource(state: BotWorldState): NearbyLoc | null {
     return sources[0] ?? null;
 }
 
+function findOpenDoor(state: BotWorldState): NearbyLoc | null {
+    return state.nearbyLocs
+        .filter(loc => /door|gate/i.test(loc.name))
+        .filter(loc => loc.optionsWithIndex.some(option => /^open$/i.test(option.text)))
+        .sort((a, b) => a.distance - b.distance)[0] ?? null;
+}
+
+function shouldAttemptReachabilityRecovery(result: ActionResult): boolean {
+    return !result.success && /cannot reach|can't reach|cant reach|out of reach|could not walk/i.test(result.message);
+}
+
 async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentBot>>, timeout = 15_000): Promise<StateSummary> {
     const state = await conn.sdk.waitForCondition(
         s => s.inGame && Boolean(s.player) && (s.nearbyLocs.length > 0 || s.nearbyNpcs.length > 0),
@@ -111,6 +122,20 @@ async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentB
 }
 
 async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>>, step: PlanStep): Promise<ActionResult> {
+    if (step.actionSchemaId === 'open_nearby_door') {
+        const state = conn.sdk.getState();
+        if (!state) return { success: false, message: 'No game state available' };
+
+        const door = findOpenDoor(state) ?? await conn.sdk.scanFindNearbyLoc(/door|gate/i, 12);
+        if (!door) return { success: false, message: 'No nearby door or gate found for reachability recovery' };
+
+        const result = await conn.bot.openDoor(door);
+        return {
+            ...result,
+            message: `Reachability recovery via ${door.name}: ${result.message}`,
+        };
+    }
+
     if (step.actionSchemaId !== 'use_item_on_cooking_source') {
         return { success: false, message: `No executor for action schema: ${step.actionSchemaId ?? 'unknown'}` };
     }
@@ -224,14 +249,26 @@ async function main() {
             learnedActions: domainModel?.actions,
         });
 
+        console.log(`[Episode] Planner notes: ${plannerOutput.notes ?? 'none'}`);
+        console.log('[Episode] Plan to execute:');
+        if (plannerOutput.plan.length === 0) {
+            console.log('[Episode]   (empty plan)');
+        }
+        for (const step of plannerOutput.plan.slice(0, task.maxSteps)) {
+            console.log(`[Episode]   ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
+        }
+
         let verifier = evaluateVerifiers(before, task.success, diffStateSummaries(before, before));
+        let replanningCount = 0;
 
         for (const step of plannerOutput.plan.slice(0, task.maxSteps)) {
             const stepBefore = await currentSummary(conn, readyTimeout);
             const startedTick = stepBefore.tick;
+            console.log(`[Episode] Executing step ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
             const result = await executeStep(conn, step);
             const stepAfter = await currentSummary(conn, readyTimeout);
             const delta = diffStateSummaries(stepBefore, stepAfter);
+            console.log(`[Episode] Result step ${step.stepIndex}: ${result.success ? 'ok' : 'failed'} - ${result.message}`);
 
             execution.push({
                 stepIndex: step.stepIndex,
@@ -245,7 +282,39 @@ async function main() {
             });
 
             verifier = evaluateVerifiers(stepAfter, task.success, diffStateSummaries(before, stepAfter));
-            if (verifier.success || !result.success) break;
+            if (verifier.success) break;
+            if (!result.success) {
+                if (!shouldAttemptReachabilityRecovery(result)) break;
+
+                const recoveryStep: PlanStep = {
+                    stepIndex: step.stepIndex,
+                    naturalLanguage: `Replan after reachability failure: open a nearby door or gate, then continue with the remaining plan.`,
+                    actionSchemaId: 'open_nearby_door',
+                };
+                replanningCount++;
+                console.log(`[Episode] Triggering replanning #${replanningCount}: ${result.message}`);
+                console.log(`[Episode] Executing recovery step: ${recoveryStep.actionSchemaId} - ${recoveryStep.naturalLanguage}`);
+
+                const recoveryBefore = await currentSummary(conn, readyTimeout);
+                const recoveryStartedTick = recoveryBefore.tick;
+                const recoveryResult = await executeStep(conn, recoveryStep);
+                const recoveryAfter = await currentSummary(conn, readyTimeout);
+                const recoveryDelta = diffStateSummaries(recoveryBefore, recoveryAfter);
+                console.log(`[Episode] Result recovery step: ${recoveryResult.success ? 'ok' : 'failed'} - ${recoveryResult.message}`);
+
+                execution.push({
+                    stepIndex: recoveryStep.stepIndex,
+                    action: recoveryStep.naturalLanguage,
+                    startedTick: recoveryStartedTick,
+                    endedTick: recoveryAfter.tick,
+                    result: recoveryResult,
+                    before: recoveryBefore,
+                    after: recoveryAfter,
+                    delta: recoveryDelta,
+                });
+
+                if (!recoveryResult.success) break;
+            }
         }
 
         const finalState = await currentSummary(conn, readyTimeout);
@@ -272,7 +341,7 @@ async function main() {
                 success: verifier.success,
                 totalDurationMs: Date.now() - startedAt,
                 invalidActionCount: execution.filter(step => !step.result.success).length,
-                replanningCount: 0,
+                replanningCount,
             },
             finalState,
             rawFinalState: conn.sdk.getState(),

@@ -17,9 +17,9 @@ This wraps, per trial:
   3. sdk/cli.ts <bot> --server <server> --timeout <timeout> --launch
   4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>] [--force-run]
 
-For model != none, the batch runner calls extract-domain.ts once per method/model
-that needs an LLM-derived domain. Pass --rag to seed static_rag and
-learned_domain domain extraction with the 2004 Graph RAG context.
+For model != none, the batch runner captures the live post-checkpoint state and
+calls extract-domain.ts for each fresh trial domain. Pass --rag to seed
+static_rag and learned_domain domain extraction with the 2004 Graph RAG context.
 For learned_domain, it refines the model after each episode and feeds the refined
 model into the next episode.
 `.trim());
@@ -177,9 +177,9 @@ function methodUsesRag(method: PlannerMethod, ragEnabled: boolean): boolean {
     return ragEnabled && (method === 'static_rag' || method === 'learned_domain');
 }
 
-function domainPathFor(task: TaskSpec, method: PlannerMethod, model: string, domainDir: string, ragEnabled: boolean): string {
+function domainPathFor(task: TaskSpec, method: PlannerMethod, model: string, domainDir: string, ragEnabled: boolean, trialIndex: number, run: number): string {
     const source = methodUsesRag(method, ragEnabled) ? 'rag' : 'internal';
-    return join(domainDir, `${task.id}-${method}-${source}-${safeModelName(model)}.json`);
+    return join(domainDir, `${task.id}-${method}-${source}-${safeModelName(model)}-trial-${trialIndex}-run-${run}.json`);
 }
 
 function domainUseLabel(method: PlannerMethod, model: string, ragEnabled: boolean, domainPath?: string): string {
@@ -233,48 +233,64 @@ async function requestBrowserReload(gatewayHttp: string, botName: string): Promi
     }
 }
 
+function stateSnapshotPath(task: TaskSpec, method: PlannerMethod, model: string, domainDir: string, trialIndex: number, run: number): string {
+    return join(domainDir, 'state-snapshots', `${task.id}-${method}-${safeModelName(model)}-trial-${trialIndex}-run-${run}.json`);
+}
+
 async function main() {
     const options = parseArgs();
     const task = readTask(options.taskPath);
     mkdirSync(options.outDir, { recursive: true });
     mkdirSync(options.traceDir, { recursive: true });
+    mkdirSync(options.domainDir, { recursive: true });
+    mkdirSync(join(options.domainDir, 'state-snapshots'), { recursive: true });
 
     const domainByConfig = new Map<string, string>();
-    async function ensureDomain(method: PlannerMethod, model: string): Promise<string | undefined> {
-        if (model === 'none') return undefined;
+    async function ensureDomain(method: PlannerMethod, model: string, run: number, trialIndex: number, snapshotPath: string): Promise<{ path?: string; generated: boolean; use: string }> {
+        if (model === 'none') {
+            return {
+                generated: false,
+                use: method === 'pddl' || method === 'learned_domain'
+                    ? 'using default hand-written symbolic domain'
+                    : 'using scripted cook-shrimp control',
+            };
+        }
 
         const key = domainKey(method, model);
         const cached = domainByConfig.get(key);
-        if (cached) return cached;
+        if (method === 'learned_domain' && cached) {
+            console.log(`[Batch] Using learned/refined domain model: ${cached}`);
+            return { path: cached, generated: false, use: domainUseLabel(method, model, options.rag, cached) };
+        }
 
-        const domainPath = domainPathFor(task, method, model, options.domainDir, options.rag);
+        const domainPath = domainPathFor(task, method, model, options.domainDir, options.rag, trialIndex, run);
+        const ragLabel = methodUsesRag(method, options.rag) ? 'with Graph RAG context' : 'without RAG context';
+        console.log(`[Batch] LLM writing domain model (${method}/${model}, ${ragLabel}) from live state: ${snapshotPath}`);
+        const result = await runCommand([
+            'bun',
+            'experiments/extract-domain.ts',
+            '--task',
+            options.taskPath,
+            '--models',
+            model,
+            '--api-base',
+            options.apiBase,
+            '--out',
+            options.domainDir,
+            '--out-file',
+            domainPath,
+            '--state',
+            snapshotPath,
+            ...(methodUsesRag(method, options.rag) ? ['--rag'] : []),
+        ]);
+        if (!result.ok) throw new Error(`Domain extraction failed for ${method}/${model}`);
+
         if (!existsSync(domainPath)) {
-            const result = await runCommand([
-                'bun',
-                'experiments/extract-domain.ts',
-                '--task',
-                options.taskPath,
-                '--models',
-                model,
-                '--api-base',
-                options.apiBase,
-                '--out',
-                options.domainDir,
-                ...(methodUsesRag(method, options.rag) ? ['--rag'] : []),
-            ]);
-            if (!result.ok) throw new Error(`Domain extraction failed for ${method}/${model}`);
-
-            const legacyPath = join(options.domainDir, `${task.id}-${safeModelName(model)}.json`);
-            if (legacyPath !== domainPath && existsSync(legacyPath)) {
-                writeFileSync(domainPath, readFileSync(legacyPath, 'utf8'));
-            }
-            if (!existsSync(domainPath)) {
-                throw new Error(`Domain extraction did not produce expected path: ${domainPath}`);
-            }
+            throw new Error(`Domain extraction did not produce expected path: ${domainPath}`);
         }
 
         domainByConfig.set(key, domainPath);
-        return domainPath;
+        return { path: domainPath, generated: true, use: domainUseLabel(method, model, options.rag, domainPath) };
     }
 
     const rows: Array<Record<string, unknown>> = [];
@@ -287,7 +303,6 @@ async function main() {
             for (let run = 1; run <= options.runs; run++) {
                 trialIndex++;
                 console.log(`\n[Batch] Trial ${trialIndex}/${totalTrials}: method=${method} model=${model} run=${run}/${options.runs}`);
-                const domain = await ensureDomain(method, model);
                 if (checkpointPath) {
                     console.log(`[Batch] Loading checkpoint: ${checkpointPath}`);
                     const loaded = await runCommand(
@@ -325,6 +340,24 @@ async function main() {
                 }
                 await waitForGatewayReady(options.gatewayHttp, options.botName, options.readyTimeout);
 
+                let snapshotPath = '';
+                if (model !== 'none') {
+                    snapshotPath = stateSnapshotPath(task, method, model, options.domainDir, trialIndex, run);
+                    console.log(`[Batch] Capturing live initial state for LLM prompt: ${snapshotPath}`);
+                    const snapshot = await runCommand(
+                        ['bun', 'experiments/snapshot.ts', options.botName, '--server', options.server, '--out', snapshotPath],
+                        process.cwd(),
+                        { printOutput: false },
+                    );
+                    if (!snapshot.ok) {
+                        process.stdout.write(snapshot.output);
+                        throw new Error(`Initial state snapshot failed for ${method}/${model} run ${run}`);
+                    }
+                }
+
+                const domainInfo = await ensureDomain(method, model, run, trialIndex, snapshotPath);
+                const domain = domainInfo.path;
+
                 const episodeCmd = [
                     'bun',
                     'experiments/run-episode.ts',
@@ -352,7 +385,7 @@ async function main() {
                 }
 
                 console.log('[Batch] Running episode...');
-                const episode = await runCommand(episodeCmd, process.cwd(), { printOutput: false });
+                const episode = await runCommand(episodeCmd, process.cwd(), { printOutput: true });
                 const tracePath = latestTracePath(episode.output);
                 const traceSummary = readTraceSummary(tracePath);
                 if (!episode.ok) process.stdout.write(episode.output);
@@ -365,7 +398,9 @@ async function main() {
                     tracePath,
                     ...traceSummary,
                     domainPath: domain,
-                    domainUse: domainUseLabel(method, model, options.rag, domain),
+                    domainUse: domainInfo.use,
+                    domainGeneratedThisTrial: domainInfo.generated,
+                    initialStateSnapshotPath: snapshotPath,
                     ragContextEnabled: methodUsesRag(method, options.rag),
                     completedAt: new Date().toISOString(),
                 });
@@ -387,6 +422,7 @@ async function main() {
                     domain
                 ) {
                     const refinedDomain = join(options.domainDir, `${task.id}-${safeModelName(model)}-learned-run-${run}.json`);
+                    console.log(`[Batch] LLM updating learned domain model from trace: ${tracePath}`);
                     const refined = await runCommand([
                         'bun',
                         'experiments/refine-domain.ts',

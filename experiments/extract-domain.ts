@@ -13,6 +13,7 @@ Ask one or more LLMs to draft a symbolic action/domain model for a task.
 Usage:
   bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --models gemma3:12b,gemma3:4b [--api-base http://127.0.0.1:11434/v1] [--out runs/domain-models]
   bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --models gemma3:12b --rag
+  bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --models gemma3:12b --state runs/snapshots/start.json --out-file runs/domain-models/trial-domain.json
   bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --stub
 
 The output JSON can be passed to:
@@ -29,6 +30,8 @@ function parseArgs() {
     let models = 'gemma3:12b';
     let apiBase = 'http://127.0.0.1:11434/v1';
     let outDir = join('runs', 'domain-models');
+    let outFile = '';
+    let statePath = '';
     let stub = false;
     let rag = false;
 
@@ -38,16 +41,31 @@ function parseArgs() {
         else if (arg === '--models') models = args[++i] ?? models;
         else if (arg === '--api-base') apiBase = args[++i] ?? apiBase;
         else if (arg === '--out') outDir = args[++i] ?? outDir;
+        else if (arg === '--out-file') outFile = args[++i] ?? '';
+        else if (arg === '--state') statePath = args[++i] ?? '';
         else if (arg === '--stub') stub = true;
         else if (arg === '--rag') rag = true;
     }
 
     if (!taskPath) usage();
-    return { taskPath, models: models.split(',').map(m => m.trim()).filter(Boolean), apiBase, outDir, stub, rag };
+    const selectedModels = models.split(',').map(m => m.trim()).filter(Boolean);
+    if (outFile && selectedModels.length !== 1) {
+        throw new Error('--out-file requires exactly one model');
+    }
+    return { taskPath, models: selectedModels, apiBase, outDir, outFile, statePath, stub, rag };
 }
 
 function readTask(path: string): TaskSpec {
     return JSON.parse(readFileSync(path, 'utf8')) as TaskSpec;
+}
+
+function readStateSummary(path: string): StateSummary | undefined {
+    if (!path) return undefined;
+    const value = JSON.parse(readFileSync(path, 'utf8')) as unknown;
+    if (value && typeof value === 'object' && 'summary' in value) {
+        return (value as { summary?: StateSummary }).summary;
+    }
+    return value as StateSummary;
 }
 
 function emptyState(): StateSummary {
@@ -67,6 +85,7 @@ function emptyState(): StateSummary {
 
 async function retrieveGraphRagContext(task: TaskSpec): Promise<string> {
     const question = `What wiki facts support a planning domain model for this RuneScape task: ${task.description}`;
+    console.log(`[ExtractDomain] Querying Graph RAG with search: ${question}`);
     const proc = Bun.spawn([
         'python',
         'osrs_agent.py',
@@ -90,17 +109,20 @@ async function retrieveGraphRagContext(task: TaskSpec): Promise<string> {
     return stdout;
 }
 
-function domainPrompt(task: TaskSpec, retrievalContext = ''): string {
+function domainPrompt(task: TaskSpec, state?: StateSummary, retrievalContext = ''): string {
     return `
 Task:
 ${JSON.stringify(task, null, 2)}
+
+${state ? `Live initial state from the checkpoint for this trial:\n${JSON.stringify(state, null, 2)}\n` : ''}
 
 ${ACTION_DOCS}
 
 ${retrievalContext ? `Retrieved 2004 wiki / Graph RAG context:\n${retrievalContext}\n` : ''}
 
-Use only the provided actions, the task JSON, ${retrievalContext ? 'retrieved context,' : ''} and your internal knowledge of 2004 RuneScape.
+Use only the provided executable actions, the task JSON, ${state ? 'the live initial state,' : ''} ${retrievalContext ? 'retrieved context,' : ''} and your internal knowledge of 2004 RuneScape.
 Draft a compact symbolic domain model that predicts action preconditions and effects.
+If the live state suggests a reachability issue, closed door, missing item, missing tool, or wrong location, represent that as preconditions/actions/uncertainty instead of assuming the direct action can always execute.
 
 Return ONLY JSON matching this TypeScript shape:
 {
@@ -124,6 +146,18 @@ Return ONLY JSON matching this TypeScript shape:
       { "kind": "xp_gained", "args": { "skill": "Cooking", "minXp": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.5 }], "confidence": 0.5 }
     ],
     "negativeEvidence": []
+  }, {
+    "id": "open_nearby_door",
+    "name": "Open nearby door or gate",
+    "description": "Optional reachability recovery action when a door or gate blocks access.",
+    "parameters": [{ "name": "door", "type": "loc" }],
+    "preconditions": [
+      { "kind": "near_loc", "args": { "name": "Door|Gate|Large door" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
+    ],
+    "effects": [
+      { "kind": "reachable", "args": { "target": "blocked destination beyond door or gate" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
+    ],
+    "negativeEvidence": []
   }]
 }
 `.trim();
@@ -142,13 +176,15 @@ function normalizeDomain(raw: unknown, task: TaskSpec, model: string): LearnedDo
 }
 
 async function main() {
-    const { taskPath, models, apiBase, outDir, stub, rag } = parseArgs();
+    const { taskPath, models, apiBase, outDir, outFile, statePath, stub, rag } = parseArgs();
     const task = readTask(taskPath);
     mkdirSync(outDir, { recursive: true });
+    const state = readStateSummary(statePath);
     const retrievalContext = rag ? await retrieveGraphRagContext(task) : '';
 
     const selectedModels = stub ? ['stub-human-default'] : models;
     for (const model of selectedModels) {
+        console.log(`[ExtractDomain] LLM writing domain model: model=${model} rag=${rag} state=${statePath || 'none'}`);
         const rawText = stub
             ? JSON.stringify(defaultCookShrimpDomain(task.id), null, 2)
             : await chatCompletion({
@@ -156,18 +192,18 @@ async function main() {
                 model,
                 messages: [
                     { role: 'system', content: 'You extract symbolic planning domain models. Return strict JSON only.' },
-                    { role: 'user', content: domainPrompt(task, retrievalContext) },
+                    { role: 'user', content: domainPrompt(task, state, retrievalContext) },
                 ],
             });
 
         const rawDomain = extractJsonObject(rawText);
         const domain = normalizeDomain(rawDomain, task, model);
         const safe = safeModelName(model);
-        const jsonPath = join(outDir, `${task.id}-${safe}.json`);
-        const rawPath = join(outDir, `${task.id}-${safe}.raw.txt`);
-        const pddlDomainPath = join(outDir, `${task.id}-${safe}.domain.pddl`);
-        const pddlProblemPath = join(outDir, `${task.id}-${safe}.problem.pddl`);
-        const pddl = exportPddl(task, emptyState(), domain);
+        const jsonPath = outFile || join(outDir, `${task.id}-${safe}.json`);
+        const rawPath = jsonPath.replace(/\.json$/i, '.raw.txt');
+        const pddlDomainPath = jsonPath.replace(/\.json$/i, '.domain.pddl');
+        const pddlProblemPath = jsonPath.replace(/\.json$/i, '.problem.pddl');
+        const pddl = exportPddl(task, state ?? emptyState(), domain);
 
         writeFileSync(jsonPath, JSON.stringify(domain, null, 2));
         writeFileSync(rawPath, rawText);

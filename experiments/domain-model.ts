@@ -12,14 +12,17 @@ export const ACTION_DOCS = `
 Available executable SDK actions for this vertical slice:
 
 - bot.walkTo(x, z, tolerance?): pathfind to coordinates. Returns { success, message }.
+- bot.openDoor(target?): open a nearby door or gate, walking to it if needed.
 - bot.useItemOnLoc(item, loc): use an inventory item on a nearby location. Good examples: raw fish on range/fire.
 - sdk.findInventoryItem(pattern): find an item in inventory by name.
 - sdk.findNearbyLoc(pattern): find a visible location/object by name.
+- sdk.scanNearbyLocs(radius?): scan a larger area for nearby locations/objects.
 - sdk.sendUseItemOnLoc(slot, x, z, locId): low-level item-on-location packet.
 
 Important execution detail:
 - Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.
 - A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.
+- If pathing says a target cannot be reached and a nearby door/gate has an Open option, opening the door/gate is a valid recovery action.
 `.trim();
 
 const human = [{ source: 'human' as const, reference: 'experiments/domain-model.ts', confidence: 1 }];
@@ -139,6 +142,8 @@ export function predicateToFacts(predicateValue: DomainPredicate): string[] {
         }
         case 'skill_at_least':
             return [`skill_at_least:${normalizeFactName(predicateValue.args.skill)}:${predicateValue.args.level ?? 1}`];
+        case 'reachable':
+            return [`reachable:${normalizeFactName(predicateValue.args.target ?? predicateValue.args.name ?? predicateValue.args.loc)}`];
         default:
             return [];
     }
@@ -150,6 +155,24 @@ export function effectToFacts(effectValue: DomainEffect): string[] {
             return [`has_item:${normalizeFactName(effectValue.args.item)}`];
         case 'xp_gained':
             return [`xp_gained:${normalizeFactName(effectValue.args.skill)}`];
+        case 'reachable':
+            return [`reachable:${normalizeFactName(effectValue.args.target ?? effectValue.args.name ?? effectValue.args.loc)}`];
+        case 'message_observed':
+            return [`message_observed:${normalizeFactName(effectValue.args.pattern ?? effectValue.args.message)}`];
+        case 'position_changed':
+        case 'varp_changed':
+            return [`${effectValue.kind}:${normalizeFactName(effectValue.args.target ?? effectValue.args.name ?? effectValue.args.varp)}`];
+        case 'interface_opened':
+        case 'interface_closed':
+        case 'dialog_opened':
+        case 'dialog_closed':
+            return [effectValue.kind];
+        case 'level_changed':
+            return [`level_changed:${normalizeFactName(effectValue.args.skill)}`];
+        case 'bank_changed':
+        case 'shop_changed':
+        case 'combat_started':
+            return [effectValue.kind];
         default:
             return [];
     }

@@ -666,23 +666,38 @@ sets the server-side run toggle through `/api/experiment/run` after the browser
 bot relogs, so object/NPC interactions that rely on persistent run mode do not
 fall back to walking after checkpoint loads.
 
+For `model != none`, batch extraction happens after the checkpoint is loaded and
+the browser bot has relogged. The runner captures a live state snapshot and passes
+that snapshot into `extract-domain.ts`, so the LLM sees the actual start
+inventory, nearby objects/NPCs, position, and recent messages for that trial.
+Non-learned LLM methods generate a fresh domain model per trial. `learned_domain`
+generates the first model from the live start state, then intentionally reuses
+and refines that model across later runs.
+
 Current method semantics:
 
 - `few_shot / none`: scripted cook-shrimp control, with no LLM or wiki context.
 - `few_shot / <model>`: asks the LLM for a compact symbolic domain from action
-  docs, task JSON, and its internal knowledge only; no wiki/RAG context.
+  docs, task JSON, live start state, and its internal knowledge only; no wiki/RAG
+  context. A fresh domain is generated for each trial.
 - `static_rag / none`: scripted control under the static-RAG label; use this only
   as a sanity check, not as a true RAG baseline.
 - `static_rag / <model>`: asks the LLM for a compact symbolic domain with 2004
-  Graph RAG context when `--rag` is passed, then plans from that fixed domain.
+  Graph RAG context when `--rag` is passed, plus the live start state. A fresh
+  domain is generated for each trial and is not refined afterward.
 - `pddl / none`: uses the default hand-written cook-shrimp symbolic domain.
 - `pddl / <model>`: uses an LLM-extracted symbolic domain without persistent
-  refinement.
+  refinement. A fresh domain is generated for each trial.
 - `learned_domain / none`: default symbolic-domain control with no LLM
   refinement.
 - `learned_domain / <model>`: starts from an LLM-extracted domain, uses Graph RAG
   context when `--rag` is passed, then calls `refine-domain.ts` after each
   episode and feeds the refined model into the next run.
+
+The batch console logs the major LLM/retrieval events: live state snapshot
+capture, domain extraction, Graph RAG query text, use of a refined learned model,
+domain refinement, planned steps, reachability recovery replans, and per-step
+execution results.
 
 Every episode trace records `pddlArtifacts` with initial/final domain and problem
 PDDL embedded directly in the trace JSON. The initial problem captures the start

@@ -48,14 +48,27 @@ function refinementPrompt(domain: LearnedDomainModel, traceEnvelope: { trace: Ep
     const compactTrace = {
         task: traceEnvelope.trace.task,
         method: traceEnvelope.trace.method,
+        initialPddlProblem: traceEnvelope.trace.pddlArtifacts?.initialProblem,
+        finalPddlProblem: traceEnvelope.trace.pddlArtifacts?.finalProblem,
         plan: traceEnvelope.trace.plan,
         execution: traceEnvelope.trace.execution.map(step => ({
             action: step.action,
             result: step.result,
+            startedTick: step.startedTick,
+            endedTick: step.endedTick,
+            beforePosition: step.before.position,
+            afterPosition: step.after.position,
             beforeInventory: step.before.inventory,
             afterInventory: step.after.inventory,
+            beforeNearbyLocs: step.before.nearbyLocs,
+            afterNearbyLocs: step.after.nearbyLocs,
+            beforeNearbyNpcs: step.before.nearbyNpcs,
+            afterNearbyNpcs: step.after.nearbyNpcs,
+            beforeMessages: step.before.recentMessages,
+            afterMessages: step.after.recentMessages,
             delta: step.delta,
         })),
+        finalState: traceEnvelope.trace.finalState,
         metrics: traceEnvelope.trace.metrics,
         verifier: traceEnvelope.verifier,
     };
@@ -77,6 +90,8 @@ Rules:
 - Preserve valid action IDs that the executor can run, especially "use_item_on_cooking_source".
 - If an action was valid but stochastic (e.g. burned food), do not add a false missing precondition.
 - Use negativeEvidence for true failed preconditions/reachability/action mismatch.
+- If the trace shows a reachability failure followed by a recovery action such as opening a door/gate, add or refine an action schema for that recovery when executable.
+- If the trace shows repeated direct-action failure, consider whether a missing precondition, tool, location, or intermediate navigation action should be represented.
 - Update confidence values and notes based on observed success/failure.
 `.trim();
 }

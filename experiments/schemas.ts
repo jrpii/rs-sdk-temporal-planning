@@ -44,6 +44,7 @@ export type EffectKind =
     | 'shop_changed'
     | 'combat_started'
     | 'message_observed'
+    | 'reachable'
     | 'varp_changed';
 
 export interface Provenance {
