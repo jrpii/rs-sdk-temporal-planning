@@ -3,6 +3,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { ActionResult, BotWorldState, NearbyLoc } from '../sdk/types';
 import { connectExperimentBot } from './connect';
+import { defaultCookShrimpDomain } from './domain-model';
+import { exportPddl } from './pddl';
 import { createPlanner } from './planner';
 import type { EpisodeTrace, ExecutionStep, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
 import { diffStateSummaries, summarizeState } from './state-summary';
@@ -165,6 +167,21 @@ function tracePath(outDir: string, task: TaskSpec, method: PlannerMethod): strin
     return join(outDir, `${stamp}-${method}-${task.id}.json`);
 }
 
+function writePddlArtifacts(args: {
+    task: TaskSpec;
+    state: StateSummary;
+    domainModel: LearnedDomainModel;
+    basePath: string;
+    phase: 'initial' | 'final';
+}): { domainPath: string; problemPath: string } {
+    const pddl = exportPddl(args.task, args.state, args.domainModel);
+    const domainPath = `${args.basePath}.${args.phase}.domain.pddl`;
+    const problemPath = `${args.basePath}.${args.phase}.problem.pddl`;
+    writeFileSync(domainPath, pddl.domain);
+    writeFileSync(problemPath, pddl.problem);
+    return { domainPath, problemPath };
+}
+
 async function main() {
     const { taskPath, botName, method, modelName, domainPath, server, outDir, maxStepsOverride, readyTimeout } = parseArgs();
     const task = readTask(taskPath);
@@ -172,13 +189,24 @@ async function main() {
         task.maxSteps = maxStepsOverride;
     }
     const domainModel = readDomain(domainPath);
+    const effectiveDomainModel = domainModel ?? defaultCookShrimpDomain(task.id);
     const planner = createPlanner(method, domainModel);
     const conn = await connectExperimentBot(botName, server);
     const startedAt = Date.now();
     const execution: ExecutionStep[] = [];
 
     try {
+        mkdirSync(outDir, { recursive: true });
+        const outPath = tracePath(outDir, task, method);
+        const pddlBasePath = outPath.replace(/\.json$/i, '');
         const before = await currentSummary(conn, readyTimeout);
+        const initialPddl = writePddlArtifacts({
+            task,
+            state: before,
+            domainModel: effectiveDomainModel,
+            basePath: pddlBasePath,
+            phase: 'initial',
+        });
         const plannerOutput = await planner.plan({
             task,
             state: before,
@@ -210,6 +238,13 @@ async function main() {
         }
 
         const finalState = await currentSummary(conn, readyTimeout);
+        const finalPddl = writePddlArtifacts({
+            task,
+            state: finalState,
+            domainModel: effectiveDomainModel,
+            basePath: pddlBasePath,
+            phase: 'final',
+        });
         const initialState = execution[0]?.before ?? before;
         const totalDelta = diffStateSummaries(initialState, finalState);
         verifier = evaluateVerifiers(finalState, task.success, totalDelta);
@@ -232,10 +267,15 @@ async function main() {
             },
             finalState,
             rawFinalState: conn.sdk.getState(),
+            pddlArtifacts: {
+                domainModelId: effectiveDomainModel.id,
+                initialDomainPath: initialPddl.domainPath,
+                initialProblemPath: initialPddl.problemPath,
+                finalDomainPath: finalPddl.domainPath,
+                finalProblemPath: finalPddl.problemPath,
+            },
         };
 
-        mkdirSync(outDir, { recursive: true });
-        const outPath = tracePath(outDir, task, method);
         writeFileSync(outPath, JSON.stringify({ trace, verifier }, null, 2));
 
         console.log(`Episode trace written: ${outPath}`);

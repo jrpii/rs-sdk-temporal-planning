@@ -655,11 +655,29 @@ For each run, it installs the checkpoint, relogs the browser bot with
 the gateway `/reload/<bot>` endpoint plus `sdk/cli.ts --launch`, runs
 `run-episode.ts`, and writes JSON plus CSV summaries under `runs/batch/`. The
 summary includes per-run success, duration, invalid action count, verifier
-evidence, and aggregate success rates by method/model. For each non-`none` model
-it first calls `extract-domain.ts` once and passes that domain model into
-`static_rag`, `pddl`, and `learned_domain` episodes. `learned_domain` then calls
-`refine-domain.ts` after each episode and feeds the refined model into the next
-run.
+evidence, PDDL artifact paths, and aggregate success rates by method/model.
+
+Current method semantics:
+
+- `few_shot / none`: scripted cook-shrimp control, with no LLM or wiki context.
+- `few_shot / <model>`: asks the LLM for a compact symbolic domain from action
+  docs, task JSON, and its internal knowledge only; no wiki/RAG context.
+- `static_rag / none`: scripted control under the static-RAG label; use this only
+  as a sanity check, not as a true RAG baseline.
+- `static_rag / <model>`: asks the LLM for a compact symbolic domain with 2004
+  Graph RAG context when `--rag` is passed, then plans from that fixed domain.
+- `pddl / none`: uses the default hand-written cook-shrimp symbolic domain.
+- `pddl / <model>`: uses an LLM-extracted symbolic domain without persistent
+  refinement.
+- `learned_domain / none`: default symbolic-domain control with no LLM
+  refinement.
+- `learned_domain / <model>`: starts from an LLM-extracted domain, uses Graph RAG
+  context when `--rag` is passed, then calls `refine-domain.ts` after each
+  episode and feeds the refined model into the next run.
+
+Every episode trace records `pddlArtifacts` with initial/final domain and problem
+file paths. The initial problem captures the start facts for that trial; the
+final problem captures the observed end-state facts against the same goal.
 
 After adding or changing the reload endpoint, restart `server/gateway` and make
 sure `server/webclient` is running `bun run watch`, since the browser-side

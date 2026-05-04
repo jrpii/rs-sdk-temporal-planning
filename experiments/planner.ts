@@ -75,7 +75,7 @@ export class SymbolicDomainPlanner implements Planner {
 }
 
 export function createPlanner(method: PlannerMethod, domainModel?: LearnedDomainModel): Planner {
-    if (method === 'pddl' || method === 'learned_domain' || (method === 'static_rag' && domainModel)) {
+    if (method === 'pddl' || method === 'learned_domain' || domainModel) {
         return new SymbolicDomainPlanner(method, domainModel);
     }
     return new ScriptedCookShrimpPlanner(method);

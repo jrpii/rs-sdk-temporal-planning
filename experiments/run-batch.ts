@@ -17,8 +17,9 @@ This wraps, per trial:
   3. sdk/cli.ts <bot> --server <server> --timeout <timeout> --launch
   4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>]
 
-For model != none, the batch runner first calls extract-domain.ts once per model.
-Pass --rag to seed those domain models with the 2004 Graph RAG context.
+For model != none, the batch runner calls extract-domain.ts once per method/model
+that needs an LLM-derived domain. Pass --rag to seed static_rag and
+learned_domain domain extraction with the 2004 Graph RAG context.
 For learned_domain, it refines the model after each episode and feeds the refined
 model into the next episode.
 `.trim());
@@ -158,8 +159,36 @@ function readTraceSummary(tracePath: string | undefined): Record<string, unknown
         replanningCount: envelope.trace.metrics.replanningCount,
         executionSteps: envelope.trace.execution.length,
         finalTick: envelope.trace.finalState?.tick,
+        pddlDomainModelId: envelope.trace.pddlArtifacts?.domainModelId,
+        pddlInitialDomainPath: envelope.trace.pddlArtifacts?.initialDomainPath,
+        pddlInitialProblemPath: envelope.trace.pddlArtifacts?.initialProblemPath,
+        pddlFinalDomainPath: envelope.trace.pddlArtifacts?.finalDomainPath,
+        pddlFinalProblemPath: envelope.trace.pddlArtifacts?.finalProblemPath,
         verifierEvidence: envelope.verifier?.evidence?.join(' | ') ?? '',
     };
+}
+
+function domainKey(method: PlannerMethod, model: string): string {
+    return `${method}|${model}`;
+}
+
+function methodUsesRag(method: PlannerMethod, ragEnabled: boolean): boolean {
+    return ragEnabled && (method === 'static_rag' || method === 'learned_domain');
+}
+
+function domainPathFor(task: TaskSpec, method: PlannerMethod, model: string, domainDir: string, ragEnabled: boolean): string {
+    const source = methodUsesRag(method, ragEnabled) ? 'rag' : 'internal';
+    return join(domainDir, `${task.id}-${method}-${source}-${safeModelName(model)}.json`);
+}
+
+function domainUseLabel(method: PlannerMethod, model: string, ragEnabled: boolean, domainPath?: string): string {
+    if (model === 'none') {
+        return method === 'pddl' || method === 'learned_domain'
+            ? 'default symbolic cook-shrimp domain'
+            : 'scripted cook-shrimp control';
+    }
+    const source = methodUsesRag(method, ragEnabled) ? 'Graph RAG + LLM domain extraction' : 'LLM internal/action-doc domain extraction';
+    return `${source}${domainPath ? ` (${domainPath})` : ''}`;
 }
 
 function csvValue(value: unknown): string {
@@ -209,10 +238,15 @@ async function main() {
     mkdirSync(options.outDir, { recursive: true });
     mkdirSync(options.traceDir, { recursive: true });
 
-    const domainByModel = new Map<string, string>();
-    for (const model of options.models) {
-        if (model === 'none') continue;
-        const domainPath = join(options.domainDir, `${task.id}-${safeModelName(model)}.json`);
+    const domainByConfig = new Map<string, string>();
+    async function ensureDomain(method: PlannerMethod, model: string): Promise<string | undefined> {
+        if (model === 'none') return undefined;
+
+        const key = domainKey(method, model);
+        const cached = domainByConfig.get(key);
+        if (cached) return cached;
+
+        const domainPath = domainPathFor(task, method, model, options.domainDir, options.rag);
         if (!existsSync(domainPath)) {
             const result = await runCommand([
                 'bun',
@@ -225,11 +259,21 @@ async function main() {
                 options.apiBase,
                 '--out',
                 options.domainDir,
-                ...(options.rag ? ['--rag'] : []),
+                ...(methodUsesRag(method, options.rag) ? ['--rag'] : []),
             ]);
-            if (!result.ok) throw new Error(`Domain extraction failed for ${model}`);
+            if (!result.ok) throw new Error(`Domain extraction failed for ${method}/${model}`);
+
+            const legacyPath = join(options.domainDir, `${task.id}-${safeModelName(model)}.json`);
+            if (legacyPath !== domainPath && existsSync(legacyPath)) {
+                writeFileSync(domainPath, readFileSync(legacyPath, 'utf8'));
+            }
+            if (!existsSync(domainPath)) {
+                throw new Error(`Domain extraction did not produce expected path: ${domainPath}`);
+            }
         }
-        domainByModel.set(model, domainPath);
+
+        domainByConfig.set(key, domainPath);
+        return domainPath;
     }
 
     const rows: Array<Record<string, unknown>> = [];
@@ -242,6 +286,7 @@ async function main() {
             for (let run = 1; run <= options.runs; run++) {
                 trialIndex++;
                 console.log(`\n[Batch] Trial ${trialIndex}/${totalTrials}: method=${method} model=${model} run=${run}/${options.runs}`);
+                const domain = await ensureDomain(method, model);
                 if (checkpointPath) {
                     console.log(`[Batch] Loading checkpoint: ${checkpointPath}`);
                     const loaded = await runCommand(
@@ -298,8 +343,7 @@ async function main() {
                     episodeCmd.push('--max-steps', String(options.maxSteps));
                 }
                 episodeCmd.push('--ready-timeout', String(options.readyTimeout));
-                const domain = domainByModel.get(model);
-                if (domain && (method === 'pddl' || method === 'learned_domain' || method === 'static_rag')) {
+                if (domain) {
                     episodeCmd.push('--domain', domain);
                 }
 
@@ -316,6 +360,9 @@ async function main() {
                     ok: episode.ok,
                     tracePath,
                     ...traceSummary,
+                    domainPath: domain,
+                    domainUse: domainUseLabel(method, model, options.rag, domain),
+                    ragContextEnabled: methodUsesRag(method, options.rag),
                     completedAt: new Date().toISOString(),
                 });
 
@@ -351,7 +398,7 @@ async function main() {
                         refinedDomain,
                     ]);
                     if (refined.ok) {
-                        domainByModel.set(model, refinedDomain);
+                        domainByConfig.set(domainKey(method, model), refinedDomain);
                     } else {
                         console.warn(`Refinement failed for ${model} after run ${run}; keeping previous domain model.`);
                     }
