@@ -9,13 +9,13 @@ function usage(exitCode = 1): never {
 Run repeated experiment episodes across methods and LLMs.
 
 Usage:
-  bun experiments/run-batch.ts <task.json> --bot McPlan --runs 5 --methods few_shot,pddl,learned_domain --models none,gemma3:12b [--checkpoint runs/checkpoints/foo.sav] [--max-steps 10]
+  bun experiments/run-batch.ts <task.json> --bot McPlan --runs 5 --methods few_shot,pddl,learned_domain --models none,gemma3:12b [--checkpoint runs/checkpoints/foo.sav] [--max-steps 10] [--no-force-run]
 
 This wraps, per trial:
   1. load-save.ts <bot> <task.startState.checkpointPath> --api <api>
   2. gateway /reload/<bot> if a browser bot tab is already open
   3. sdk/cli.ts <bot> --server <server> --timeout <timeout> --launch
-  4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>]
+  4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>] [--force-run]
 
 For model != none, the batch runner calls extract-domain.ts once per method/model
 that needs an LLM-derived domain. Pass --rag to seed static_rag and
@@ -49,6 +49,7 @@ function parseArgs() {
     let domainDir = join('runs', 'domain-models');
     let refine = true;
     let rag = false;
+    let forceRun = true;
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -70,6 +71,8 @@ function parseArgs() {
         else if (arg === '--domain-dir') domainDir = args[++i] ?? domainDir;
         else if (arg === '--no-refine') refine = false;
         else if (arg === '--rag') rag = true;
+        else if (arg === '--force-run') forceRun = true;
+        else if (arg === '--no-force-run') forceRun = false;
     }
 
     if (!taskPath || !botName || !Number.isFinite(runs) || runs < 1) usage();
@@ -93,6 +96,7 @@ function parseArgs() {
         domainDir,
         refine,
         rag,
+        forceRun,
     };
 }
 
@@ -160,10 +164,7 @@ function readTraceSummary(tracePath: string | undefined): Record<string, unknown
         executionSteps: envelope.trace.execution.length,
         finalTick: envelope.trace.finalState?.tick,
         pddlDomainModelId: envelope.trace.pddlArtifacts?.domainModelId,
-        pddlInitialDomainPath: envelope.trace.pddlArtifacts?.initialDomainPath,
-        pddlInitialProblemPath: envelope.trace.pddlArtifacts?.initialProblemPath,
-        pddlFinalDomainPath: envelope.trace.pddlArtifacts?.finalDomainPath,
-        pddlFinalProblemPath: envelope.trace.pddlArtifacts?.finalProblemPath,
+        pddlEmbedded: Boolean(envelope.trace.pddlArtifacts),
         verifierEvidence: envelope.verifier?.evidence?.join(' | ') ?? '',
     };
 }
@@ -339,6 +340,9 @@ async function main() {
                     '--model',
                     model,
                 ];
+                if (options.forceRun) {
+                    episodeCmd.push('--force-run', '--api', options.api);
+                }
                 if (options.maxSteps > 0) {
                     episodeCmd.push('--max-steps', String(options.maxSteps));
                 }

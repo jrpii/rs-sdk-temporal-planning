@@ -238,9 +238,9 @@ export interface EpisodeTrace {
     rawFinalState?: BotWorldState | null;
     pddlArtifacts?: {
         domainModelId: string;
-        initialDomainPath: string;
-        initialProblemPath: string;
-        finalDomainPath: string;
-        finalProblemPath: string;
+        initialDomain: string;
+        initialProblem: string;
+        finalDomain: string;
+        finalProblem: string;
     };
 }

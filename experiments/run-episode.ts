@@ -15,7 +15,7 @@ function usage(exitCode = 1): never {
 Run one experiment episode from a TaskSpec JSON file.
 
 Usage:
-  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
+  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--force-run] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
 
 Example:
   bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
@@ -37,6 +37,8 @@ function parseArgs() {
     let modelName = 'none';
     let domainPath = '';
     let server = 'localhost';
+    let api = 'http://localhost:8888';
+    let forceRun = false;
     let outDir = join('runs', 'traces');
     let maxStepsOverride: number | undefined;
     let readyTimeout = 15_000;
@@ -53,6 +55,10 @@ function parseArgs() {
             domainPath = args[++i] ?? '';
         } else if (arg === '--server') {
             server = args[++i] ?? server;
+        } else if (arg === '--api') {
+            api = args[++i] ?? api;
+        } else if (arg === '--force-run') {
+            forceRun = true;
         } else if (arg === '--max-steps') {
             maxStepsOverride = Number(args[++i]);
         } else if (arg === '--ready-timeout') {
@@ -67,7 +73,7 @@ function parseArgs() {
         throw new Error(`Unknown method: ${method}`);
     }
 
-    return { taskPath, botName, method, modelName, domainPath, server, outDir, maxStepsOverride, readyTimeout };
+    return { taskPath, botName, method, modelName, domainPath, server, api, forceRun, outDir, maxStepsOverride, readyTimeout };
 }
 
 function readTask(path: string): TaskSpec {
@@ -167,23 +173,28 @@ function tracePath(outDir: string, task: TaskSpec, method: PlannerMethod): strin
     return join(outDir, `${stamp}-${method}-${task.id}.json`);
 }
 
-function writePddlArtifacts(args: {
+async function setExperimentRunMode(api: string, botName: string, enabled: boolean): Promise<void> {
+    const response = await fetch(`${api.replace(/\/$/, '')}/api/experiment/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: botName, enabled }),
+    });
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Failed to set run mode (${response.status}): ${text.slice(0, 300)}`);
+    }
+}
+
+function buildPddlArtifact(args: {
     task: TaskSpec;
     state: StateSummary;
     domainModel: LearnedDomainModel;
-    basePath: string;
-    phase: 'initial' | 'final';
-}): { domainPath: string; problemPath: string } {
-    const pddl = exportPddl(args.task, args.state, args.domainModel);
-    const domainPath = `${args.basePath}.${args.phase}.domain.pddl`;
-    const problemPath = `${args.basePath}.${args.phase}.problem.pddl`;
-    writeFileSync(domainPath, pddl.domain);
-    writeFileSync(problemPath, pddl.problem);
-    return { domainPath, problemPath };
+}): { domain: string; problem: string } {
+    return exportPddl(args.task, args.state, args.domainModel);
 }
 
 async function main() {
-    const { taskPath, botName, method, modelName, domainPath, server, outDir, maxStepsOverride, readyTimeout } = parseArgs();
+    const { taskPath, botName, method, modelName, domainPath, server, api, forceRun, outDir, maxStepsOverride, readyTimeout } = parseArgs();
     const task = readTask(taskPath);
     if (maxStepsOverride !== undefined && Number.isFinite(maxStepsOverride) && maxStepsOverride > 0) {
         task.maxSteps = maxStepsOverride;
@@ -196,16 +207,16 @@ async function main() {
     const execution: ExecutionStep[] = [];
 
     try {
+        if (forceRun) {
+            await setExperimentRunMode(api, botName, true);
+        }
         mkdirSync(outDir, { recursive: true });
         const outPath = tracePath(outDir, task, method);
-        const pddlBasePath = outPath.replace(/\.json$/i, '');
         const before = await currentSummary(conn, readyTimeout);
-        const initialPddl = writePddlArtifacts({
+        const initialPddl = buildPddlArtifact({
             task,
             state: before,
             domainModel: effectiveDomainModel,
-            basePath: pddlBasePath,
-            phase: 'initial',
         });
         const plannerOutput = await planner.plan({
             task,
@@ -238,12 +249,10 @@ async function main() {
         }
 
         const finalState = await currentSummary(conn, readyTimeout);
-        const finalPddl = writePddlArtifacts({
+        const finalPddl = buildPddlArtifact({
             task,
             state: finalState,
             domainModel: effectiveDomainModel,
-            basePath: pddlBasePath,
-            phase: 'final',
         });
         const initialState = execution[0]?.before ?? before;
         const totalDelta = diffStateSummaries(initialState, finalState);
@@ -269,10 +278,10 @@ async function main() {
             rawFinalState: conn.sdk.getState(),
             pddlArtifacts: {
                 domainModelId: effectiveDomainModel.id,
-                initialDomainPath: initialPddl.domainPath,
-                initialProblemPath: initialPddl.problemPath,
-                finalDomainPath: finalPddl.domainPath,
-                finalProblemPath: finalPddl.problemPath,
+                initialDomain: initialPddl.domain,
+                initialProblem: initialPddl.problem,
+                finalDomain: finalPddl.domain,
+                finalProblem: finalPddl.problem,
             },
         };
 

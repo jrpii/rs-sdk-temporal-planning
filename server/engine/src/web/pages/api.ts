@@ -2,6 +2,7 @@ import fs from 'fs';
 import * as rsmod from '@2004scape/rsmod-pathfinder';
 import { CollisionFlag, LocLayer } from '@2004scape/rsmod-pathfinder';
 import LocType from '#/cache/config/LocType.js';
+import VarPlayerType from '#/cache/config/VarPlayerType.js';
 import { PlayerLoading } from '#/engine/entity/PlayerLoading.js';
 import World from '#/engine/World.js';
 import Packet from '#/io/Packet.js';
@@ -101,6 +102,40 @@ export async function handleExperimentControlApi(req: Request, url: URL): Promis
             ticks = 1;
         }
         return jsonResponse({ success: true, ...World.stepTicks(ticks) });
+    }
+
+    if (url.pathname === '/api/experiment/run') {
+        try {
+            const body = await req.json();
+            const username = toSafeName(String(body?.username || ''));
+            const enabled = body?.enabled !== false;
+
+            if (!username || username === 'invalid_name') {
+                return jsonResponse({ success: false, error: 'Valid username is required' }, 400);
+            }
+
+            const onlinePlayer = World.getPlayerByUsername(username);
+            if (!onlinePlayer) {
+                return jsonResponse({ success: false, error: `No online player found for ${username}` }, 404);
+            }
+
+            onlinePlayer.run = enabled ? 1 : 0;
+            onlinePlayer.tempRun = enabled ? 1 : 0;
+            onlinePlayer.setVar(VarPlayerType.RUN, onlinePlayer.run);
+
+            return jsonResponse({
+                success: true,
+                username,
+                run: onlinePlayer.run,
+                runEnergy: onlinePlayer.runenergy,
+                message: enabled ? 'Run mode enabled.' : 'Run mode disabled.'
+            });
+        } catch (error) {
+            return jsonResponse({
+                success: false,
+                error: error instanceof Error ? error.message : String(error)
+            }, 500);
+        }
     }
 
     if (url.pathname === '/api/experiment/load-save') {

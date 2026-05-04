@@ -591,13 +591,13 @@ bun experiments/refine-domain.ts --domain runs/domain-models/cook_shrimp_alkhari
 Then run the symbolic/PDDL-backed episode against one extracted model:
 
 ```powershell
-bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method pddl --model gemma3:12b --domain runs/domain-models/cook_shrimp_alkharid-gemma3_12b.json --server localhost
+bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method pddl --model gemma3:12b --domain runs/domain-models/cook_shrimp_alkharid-gemma3_12b.json --server localhost --force-run
 ```
 
 The first executable episode driver lives in `experiments/run-episode.ts`:
 
 ```powershell
-bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
+bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost --force-run
 ```
 
 For `cook_shrimp`, the current executor sends `useItemOnLoc` directly through the
@@ -649,13 +649,22 @@ Useful batch stability knobs:
 
 # Override the task JSON maxSteps for harder starts/tasks.
 --max-steps 12
+
+# Batch enables persistent run mode after each relog by default.
+# Disable it only when a walking-speed control is useful.
+--no-force-run
 ```
 
 For each run, it installs the checkpoint, relogs the browser bot with
 the gateway `/reload/<bot>` endpoint plus `sdk/cli.ts --launch`, runs
 `run-episode.ts`, and writes JSON plus CSV summaries under `runs/batch/`. The
 summary includes per-run success, duration, invalid action count, verifier
-evidence, PDDL artifact paths, and aggregate success rates by method/model.
+evidence, embedded PDDL artifact status, and aggregate success rates by
+method/model.
+`run-batch.ts` also passes `--force-run` to `run-episode.ts` by default. This
+sets the server-side run toggle through `/api/experiment/run` after the browser
+bot relogs, so object/NPC interactions that rely on persistent run mode do not
+fall back to walking after checkpoint loads.
 
 Current method semantics:
 
@@ -676,8 +685,132 @@ Current method semantics:
   episode and feeds the refined model into the next run.
 
 Every episode trace records `pddlArtifacts` with initial/final domain and problem
-file paths. The initial problem captures the start facts for that trial; the
-final problem captures the observed end-state facts against the same goal.
+PDDL embedded directly in the trace JSON. The initial problem captures the start
+facts for that trial; the final problem captures the observed end-state facts
+against the same goal.
+
+### Creating More Tasks
+
+The task harness has two layers:
+
+1. A `TaskSpec` JSON file that describes the start checkpoint, minimal goal, and
+   executable verifiers.
+2. An executor in `experiments/run-episode.ts` that knows how to turn a planned
+   `actionSchemaId` into SDK calls.
+
+The JSON/checkpoint side can be created now for any task. Fully automated
+execution currently has one implemented action executor:
+`use_item_on_cooking_source`. For new tasks like fishing, chopping, or lighting a
+fire, add an executor case before treating those tasks as proposal-faithful
+automated trials.
+
+Recommended workflow:
+
+1. Manually or synthetically create a stable start state.
+
+```powershell
+# Live checkpoint from the currently logged-in browser bot.
+bun experiments/save-checkpoint.ts McPlan --api http://localhost:8888 --out runs/checkpoints/McPlan-fish-shrimp-lumbridge.sav
+
+# Or generate a synthetic checkpoint from a preset/config.
+bun experiments/create-save.ts McPlan --preset WOODCUTTER_AT_LUMBRIDGE --out runs/checkpoints/McPlan-chop-tree-lumbridge.sav
+bun experiments/create-save.ts McPlan --config experiments/save-configs/cook-shrimp-alkharid.json --out runs/checkpoints/McPlan-cook-shrimp-alkharid.sav
+```
+
+2. Create a task preset under `experiments/task-presets/`.
+
+Example `fish-shrimp-lumbridge.json`:
+
+```json
+{
+  "id": "fish_shrimp_lumbridge",
+  "description": "Catch one raw shrimp from a checkpoint near a net fishing spot.",
+  "maxSteps": 8,
+  "startState": {
+    "checkpointPath": "runs/checkpoints/McPlan-fish-shrimp-lumbridge.sav",
+    "checkpointProfile": "experiments"
+  },
+  "goalState": {
+    "description": "Inventory gains Raw shrimps and Fishing XP increases.",
+    "inventoryGained": { "Raw shrimps": 1 },
+    "xpGained": { "Fishing": 1 }
+  },
+  "success": [
+    { "kind": "inventory_gained", "item": "^Raw shrimps$", "count": 1 },
+    { "kind": "xp_gained", "skill": "Fishing", "minXp": 1 }
+  ]
+}
+```
+
+Example `chop-tree-lumbridge.json`:
+
+```json
+{
+  "id": "chop_tree_lumbridge",
+  "description": "Chop one log from a checkpoint near Lumbridge trees.",
+  "maxSteps": 8,
+  "startState": {
+    "checkpointPath": "runs/checkpoints/McPlan-chop-tree-lumbridge.sav",
+    "checkpointProfile": "experiments"
+  },
+  "goalState": {
+    "description": "Inventory gains Logs and Woodcutting XP increases.",
+    "inventoryGained": { "Logs": 1 },
+    "xpGained": { "Woodcutting": 1 }
+  },
+  "success": [
+    { "kind": "inventory_gained", "item": "^Logs$", "count": 1 },
+    { "kind": "xp_gained", "skill": "Woodcutting", "minXp": 1 }
+  ]
+}
+```
+
+Example `chop-and-light-fire-lumbridge.json`:
+
+```json
+{
+  "id": "chop_and_light_fire_lumbridge",
+  "description": "Chop logs and light a fire from a checkpoint near Lumbridge trees.",
+  "maxSteps": 12,
+  "startState": {
+    "checkpointPath": "runs/checkpoints/McPlan-chop-tree-lumbridge.sav",
+    "checkpointProfile": "experiments"
+  },
+  "goalState": {
+    "description": "Woodcutting and Firemaking XP both increase.",
+    "xpGained": { "Woodcutting": 1, "Firemaking": 1 }
+  },
+  "success": [
+    { "kind": "xp_gained", "skill": "Woodcutting", "minXp": 1 },
+    { "kind": "xp_gained", "skill": "Firemaking", "minXp": 1 }
+  ]
+}
+```
+
+3. Add execution support for the task's action schema IDs.
+
+Edit `experiments/run-episode.ts` so `executeStep()` recognizes the new
+`actionSchemaId` values. The SDK action mapping will probably be:
+
+- `fish_shrimp`: find a nearby fishing spot and call `bot.interactNpc(spot, 'net')`.
+- `chop_tree`: find a nearby tree and call `bot.chopTree(tree)`.
+- `light_fire`: find logs in inventory and call `bot.burnLogs(logs)`.
+
+Also update `ACTION_DOCS` / default domains in `experiments/domain-model.ts` when
+you want the LLM/PDDL layer to reason about the new actions instead of relying on
+hand-scripted behavior.
+
+4. Smoke test one episode, then batch it.
+
+```powershell
+bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-fish-shrimp-lumbridge.sav --api http://localhost:8888
+bun sdk/cli.ts McPlan --server localhost --timeout 45000 --launch
+bun experiments/run-episode.ts experiments/task-presets/fish-shrimp-lumbridge.json --bot McPlan --method pddl --model gemma3:12b --server localhost --force-run --max-steps 8
+```
+
+```powershell
+bun experiments/run-batch.ts experiments/task-presets/fish-shrimp-lumbridge.json --bot McPlan --runs 5 --methods few_shot,static_rag,pddl,learned_domain --models none,gemma3:12b --server localhost --api http://localhost:8888 --rag --checkpoint runs/checkpoints/McPlan-fish-shrimp-lumbridge.sav --settle-ms 8000 --ready-timeout 45000 --max-steps 8
+```
 
 After adding or changing the reload endpoint, restart `server/gateway` and make
 sure `server/webclient` is running `bun run watch`, since the browser-side
