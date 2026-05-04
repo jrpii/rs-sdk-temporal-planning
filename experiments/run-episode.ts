@@ -3,10 +3,11 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { ActionResult, BotWorldState, NearbyLoc } from '../sdk/types';
 import { connectExperimentBot } from './connect';
-import { defaultCookShrimpDomain } from './domain-model';
+import { ACTION_DOCS, defaultCookShrimpDomain } from './domain-model';
+import { chatCompletion, extractJsonObject } from './llm';
 import { exportPddl } from './pddl';
 import { createPlanner } from './planner';
-import type { EpisodeTrace, ExecutionStep, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
+import type { AgenticReplanEvent, EpisodeTrace, ExecutionStep, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
 import { diffStateSummaries, summarizeState } from './state-summary';
 import { evaluateVerifiers } from './verifier';
 
@@ -15,7 +16,7 @@ function usage(exitCode = 1): never {
 Run one experiment episode from a TaskSpec JSON file.
 
 Usage:
-  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--force-run] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
+  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--api-base http://127.0.0.1:11434/v1] [--force-run] [--agentic-replan] [--replan-rag] [--max-replans 2] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
 
 Example:
   bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
@@ -38,7 +39,11 @@ function parseArgs() {
     let domainPath = '';
     let server = 'localhost';
     let api = 'http://localhost:8888';
+    let apiBase = 'http://127.0.0.1:11434/v1';
     let forceRun = false;
+    let agenticReplan = false;
+    let replanRag = false;
+    let maxReplans = 2;
     let outDir = join('runs', 'traces');
     let maxStepsOverride: number | undefined;
     let readyTimeout = 15_000;
@@ -57,8 +62,16 @@ function parseArgs() {
             server = args[++i] ?? server;
         } else if (arg === '--api') {
             api = args[++i] ?? api;
+        } else if (arg === '--api-base') {
+            apiBase = args[++i] ?? apiBase;
         } else if (arg === '--force-run') {
             forceRun = true;
+        } else if (arg === '--agentic-replan') {
+            agenticReplan = true;
+        } else if (arg === '--replan-rag') {
+            replanRag = true;
+        } else if (arg === '--max-replans') {
+            maxReplans = Number(args[++i] ?? maxReplans);
         } else if (arg === '--max-steps') {
             maxStepsOverride = Number(args[++i]);
         } else if (arg === '--ready-timeout') {
@@ -73,7 +86,7 @@ function parseArgs() {
         throw new Error(`Unknown method: ${method}`);
     }
 
-    return { taskPath, botName, method, modelName, domainPath, server, api, forceRun, outDir, maxStepsOverride, readyTimeout };
+    return { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout };
 }
 
 function readTask(path: string): TaskSpec {
@@ -102,6 +115,12 @@ function findCookingSource(state: BotWorldState): NearbyLoc | null {
     return sources[0] ?? null;
 }
 
+function findCookingSourceInLocs(locs: NearbyLoc[]): NearbyLoc | null {
+    return locs
+        .filter(loc => /^(Range|Fire)$/i.test(loc.name))
+        .sort((a, b) => a.distance - b.distance)[0] ?? null;
+}
+
 function findOpenDoor(state: BotWorldState): NearbyLoc | null {
     return state.nearbyLocs
         .filter(loc => /door|gate/i.test(loc.name))
@@ -113,6 +132,12 @@ function shouldAttemptReachabilityRecovery(result: ActionResult): boolean {
     return !result.success && /cannot reach|can't reach|cant reach|out of reach|could not walk/i.test(result.message);
 }
 
+function shouldAttemptAgenticReplan(result: ActionResult, verifierSuccess: boolean): boolean {
+    if (verifierSuccess) return false;
+    if (!result.success) return true;
+    return /no detected product|burned|no progress|timed out/i.test(result.message);
+}
+
 async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentBot>>, timeout = 15_000): Promise<StateSummary> {
     const state = await conn.sdk.waitForCondition(
         s => s.inGame && Boolean(s.player) && (s.nearbyLocs.length > 0 || s.nearbyNpcs.length > 0),
@@ -122,6 +147,70 @@ async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentB
 }
 
 async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>>, step: PlanStep): Promise<ActionResult> {
+    if (step.actionSchemaId === 'explore_for_cooking_source') {
+        const state = conn.sdk.getState();
+        if (!state?.player) return { success: false, message: 'No game state available' };
+
+        const existingSource = findCookingSource(state);
+        if (existingSource) {
+            const walkResult = await conn.bot.walkTo(existingSource.x, existingSource.z, 3);
+            return {
+                ...walkResult,
+                message: `Exploration found visible ${existingSource.name}: ${walkResult.message}`,
+            };
+        }
+
+        const scannedLocs = await conn.sdk.scanNearbyLocs(30);
+        const scannedSource = findCookingSourceInLocs(scannedLocs);
+        if (scannedSource) {
+            const walkResult = await conn.bot.walkTo(scannedSource.x, scannedSource.z, 3);
+            return {
+                ...walkResult,
+                message: `Exploration scanned ${scannedSource.name} at (${scannedSource.x}, ${scannedSource.z}): ${walkResult.message}`,
+            };
+        }
+
+        const openDoor = findOpenDoor(state) ?? scannedLocs
+            .filter(loc => /door|gate/i.test(loc.name))
+            .filter(loc => loc.optionsWithIndex.some(option => /^open$/i.test(option.text)))
+            .sort((a, b) => a.distance - b.distance)[0];
+        if (openDoor) {
+            const doorResult = await conn.bot.openDoor(openDoor);
+            if (!doorResult.success) {
+                return { ...doorResult, message: `Exploration tried ${openDoor.name}: ${doorResult.message}` };
+            }
+            await conn.sdk.waitForTicks(1);
+            const afterDoorSource = findCookingSource(conn.sdk.getState() ?? state)
+                ?? findCookingSourceInLocs(await conn.sdk.scanNearbyLocs(30));
+            if (afterDoorSource) {
+                const walkResult = await conn.bot.walkTo(afterDoorSource.x, afterDoorSource.z, 3);
+                return {
+                    ...walkResult,
+                    message: `Exploration opened ${openDoor.name} and found ${afterDoorSource.name}: ${walkResult.message}`,
+                };
+            }
+            return { success: true, message: `Exploration opened ${openDoor.name}; no cooking source visible yet` };
+        }
+
+        const probes = [
+            { x: state.player.worldX + 6, z: state.player.worldZ },
+            { x: state.player.worldX, z: state.player.worldZ + 6 },
+            { x: state.player.worldX - 6, z: state.player.worldZ },
+            { x: state.player.worldX, z: state.player.worldZ - 6 },
+        ];
+        for (const probe of probes) {
+            const walkResult = await conn.bot.walkTo(probe.x, probe.z, 3);
+            if (!walkResult.success) continue;
+            const source = findCookingSource(conn.sdk.getState() ?? state)
+                ?? findCookingSourceInLocs(await conn.sdk.scanNearbyLocs(30));
+            if (source) {
+                return { success: true, message: `Exploration probe found ${source.name} at (${source.x}, ${source.z})` };
+            }
+        }
+
+        return { success: false, message: 'Exploration did not find a Range or Fire within bounded probes' };
+    }
+
     if (step.actionSchemaId === 'open_nearby_door') {
         const state = conn.sdk.getState();
         if (!state) return { success: false, message: 'No game state available' };
@@ -218,18 +307,178 @@ function buildPddlArtifact(args: {
     return exportPddl(args.task, args.state, args.domainModel);
 }
 
+async function retrieveReplanRagContext(task: TaskSpec, trigger: ActionResult): Promise<{ query: string; context: string }> {
+    const query = `RuneScape 2004 planning recovery for task "${task.description}" after failed action: ${trigger.message}. Include cooking ranges, doors/gates, and navigation hints.`;
+    console.log(`[AgenticReplan] Querying Graph RAG with search: ${query}`);
+    const proc = Bun.spawn([
+        'python',
+        'osrs_agent.py',
+        '--question',
+        query,
+        '--no-llm',
+        '--show-context',
+    ], {
+        cwd: join(process.cwd(), 'agents', 'cse476-final-project'),
+        stdout: 'pipe',
+        stderr: 'pipe',
+    });
+    const [stdout, stderr, exitCode] = await Promise.all([
+        new Response(proc.stdout).text(),
+        new Response(proc.stderr).text(),
+        proc.exited,
+    ]);
+    if (exitCode !== 0) {
+        throw new Error(`Graph RAG replan retrieval failed: ${stderr || stdout}`);
+    }
+    return { query, context: stdout };
+}
+
+function replanPrompt(args: {
+    task: TaskSpec;
+    currentState: StateSummary;
+    domainModel: LearnedDomainModel;
+    currentPlan: PlanStep[];
+    execution: ExecutionStep[];
+    trigger: { action: string; result: ActionResult };
+    ragContext?: string;
+}): string {
+    return `
+You are the within-episode controller for a RuneScape planning experiment.
+
+Goal:
+${JSON.stringify(args.task.goalState ?? args.task.success, null, 2)}
+
+Task:
+${JSON.stringify(args.task, null, 2)}
+
+Available executable actionSchemaId values:
+- use_item_on_cooking_source: use Raw shrimps on a visible/reachable Range or Fire.
+- open_nearby_door: open the nearest visible door/gate with an Open option.
+- explore_for_cooking_source: bounded exploration that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.
+
+Available SDK/action docs:
+${ACTION_DOCS}
+
+Current symbolic domain model:
+${JSON.stringify(args.domainModel, null, 2)}
+
+Current planned steps:
+${JSON.stringify(args.currentPlan, null, 2)}
+
+Execution trace so far:
+${JSON.stringify(args.execution.map(step => ({
+        action: step.action,
+        result: step.result,
+        before: {
+            position: step.before.position,
+            inventory: step.before.inventory,
+            nearbyLocs: step.before.nearbyLocs,
+            messages: step.before.recentMessages,
+        },
+        after: {
+            position: step.after.position,
+            inventory: step.after.inventory,
+            nearbyLocs: step.after.nearbyLocs,
+            messages: step.after.recentMessages,
+        },
+        delta: step.delta,
+    })), null, 2)}
+
+Failure or stalled-progress trigger:
+${JSON.stringify(args.trigger, null, 2)}
+
+Current state:
+${JSON.stringify(args.currentState, null, 2)}
+
+${args.ragContext ? `Retrieved Graph RAG context:\n${args.ragContext}\n` : ''}
+
+Return ONLY JSON in this exact shape:
+{
+  "notes": "brief reason for the replan",
+  "domainModel": { "id": "...", "taskId": "...", "description": "...", "provenance": [], "notes": [], "actions": [] },
+  "plan": [
+    { "stepIndex": 0, "naturalLanguage": "explore/open/cook step", "actionSchemaId": "explore_for_cooking_source" },
+    { "stepIndex": 1, "naturalLanguage": "cook after recovery", "actionSchemaId": "use_item_on_cooking_source" }
+  ]
+}
+
+Rules:
+- Prefer a short recovery plan of 1-4 steps.
+- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try exploration or door opening before retrying cooking.
+- Use only the three executable actionSchemaId values listed above.
+- Preserve the learned domain model, but add/refine actions for reachability, exploration, doors, and failed/no-progress observations.
+`.trim();
+}
+
+async function requestAgenticReplan(args: {
+    task: TaskSpec;
+    currentState: StateSummary;
+    domainModel: LearnedDomainModel;
+    currentPlan: PlanStep[];
+    execution: ExecutionStep[];
+    trigger: { action: string; result: ActionResult };
+    modelName: string;
+    apiBase: string;
+    useRag: boolean;
+    replanIndex: number;
+}): Promise<AgenticReplanEvent> {
+    const rag = args.useRag ? await retrieveReplanRagContext(args.task, args.trigger.result) : undefined;
+    console.log(`[AgenticReplan] LLM writing in-episode replan #${args.replanIndex} with model=${args.modelName}`);
+    const rawResponse = await chatCompletion({
+        apiBase: args.apiBase,
+        model: args.modelName,
+        messages: [
+            { role: 'system', content: 'You are an agentic replanning controller. Return strict JSON only.' },
+            {
+                role: 'user',
+                content: replanPrompt({
+                    task: args.task,
+                    currentState: args.currentState,
+                    domainModel: args.domainModel,
+                    currentPlan: args.currentPlan,
+                    execution: args.execution,
+                    trigger: args.trigger,
+                    ragContext: rag?.context,
+                }),
+            },
+        ],
+        temperature: 0.2,
+    });
+    const parsed = extractJsonObject(rawResponse) as Partial<AgenticReplanEvent>;
+    const plan = (parsed.plan ?? [])
+        .filter(step => ['use_item_on_cooking_source', 'open_nearby_door', 'explore_for_cooking_source'].includes(step.actionSchemaId ?? ''))
+        .map((step, index) => ({
+            stepIndex: index,
+            naturalLanguage: step.naturalLanguage || `Agentic recovery step ${index + 1}`,
+            actionSchemaId: step.actionSchemaId,
+            expectedEffects: step.expectedEffects,
+        }));
+
+    return {
+        replanIndex: args.replanIndex,
+        triggeredBy: args.trigger,
+        ragQueries: rag ? [rag.query] : undefined,
+        ragContext: rag?.context,
+        notes: typeof parsed.notes === 'string' ? parsed.notes : undefined,
+        plan,
+        domainModel: parsed.domainModel,
+        rawResponse,
+    };
+}
+
 async function main() {
-    const { taskPath, botName, method, modelName, domainPath, server, api, forceRun, outDir, maxStepsOverride, readyTimeout } = parseArgs();
+    const { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout } = parseArgs();
     const task = readTask(taskPath);
     if (maxStepsOverride !== undefined && Number.isFinite(maxStepsOverride) && maxStepsOverride > 0) {
         task.maxSteps = maxStepsOverride;
     }
     const domainModel = readDomain(domainPath);
-    const effectiveDomainModel = domainModel ?? defaultCookShrimpDomain(task.id);
-    const planner = createPlanner(method, domainModel);
+    let effectiveDomainModel = domainModel ?? defaultCookShrimpDomain(task.id);
+    const planner = createPlanner(method, effectiveDomainModel);
     const conn = await connectExperimentBot(botName, server);
     const startedAt = Date.now();
     const execution: ExecutionStep[] = [];
+    const agenticReplans: AgenticReplanEvent[] = [];
 
     try {
         if (forceRun) {
@@ -246,22 +495,24 @@ async function main() {
         const plannerOutput = await planner.plan({
             task,
             state: before,
-            learnedActions: domainModel?.actions,
+            learnedActions: effectiveDomainModel.actions,
         });
 
         console.log(`[Episode] Planner notes: ${plannerOutput.notes ?? 'none'}`);
         console.log('[Episode] Plan to execute:');
-        if (plannerOutput.plan.length === 0) {
+        const plan = [...plannerOutput.plan.slice(0, task.maxSteps)];
+        if (plan.length === 0) {
             console.log('[Episode]   (empty plan)');
         }
-        for (const step of plannerOutput.plan.slice(0, task.maxSteps)) {
+        for (const step of plan) {
             console.log(`[Episode]   ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
         }
 
         let verifier = evaluateVerifiers(before, task.success, diffStateSummaries(before, before));
         let replanningCount = 0;
 
-        for (const step of plannerOutput.plan.slice(0, task.maxSteps)) {
+        for (let cursor = 0; cursor < plan.length && execution.length < task.maxSteps; cursor++) {
+            const step = plan[cursor]!;
             const stepBefore = await currentSummary(conn, readyTimeout);
             const startedTick = stepBefore.tick;
             console.log(`[Episode] Executing step ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
@@ -283,6 +534,37 @@ async function main() {
 
             verifier = evaluateVerifiers(stepAfter, task.success, diffStateSummaries(before, stepAfter));
             if (verifier.success) break;
+            if (shouldAttemptAgenticReplan(result, verifier.success) && agenticReplan && modelName !== 'none' && replanningCount < maxReplans) {
+                replanningCount++;
+                const currentState = await currentSummary(conn, readyTimeout);
+                console.log(`[Episode] Triggering agentic replanning #${replanningCount}: ${result.message}`);
+                const replan = await requestAgenticReplan({
+                    task,
+                    currentState,
+                    domainModel: effectiveDomainModel,
+                    currentPlan: plan.slice(cursor + 1),
+                    execution,
+                    trigger: { action: step.naturalLanguage, result },
+                    modelName,
+                    apiBase,
+                    useRag: replanRag,
+                    replanIndex: replanningCount,
+                });
+                agenticReplans.push(replan);
+                if (replan.domainModel) {
+                    effectiveDomainModel = replan.domainModel;
+                }
+                if (replan.plan.length > 0) {
+                    console.log(`[Episode] Agentic replan #${replanningCount}: ${replan.notes ?? 'no notes'}`);
+                    for (const plannedStep of replan.plan) {
+                        console.log(`[Episode]   replan ${plannedStep.stepIndex}: ${plannedStep.actionSchemaId ?? 'unknown'} - ${plannedStep.naturalLanguage}`);
+                    }
+                    plan.splice(cursor + 1, 0, ...replan.plan);
+                    continue;
+                }
+                console.log(`[Episode] Agentic replan #${replanningCount} returned no executable steps.`);
+            }
+
             if (!result.success) {
                 if (!shouldAttemptReachabilityRecovery(result)) break;
 
@@ -335,7 +617,8 @@ async function main() {
                 provider: modelName === 'none' ? 'none' : 'ollama',
                 name: modelName === 'none' ? planner.constructor.name : modelName,
             },
-            plan: plannerOutput.plan,
+            plan,
+            agenticReplans,
             execution,
             metrics: {
                 success: verifier.success,

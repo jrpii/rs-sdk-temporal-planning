@@ -216,6 +216,20 @@ export interface ExecutionStep {
     delta: StateDelta;
 }
 
+export interface AgenticReplanEvent {
+    replanIndex: number;
+    triggeredBy: {
+        action: string;
+        result: ActionResult;
+    };
+    ragQueries?: string[];
+    ragContext?: string;
+    notes?: string;
+    plan: PlanStep[];
+    domainModel?: LearnedDomainModel;
+    rawResponse?: string;
+}
+
 export interface EpisodeTrace {
     episodeId: string;
     method: PlannerMethod;
@@ -227,6 +241,7 @@ export interface EpisodeTrace {
     };
     retrieval?: RetrievalTrace;
     plan: PlanStep[];
+    agenticReplans?: AgenticReplanEvent[];
     execution: ExecutionStep[];
     metrics: {
         success: boolean;

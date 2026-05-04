@@ -14,6 +14,7 @@ Available executable SDK actions for this vertical slice:
 - bot.walkTo(x, z, tolerance?): pathfind to coordinates. Returns { success, message }.
 - bot.openDoor(target?): open a nearby door or gate, walking to it if needed.
 - bot.useItemOnLoc(item, loc): use an inventory item on a nearby location. Good examples: raw fish on range/fire.
+- explore_for_cooking_source: bounded experiment executor that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.
 - sdk.findInventoryItem(pattern): find an item in inventory by name.
 - sdk.findNearbyLoc(pattern): find a visible location/object by name.
 - sdk.scanNearbyLocs(radius?): scan a larger area for nearby locations/objects.

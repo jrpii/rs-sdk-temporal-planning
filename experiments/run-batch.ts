@@ -9,13 +9,13 @@ function usage(exitCode = 1): never {
 Run repeated experiment episodes across methods and LLMs.
 
 Usage:
-  bun experiments/run-batch.ts <task.json> --bot McPlan --runs 5 --methods few_shot,pddl,learned_domain --models none,gemma3:12b [--checkpoint runs/checkpoints/foo.sav] [--max-steps 10] [--no-force-run]
+  bun experiments/run-batch.ts <task.json> --bot McPlan --runs 5 --methods few_shot,pddl,learned_domain --models none,gemma3:12b [--checkpoint runs/checkpoints/foo.sav] [--max-steps 10] [--max-replans 2] [--no-force-run] [--no-agentic-replan]
 
 This wraps, per trial:
   1. load-save.ts <bot> <task.startState.checkpointPath> --api <api>
   2. gateway /reload/<bot> if a browser bot tab is already open
   3. sdk/cli.ts <bot> --server <server> --timeout <timeout> --launch
-  4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>] [--force-run]
+  4. run-episode.ts <task> --bot <bot> --method <method> [--model <model>] [--domain <domain>] [--force-run] [--agentic-replan]
 
 For model != none, the batch runner captures the live post-checkpoint state and
 calls extract-domain.ts for each fresh trial domain. Pass --rag to seed
@@ -50,6 +50,8 @@ function parseArgs() {
     let refine = true;
     let rag = false;
     let forceRun = true;
+    let agenticReplan = true;
+    let maxReplans = 2;
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -73,6 +75,9 @@ function parseArgs() {
         else if (arg === '--rag') rag = true;
         else if (arg === '--force-run') forceRun = true;
         else if (arg === '--no-force-run') forceRun = false;
+        else if (arg === '--agentic-replan') agenticReplan = true;
+        else if (arg === '--no-agentic-replan') agenticReplan = false;
+        else if (arg === '--max-replans') maxReplans = Number(args[++i] ?? maxReplans);
     }
 
     if (!taskPath || !botName || !Number.isFinite(runs) || runs < 1) usage();
@@ -97,6 +102,8 @@ function parseArgs() {
         refine,
         rag,
         forceRun,
+        agenticReplan,
+        maxReplans,
     };
 }
 
@@ -165,6 +172,7 @@ function readTraceSummary(tracePath: string | undefined): Record<string, unknown
         finalTick: envelope.trace.finalState?.tick,
         pddlDomainModelId: envelope.trace.pddlArtifacts?.domainModelId,
         pddlEmbedded: Boolean(envelope.trace.pddlArtifacts),
+        agenticReplans: envelope.trace.agenticReplans?.length ?? 0,
         verifierEvidence: envelope.verifier?.evidence?.join(' | ') ?? '',
     };
 }
@@ -375,6 +383,16 @@ async function main() {
                 ];
                 if (options.forceRun) {
                     episodeCmd.push('--force-run', '--api', options.api);
+                }
+                if (options.agenticReplan && method === 'learned_domain' && model !== 'none') {
+                    episodeCmd.push(
+                        '--agentic-replan',
+                        '--api-base',
+                        options.apiBase,
+                        '--max-replans',
+                        String(options.maxReplans),
+                    );
+                    if (options.rag) episodeCmd.push('--replan-rag');
                 }
                 if (options.maxSteps > 0) {
                     episodeCmd.push('--max-steps', String(options.maxSteps));

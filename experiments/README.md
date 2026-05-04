@@ -653,6 +653,13 @@ Useful batch stability knobs:
 # Batch enables persistent run mode after each relog by default.
 # Disable it only when a walking-speed control is useful.
 --no-force-run
+
+# learned_domain / <model> enables in-episode LLM replanning by default.
+# Disable it for a between-episode-only learning ablation.
+--no-agentic-replan
+
+# Bound the number of in-episode LLM replans.
+--max-replans 2
 ```
 
 For each run, it installs the checkpoint, relogs the browser bot with
@@ -674,6 +681,13 @@ Non-learned LLM methods generate a fresh domain model per trial. `learned_domain
 generates the first model from the live start state, then intentionally reuses
 and refines that model across later runs.
 
+For `learned_domain / <model>`, `run-batch.ts` also enables `run-episode.ts
+--agentic-replan` by default. When a step fails or makes no progress, the episode
+controller sends the current domain, task, plan, execution trace, current state,
+and optionally Graph RAG context back to the LLM. The LLM returns a short revised
+plan and optionally a revised domain model. The episode then continues without
+resetting the checkpoint.
+
 Current method semantics:
 
 - `few_shot / none`: scripted cook-shrimp control, with no LLM or wiki context.
@@ -692,12 +706,20 @@ Current method semantics:
   refinement.
 - `learned_domain / <model>`: starts from an LLM-extracted domain, uses Graph RAG
   context when `--rag` is passed, then calls `refine-domain.ts` after each
-  episode and feeds the refined model into the next run.
+  episode and feeds the refined model into the next run. During an episode it can
+  also trigger bounded agentic replanning with `use_item_on_cooking_source`,
+  `open_nearby_door`, and `explore_for_cooking_source`.
 
 The batch console logs the major LLM/retrieval events: live state snapshot
 capture, domain extraction, Graph RAG query text, use of a refined learned model,
-domain refinement, planned steps, reachability recovery replans, and per-step
-execution results.
+domain refinement, planned steps, in-episode agentic replans, exploration
+actions, reachability recovery replans, and per-step execution results.
+
+The current exploration action is intentionally bounded for reproducibility. It
+scans for a `Range`/`Fire` in a larger radius, tries an obvious nearby openable
+door/gate, and walks short probe steps around the current position. This is enough
+to handle many "range is nearby but not currently usable/visible" starts without
+turning the experiment into an unbounded wander.
 
 Every episode trace records `pddlArtifacts` with initial/final domain and problem
 PDDL embedded directly in the trace JSON. The initial problem captures the start

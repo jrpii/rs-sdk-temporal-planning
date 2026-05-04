@@ -147,6 +147,18 @@ Return ONLY JSON matching this TypeScript shape:
     ],
     "negativeEvidence": []
   }, {
+    "id": "explore_for_cooking_source",
+    "name": "Explore for a cooking source",
+    "description": "Bounded recovery action to scan and move around when no reachable Range or Fire is currently usable.",
+    "parameters": [{ "name": "source", "type": "facility" }],
+    "preconditions": [
+      { "kind": "has_item", "args": { "item": "Raw shrimps", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
+    ],
+    "effects": [
+      { "kind": "reachable", "args": { "target": "Range|Fire" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
+    ],
+    "negativeEvidence": []
+  }, {
     "id": "open_nearby_door",
     "name": "Open nearby door or gate",
     "description": "Optional reachability recovery action when a door or gate blocks access.",
