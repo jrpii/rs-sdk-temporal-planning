@@ -658,6 +658,10 @@ Useful batch stability knobs:
 # Disable it for a between-episode-only learning ablation.
 --no-agentic-replan
 
+# learned_domain / <model> also enables bounded exploration by default.
+# Disable it for a replan-without-exploration ablation.
+--no-agentic-explore
+
 # Bound the number of in-episode LLM replans.
 --max-replans 2
 ```
@@ -682,11 +686,13 @@ generates the first model from the live start state, then intentionally reuses
 and refines that model across later runs.
 
 For `learned_domain / <model>`, `run-batch.ts` also enables `run-episode.ts
---agentic-replan` by default. When a step fails or makes no progress, the episode
-controller sends the current domain, task, plan, execution trace, current state,
-and optionally Graph RAG context back to the LLM. The LLM returns a short revised
-plan and optionally a revised domain model. The episode then continues without
-resetting the checkpoint.
+--agentic-replan --agentic-explore` by default. When a step fails or makes no
+progress, the episode controller sends the current domain, task, plan, execution
+trace, current state, and optionally Graph RAG context back to the LLM. The LLM
+returns a short revised plan and optionally a revised domain model. The episode
+then continues without resetting the checkpoint. Exploration can be ablated
+separately with `--no-agentic-explore`; replanning can be ablated separately with
+`--no-agentic-replan`.
 
 Current method semantics:
 

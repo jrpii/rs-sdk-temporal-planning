@@ -16,7 +16,7 @@ function usage(exitCode = 1): never {
 Run one experiment episode from a TaskSpec JSON file.
 
 Usage:
-  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--api-base http://127.0.0.1:11434/v1] [--force-run] [--agentic-replan] [--replan-rag] [--max-replans 2] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
+  bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--api-base http://127.0.0.1:11434/v1] [--force-run] [--agentic-replan] [--agentic-explore] [--replan-rag] [--max-replans 2] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
 
 Example:
   bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
@@ -42,6 +42,7 @@ function parseArgs() {
     let apiBase = 'http://127.0.0.1:11434/v1';
     let forceRun = false;
     let agenticReplan = false;
+    let agenticExplore = false;
     let replanRag = false;
     let maxReplans = 2;
     let outDir = join('runs', 'traces');
@@ -68,6 +69,8 @@ function parseArgs() {
             forceRun = true;
         } else if (arg === '--agentic-replan') {
             agenticReplan = true;
+        } else if (arg === '--agentic-explore') {
+            agenticExplore = true;
         } else if (arg === '--replan-rag') {
             replanRag = true;
         } else if (arg === '--max-replans') {
@@ -86,7 +89,7 @@ function parseArgs() {
         throw new Error(`Unknown method: ${method}`);
     }
 
-    return { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout };
+    return { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, agenticExplore, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout };
 }
 
 function readTask(path: string): TaskSpec {
@@ -341,7 +344,27 @@ function replanPrompt(args: {
     execution: ExecutionStep[];
     trigger: { action: string; result: ActionResult };
     ragContext?: string;
+    allowExplore: boolean;
 }): string {
+    const executableActions = [
+        '- use_item_on_cooking_source: use Raw shrimps on a visible/reachable Range or Fire.',
+        '- open_nearby_door: open the nearest visible door/gate with an Open option.',
+        ...(args.allowExplore
+            ? ['- explore_for_cooking_source: bounded exploration that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.']
+            : []),
+    ].join('\n');
+    const actionShapeExample = args.allowExplore
+        ? `    { "stepIndex": 0, "naturalLanguage": "explore/open/cook step", "actionSchemaId": "explore_for_cooking_source" },
+    { "stepIndex": 1, "naturalLanguage": "cook after recovery", "actionSchemaId": "use_item_on_cooking_source" }`
+        : `    { "stepIndex": 0, "naturalLanguage": "open a nearby blocking door", "actionSchemaId": "open_nearby_door" },
+    { "stepIndex": 1, "naturalLanguage": "retry cooking after recovery", "actionSchemaId": "use_item_on_cooking_source" }`;
+    const timeoutRule = args.allowExplore
+        ? '- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try exploration or door opening before retrying cooking.'
+        : '- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try door opening before retrying cooking.';
+    const allowedActionText = args.allowExplore
+        ? 'Use only these executable actionSchemaId values: use_item_on_cooking_source, open_nearby_door, explore_for_cooking_source.'
+        : 'Use only these executable actionSchemaId values: use_item_on_cooking_source, open_nearby_door.';
+
     return `
 You are the within-episode controller for a RuneScape planning experiment.
 
@@ -352,9 +375,7 @@ Task:
 ${JSON.stringify(args.task, null, 2)}
 
 Available executable actionSchemaId values:
-- use_item_on_cooking_source: use Raw shrimps on a visible/reachable Range or Fire.
-- open_nearby_door: open the nearest visible door/gate with an Open option.
-- explore_for_cooking_source: bounded exploration that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.
+${executableActions}
 
 Available SDK/action docs:
 ${ACTION_DOCS}
@@ -397,15 +418,14 @@ Return ONLY JSON in this exact shape:
   "notes": "brief reason for the replan",
   "domainModel": { "id": "...", "taskId": "...", "description": "...", "provenance": [], "notes": [], "actions": [] },
   "plan": [
-    { "stepIndex": 0, "naturalLanguage": "explore/open/cook step", "actionSchemaId": "explore_for_cooking_source" },
-    { "stepIndex": 1, "naturalLanguage": "cook after recovery", "actionSchemaId": "use_item_on_cooking_source" }
+${actionShapeExample}
   ]
 }
 
 Rules:
 - Prefer a short recovery plan of 1-4 steps.
-- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try exploration or door opening before retrying cooking.
-- Use only the three executable actionSchemaId values listed above.
+${timeoutRule}
+- ${allowedActionText}
 - Preserve the learned domain model, but add/refine actions for reachability, exploration, doors, and failed/no-progress observations.
 `.trim();
 }
@@ -420,6 +440,7 @@ async function requestAgenticReplan(args: {
     modelName: string;
     apiBase: string;
     useRag: boolean;
+    allowExplore: boolean;
     replanIndex: number;
 }): Promise<AgenticReplanEvent> {
     const rag = args.useRag ? await retrieveReplanRagContext(args.task, args.trigger.result) : undefined;
@@ -439,14 +460,18 @@ async function requestAgenticReplan(args: {
                     execution: args.execution,
                     trigger: args.trigger,
                     ragContext: rag?.context,
+                    allowExplore: args.allowExplore,
                 }),
             },
         ],
         temperature: 0.2,
     });
     const parsed = extractJsonObject(rawResponse) as Partial<AgenticReplanEvent>;
+    const allowedActions = args.allowExplore
+        ? ['use_item_on_cooking_source', 'open_nearby_door', 'explore_for_cooking_source']
+        : ['use_item_on_cooking_source', 'open_nearby_door'];
     const plan = (parsed.plan ?? [])
-        .filter(step => ['use_item_on_cooking_source', 'open_nearby_door', 'explore_for_cooking_source'].includes(step.actionSchemaId ?? ''))
+        .filter(step => allowedActions.includes(step.actionSchemaId ?? ''))
         .map((step, index) => ({
             stepIndex: index,
             naturalLanguage: step.naturalLanguage || `Agentic recovery step ${index + 1}`,
@@ -467,7 +492,7 @@ async function requestAgenticReplan(args: {
 }
 
 async function main() {
-    const { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout } = parseArgs();
+    const { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, agenticExplore, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout } = parseArgs();
     const task = readTask(taskPath);
     if (maxStepsOverride !== undefined && Number.isFinite(maxStepsOverride) && maxStepsOverride > 0) {
         task.maxSteps = maxStepsOverride;
@@ -510,6 +535,7 @@ async function main() {
 
         let verifier = evaluateVerifiers(before, task.success, diffStateSummaries(before, before));
         let replanningCount = 0;
+        let explorationCount = 0;
 
         for (let cursor = 0; cursor < plan.length && execution.length < task.maxSteps; cursor++) {
             const step = plan[cursor]!;
@@ -548,6 +574,7 @@ async function main() {
                     modelName,
                     apiBase,
                     useRag: replanRag,
+                    allowExplore: agenticExplore,
                     replanIndex: replanningCount,
                 });
                 agenticReplans.push(replan);
@@ -563,6 +590,45 @@ async function main() {
                     continue;
                 }
                 console.log(`[Episode] Agentic replan #${replanningCount} returned no executable steps.`);
+            }
+
+            if (shouldAttemptAgenticReplan(result, verifier.success) && agenticExplore && explorationCount < maxReplans) {
+                explorationCount++;
+                replanningCount++;
+                const explorationStep: PlanStep = {
+                    stepIndex: step.stepIndex,
+                    naturalLanguage: 'Exploration recovery: search for a reachable cooking source before retrying cooking.',
+                    actionSchemaId: 'explore_for_cooking_source',
+                };
+                console.log(`[Episode] Triggering exploration recovery #${explorationCount}: ${result.message}`);
+                console.log(`[Episode] Executing exploration step: ${explorationStep.actionSchemaId} - ${explorationStep.naturalLanguage}`);
+                const explorationBefore = await currentSummary(conn, readyTimeout);
+                const explorationStartedTick = explorationBefore.tick;
+                const explorationResult = await executeStep(conn, explorationStep);
+                const explorationAfter = await currentSummary(conn, readyTimeout);
+                const explorationDelta = diffStateSummaries(explorationBefore, explorationAfter);
+                console.log(`[Episode] Result exploration step: ${explorationResult.success ? 'ok' : 'failed'} - ${explorationResult.message}`);
+
+                execution.push({
+                    stepIndex: explorationStep.stepIndex,
+                    action: explorationStep.naturalLanguage,
+                    startedTick: explorationStartedTick,
+                    endedTick: explorationAfter.tick,
+                    result: explorationResult,
+                    before: explorationBefore,
+                    after: explorationAfter,
+                    delta: explorationDelta,
+                });
+
+                if (explorationResult.success) {
+                    plan.splice(cursor + 1, 0, {
+                        stepIndex: step.stepIndex,
+                        naturalLanguage: 'Retry cooking after exploration recovery.',
+                        actionSchemaId: 'use_item_on_cooking_source',
+                    });
+                    continue;
+                }
+                if (!explorationResult.success && !shouldAttemptReachabilityRecovery(result)) break;
             }
 
             if (!result.success) {
