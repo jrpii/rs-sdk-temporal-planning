@@ -155,12 +155,27 @@ server/webclient/src/bot/GatewayConnection.ts
 The local bot page command bar includes experiment controls:
 
 ```text
-Pause game | Step tick | State snapshot
+Pause game | Step tick | State snapshot | Save checkpoint | Load checkpoint
 ```
 
-`Pause game` and `Step tick` call the engine debug control endpoints under
-`/api/experiment/*`, so the engine must be restarted after changing those
-endpoints. `State snapshot` downloads the current browser-side bot state as JSON.
+`Pause game`, `Step tick`, `Save checkpoint`, and `Load checkpoint` call the engine
+debug control endpoints under `/api/experiment/*`, so the engine must be
+restarted after changing those endpoints. `State snapshot` downloads the current
+browser-side bot state as JSON. `Save checkpoint` downloads the current live
+player state as a binary `.sav` file. `Load checkpoint` uploads a `.sav` checkpoint
+for the current bot username under the active `NODE_PROFILE`; if the bot is
+online, the engine disconnects it without saving over the checkpoint and the
+browser refreshes to load the checkpoint.
+While paused, the engine keeps browser and SDK I/O alive but does not advance
+world ticks until you click `Step tick` or resume.
+
+The bot SDK overlay is split into a left world-state panel and a right column.
+The world-state panel has `Copy`, `Save Text`, and `Save JSON` buttons. The
+right column stacks the SDK action log above a browser terminal. The terminal can
+run short built-in commands such as `state`, `npcs`, `walk 3221 3222`,
+`dialog 1`, `pause`, `resume`, `step`, `save`, and `load`; it can also run
+JavaScript against the local `client` and `helpers` objects with commands such as
+`js client.getBotState()`.
 
 For non-UI smoke tests, an existing build in `server/webclient/out` may be
 enough. If the route fails to load `/bot/client.js`, or if you are editing any
@@ -265,6 +280,14 @@ With the local server running, inspect state:
 bun sdk/cli.ts ExpBot --server localhost --timeout 15000
 ```
 
+The SDK CLI requires a browser bot session with the same username to already be
+connected to the gateway. If `ExpBot` is not open at `/bot`, the gateway can
+accept the SDK connection but there will be no bot state to return. Open:
+
+```text
+http://localhost:8888/bot?bot=ExpBot&password=<PASSWORD_FROM_bot.env>
+```
+
 Run the starter script:
 
 ```powershell
@@ -287,6 +310,11 @@ Generated experiment saves usually set tutorial varp `281 = 1000`, so tests that
 use `generateSave()` should pass `skipTutorial: false`.
 
 ## Snapshot and Tick Commands
+
+There are two different snapshot/checkpoint concepts:
+
+- JSON state snapshots are observations for logs, deltas, verifiers, and episode traces.
+- Binary `.sav` checkpoints are restorable game save files for resetting an experiment start state.
 
 JSON state snapshot:
 
@@ -317,6 +345,94 @@ These commands do not pause the world. They connect to the SDK, wait for the req
 ## Checkpointed Save States
 
 Local experiments can start from controlled checkpoint saves. Use:
+
+```powershell
+bun experiments/create-save.ts McPlan --preset LUMBRIDGE_SPAWN --profile experiments
+bun experiments/create-save.ts ExpBot --preset FISHER_AT_ALKHARID --profile experiments
+bun experiments/create-save.ts McPlan --preset COOK_SHRIMP_LUMBRIDGE --profile experiments
+bun experiments/create-save.ts McPlan --preset COOK_SHRIMP_ALKHARID --profile experiments
+```
+
+List available presets:
+
+```powershell
+bun experiments/create-save.ts --list
+```
+
+You can also use a JSON config:
+
+```powershell
+bun experiments/create-save.ts CookBot --config experiments/save-configs/cook-shrimp.json --profile experiments
+bun experiments/create-save.ts CookBot --config experiments/save-configs/cook-shrimp-alkharid.json --profile experiments
+```
+
+Create the checkpoint in the engine save directory and also keep a named copy
+under `runs/checkpoints`:
+
+```powershell
+bun experiments/create-save.ts McPlan --preset COOK_SHRIMP_LUMBRIDGE --profile experiments --out runs/checkpoints/cook-shrimp.sav
+bun experiments/create-save.ts McPlan --preset COOK_SHRIMP_ALKHARID --profile experiments --out runs/checkpoints/cook-shrimp-alkharid.sav
+```
+
+`create-save.ts` always generates a synthetic checkpoint from an explicit
+`--preset` or `--config`; it is not the same as the browser `Save checkpoint`
+button. To save the current live browser bot state from the CLI, use:
+
+```powershell
+bun experiments/save-checkpoint.ts McPlan --api http://localhost:8888 --out runs/checkpoints/McPlan-cook-shrimp-alkharid.sav
+```
+
+Example config:
+
+```json
+{
+  "position": { "x": 3222, "z": 3218 },
+  "skills": { "Cooking": 1 },
+  "inventory": [
+    { "id": 317, "count": 1 }
+  ]
+}
+```
+
+The script writes a binary `.sav` to:
+
+```text
+server/engine/data/players/experiments/<botname>.sav
+```
+
+The live-state save command calls the running engine at
+`http://localhost:8888/api/experiment/save` by default, matching the browser
+button. Pass `--api http://localhost:8888` explicitly if you want the command to
+show which engine it is using.
+
+Load an existing `.sav` from the CLI:
+
+```powershell
+# Offline/simple path: copy checkpoint into the active profile save directory.
+bun experiments/load-save.ts McPlan server/engine/data/players/experiments/mcplan.sav --profile experiments
+
+# Online path: ask the running engine to verify/install it and disconnect the live player.
+bun experiments/load-save.ts McPlan runs/checkpoints/cook-shrimp.sav --api http://localhost:8888
+```
+
+If the bot is already online and you use the offline copy path, refresh/relog the
+browser after copying. If you use the browser `Load checkpoint` control, the page
+will refresh after the engine installs the checkpoint.
+
+For the known-working McPlan Al Kharid checkpoint flow, use:
+
+```powershell
+# Optional: save the current hand-tuned browser state.
+bun experiments/save-checkpoint.ts McPlan --api http://localhost:8888 --out runs/checkpoints/McPlan-cook-shrimp-alkharid.sav
+
+# If McPlan is online, install through the running engine so it disconnects safely.
+bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-cook-shrimp-alkharid.sav --api http://localhost:8888
+
+# Reopen/relog the browser bot page, then confirm state.
+bun sdk/cli.ts McPlan --server localhost --timeout 15000 --launch
+```
+
+Programmatic usage:
 
 ```typescript
 import { generateSave, Items, Locations } from '../sdk/test/utils/save-generator';
@@ -400,6 +516,16 @@ Snapshot CLI lives in `experiments/snapshot.ts`.
 
 Tick observation CLI lives in `experiments/tick.ts`.
 
+Minimal task preset JSON files live in `experiments/task-presets/`. For the
+cook-shrimp vertical slice, start with:
+
+```text
+experiments/task-presets/cook-shrimp-alkharid.json
+```
+
+That file links the initial checkpoint path, records a human task description,
+and gives both a minimal `goalState` and executable `success` verifiers.
+
 ## Planner Interface Direction
 
 All planner methods should eventually consume the same input:
@@ -429,17 +555,115 @@ The difference between methods should be what context they receive:
 - Static RAG: task + state + strict 2004 Graph RAG context, with lax fallback if needed.
 - Learned domain: task + state + RAG context + persistent learned action schemas + prior episode traces.
 
+The first planner boundary lives in `experiments/planner.ts`. It currently
+contains a deterministic cook-shrimp planner for validating the harness. PDDL is
+the right next layer once the small predicate/action set is stable: emit PDDL
+from `LearnedActionSchema[]`, call a planner, then execute the resulting plan
+through `bot.*` / `sdk.*`.
+
+The initial symbolic layer is now split into:
+
+- `experiments/domain-model.ts` for action documentation, the default cook-shrimp
+  domain, and state/goal fact extraction.
+- `experiments/pddl.ts` for PDDL domain/problem export plus a small in-process
+  STRIPS-style forward-search planner.
+- `experiments/extract-domain.ts` for asking local Ollama models to draft
+  `LearnedDomainModel` JSON files from action docs, start state, and goal.
+
+Example LLM/domain extraction:
+
+```powershell
+bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --models gemma3:12b,gemma3:4b --out runs/domain-models
+```
+
+For the static RAG arm, seed the LLM extraction with the 2004 Graph RAG context:
+
+```powershell
+bun experiments/extract-domain.ts --task experiments/task-presets/cook-shrimp-alkharid.json --models gemma3:12b --rag --out runs/domain-models
+```
+
+After an episode, refine the model from the trace:
+
+```powershell
+bun experiments/refine-domain.ts --domain runs/domain-models/cook_shrimp_alkharid-gemma3_12b.json --trace runs/traces/<episode>.json --model gemma3:12b --out runs/domain-models/cook_shrimp_alkharid-gemma3_12b-refined.json
+```
+
+Then run the symbolic/PDDL-backed episode against one extracted model:
+
+```powershell
+bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method pddl --model gemma3:12b --domain runs/domain-models/cook_shrimp_alkharid-gemma3_12b.json --server localhost
+```
+
+The first executable episode driver lives in `experiments/run-episode.ts`:
+
+```powershell
+bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
+```
+
+For `cook_shrimp`, the current executor sends `useItemOnLoc` directly through the
+SDK after selecting the nearest visible `Range`/`Fire`. It waits for an inventory
+or Cooking XP outcome, treats burned shrimp as a valid stochastic action outcome,
+and retries while the planner has remaining bounded steps.
+
+The cook-shrimp verifier is transition-based: success requires `inventory_gained`
+for cooked `Shrimps` and `xp_gained` for Cooking. This avoids counting shrimp
+that were already in inventory before the episode.
+
 ## Next Implementation Slice
 
 The first executable vertical slice should be `cook_shrimp`:
 
-1. Generate a local save with `Raw shrimps`, Cooking level 1, and a nearby cooking facility.
-2. Snapshot before state.
-3. Run one planner-produced bounded action script.
-4. Snapshot after state.
-5. Compute `StateDelta`.
-6. Evaluate `VerifierSpec[]`.
-7. Write an `EpisodeTrace` JSON file.
+1. Load `experiments/task-presets/cook-shrimp-alkharid.json`.
+2. Install `startState.checkpointPath` with `experiments/load-save.ts`.
+3. Reopen/relog `McPlan` with `sdk/cli.ts --launch` or the browser URL.
+4. Snapshot before state.
+5. Run `experiments/run-episode.ts`, which executes the bounded plan from
+   `experiments/planner.ts`.
+6. Inspect the `EpisodeTrace` JSON written under `runs/traces/`.
+
+After that works once, run the same task across `few_shot`, `static_rag`, and
+`learned_domain`, then repeat across local Ollama models and aggregate success,
+time-to-completion, invalid actions, replans, and learned-domain improvement
+over episodes.
+
+The batch wrapper for this is `experiments/run-batch.ts`:
+
+```powershell
+bun experiments/run-batch.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --runs 5 --methods few_shot,static_rag,pddl,learned_domain --models none,gemma3:12b --server localhost --api http://localhost:8888 --rag
+```
+
+Use a different starting checkpoint without editing the task JSON:
+
+```powershell
+bun experiments/run-batch.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --runs 5 --methods few_shot,static_rag,pddl,learned_domain --models none,gemma3:12b --server localhost --api http://localhost:8888 --rag --checkpoint runs/checkpoints/McPlan-cook-shrimp-alkharid-2.sav
+```
+
+Useful batch stability knobs:
+
+```powershell
+# Give the browser/engine longer to settle after checkpoint reload.
+--settle-ms 8000
+
+# Poll the gateway longer before starting an episode.
+--ready-timeout 45000
+
+# Override the task JSON maxSteps for harder starts/tasks.
+--max-steps 12
+```
+
+For each run, it installs the checkpoint, relogs the browser bot with
+the gateway `/reload/<bot>` endpoint plus `sdk/cli.ts --launch`, runs
+`run-episode.ts`, and writes JSON plus CSV summaries under `runs/batch/`. The
+summary includes per-run success, duration, invalid action count, verifier
+evidence, and aggregate success rates by method/model. For each non-`none` model
+it first calls `extract-domain.ts` once and passes that domain model into
+`static_rag`, `pddl`, and `learned_domain` episodes. `learned_domain` then calls
+`refine-domain.ts` after each episode and feeds the refined model into the next
+run.
+
+After adding or changing the reload endpoint, restart `server/gateway` and make
+sure `server/webclient` is running `bun run watch`, since the browser-side
+gateway connection needs to understand the new `reload` message.
 
 ## Troubleshooting
 

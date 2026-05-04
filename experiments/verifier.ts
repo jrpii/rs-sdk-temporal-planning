@@ -20,6 +20,14 @@ export function evaluateVerifier(summary: StateSummary, spec: VerifierSpec, delt
             const needed = spec.count ?? 1;
             return { pass: count >= needed, evidence: `inventory ${spec.item}: ${count}/${needed}` };
         }
+        case 'inventory_gained': {
+            const pattern = new RegExp(spec.item, 'i');
+            const gained = Object.entries(delta?.inventoryAdded ?? {})
+                .filter(([name]) => pattern.test(name))
+                .reduce((total, [, count]) => total + count, 0);
+            const needed = spec.count ?? 1;
+            return { pass: gained >= needed, evidence: `inventory gained ${spec.item}: ${gained}/${needed}` };
+        }
         case 'inventory_lacks': {
             const count = countOf(summary, spec.item);
             return { pass: count === 0, evidence: `inventory ${spec.item}: ${count}` };

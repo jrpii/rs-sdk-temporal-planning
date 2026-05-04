@@ -1,6 +1,6 @@
 import type { ActionResult, BotWorldState } from '../sdk/types';
 
-export type PlannerMethod = 'few_shot' | 'static_rag' | 'learned_domain';
+export type PlannerMethod = 'few_shot' | 'static_rag' | 'learned_domain' | 'pddl';
 
 export type ParameterType =
     | 'item'
@@ -87,6 +87,15 @@ export interface LearnedActionSchema {
     }>;
 }
 
+export interface LearnedDomainModel {
+    id: string;
+    taskId?: string;
+    description?: string;
+    actions: LearnedActionSchema[];
+    provenance: Provenance[];
+    notes?: string[];
+}
+
 export interface StateSummary {
     tick: number;
     inGame: boolean;
@@ -123,6 +132,14 @@ export interface StateDelta {
     newMessages: string[];
 }
 
+export interface MinimalGoalState {
+    description?: string;
+    inventoryContains?: Record<string, number>;
+    inventoryGained?: Record<string, number>;
+    xpGained?: Record<string, number>;
+    positionWithin?: { x: number; z: number; tolerance: number; level?: number };
+}
+
 export interface TaskSpec {
     id: string;
     description: string;
@@ -130,14 +147,18 @@ export interface TaskSpec {
     startState?: {
         savePreset?: string;
         saveConfig?: unknown;
+        checkpointPath?: string;
+        checkpointProfile?: string;
         notes?: string;
     };
+    goalState?: MinimalGoalState;
     success: VerifierSpec[];
     failure?: VerifierSpec[];
 }
 
 export type VerifierSpec =
     | { kind: 'inventory_contains'; item: string; count?: number }
+    | { kind: 'inventory_gained'; item: string; count?: number }
     | { kind: 'inventory_lacks'; item: string }
     | { kind: 'xp_gained'; skill: string; minXp?: number }
     | { kind: 'level_at_least'; skill: string; level: number }
@@ -159,6 +180,20 @@ export interface RetrievalTrace {
     directMatches: string[];
     traversedEdges: string[];
     fallbackUsed?: boolean;
+}
+
+export interface PlannerInput {
+    task: TaskSpec;
+    state: StateSummary;
+    learnedActions?: LearnedActionSchema[];
+    retrievalContext?: string;
+}
+
+export interface PlannerOutput {
+    plan: PlanStep[];
+    candidateActions?: LearnedActionSchema[];
+    verifierHints?: VerifierSpec[];
+    notes?: string;
 }
 
 export interface PlanStep {

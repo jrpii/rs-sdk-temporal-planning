@@ -393,14 +393,47 @@ class World {
         return this.getExperimentControlState();
     }
 
+    private processPausedClients(): void {
+        // Keep browser clients and SDK state flowing while the simulation clock is stopped.
+        this.processClientsIn();
+
+        for (const player of this.players) {
+            player.requestIdleLogout = false;
+        }
+
+        this.processInfo();
+        this.processClientsOut();
+        this.processPausedCleanup();
+    }
+
+    private processPausedCleanup(): void {
+        this.zonesTracking.forEach(zone => zone.reset());
+        this.zonesTracking.clear();
+
+        for (const player of this.players) {
+            player.resetEntity(false);
+
+            for (const inv of player.invs.values()) {
+                if (inv) {
+                    inv.update = false;
+                }
+            }
+        }
+
+        for (const npc of this.npcs) {
+            npc.resetEntity(false);
+        }
+    }
+
     cycle(): void {
         try {
             const start: number = Date.now();
             const drift: number = Math.max(0, start - this.nextTick);
 
             if (this.paused && this.pendingManualTicks <= 0) {
+                this.processPausedClients();
                 this.nextTick = Date.now() + this.tickRate;
-                setTimeout(this.cycle.bind(this), 50);
+                setTimeout(this.cycle.bind(this), this.tickRate);
                 return;
             }
 

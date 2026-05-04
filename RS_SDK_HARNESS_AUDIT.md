@@ -490,6 +490,22 @@ This means the proposal can report both controlled benchmark results and persist
 
 ### Checkpointing Commands
 
+There are three distinct checkpoint operations:
+
+```powershell
+# Synthetic checkpoint from a preset/config. Requires --preset or --config.
+bun experiments/create-save.ts McPlan --preset COOK_SHRIMP_ALKHARID --profile experiments --out runs/checkpoints/cook-shrimp-alkharid.sav
+
+# Live checkpoint, same source as the browser Save checkpoint button.
+bun experiments/save-checkpoint.ts McPlan --api http://localhost:8888 --out runs/checkpoints/McPlan-cook-shrimp-alkharid.sav
+
+# Install a checkpoint through the running engine, safely disconnecting an online player.
+bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-cook-shrimp-alkharid.sav --api http://localhost:8888
+
+# Reopen/relog the browser bot and verify the loaded position/state.
+bun sdk/cli.ts McPlan --server localhost --timeout 15000 --launch
+```
+
 Run an existing SDK test that uses save generation:
 
 ```powershell

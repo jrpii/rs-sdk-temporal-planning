@@ -160,6 +160,9 @@ export class GatewayConnection {
             // Set flag to prevent auto-reconnect before calling handler
             this.preventReconnect = true;
             this.handler.onSaveAndDisconnect(msg.reason || 'Session being replaced');
+        } else if (msg.type === 'reload') {
+            console.warn(`[GatewayConnection] Reload requested: ${msg.reason || 'gateway requested reload'}`);
+            window.location.reload();
         }
     }
 }

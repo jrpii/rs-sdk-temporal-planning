@@ -18,10 +18,16 @@ export const smokeTasks: TaskSpec[] = [
         description: 'Cook raw shrimps using a nearby range or fire.',
         maxSteps: 6,
         startState: {
-            notes: 'Use a generated save near a cooking facility with Raw shrimps and Cooking level 1.',
+            savePreset: 'COOK_SHRIMP_ALKHARID',
+            notes: 'Synthetic preset near an Al Kharid range with Raw shrimps and Cooking level 1.',
+        },
+        goalState: {
+            description: 'Inventory gains cooked Shrimps and Cooking XP increases.',
+            inventoryGained: { Shrimps: 1 },
+            xpGained: { Cooking: 1 },
         },
         success: [
-            { kind: 'inventory_contains', item: '^Shrimps$', count: 1 },
+            { kind: 'inventory_gained', item: '^Shrimps$', count: 1 },
             { kind: 'xp_gained', skill: 'Cooking', minXp: 1 },
         ],
     },
