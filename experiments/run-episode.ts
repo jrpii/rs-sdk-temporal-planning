@@ -3,11 +3,11 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { ActionResult, BotWorldState, NearbyLoc } from '../sdk/types';
 import { connectExperimentBot } from './connect';
-import { ACTION_DOCS, defaultCookShrimpDomain } from './domain-model';
+import { ACTION_DOCS, appendDomainLessons, defaultCookShrimpDomain, effect, predicate, sanitizeLearnedDomainModel } from './domain-model';
 import { chatCompletion, extractJsonObject } from './llm';
 import { exportPddl } from './pddl';
 import { createPlanner } from './planner';
-import type { AgenticReplanEvent, EpisodeTrace, ExecutionStep, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
+import type { AgenticReplanEvent, DomainEffect, DomainPredicate, EpisodeTrace, ExecutionStep, LearnedActionSchema, LearnedDomainLesson, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
 import { diffStateSummaries, summarizeState } from './state-summary';
 import { evaluateVerifiers } from './verifier';
 
@@ -310,6 +310,162 @@ function buildPddlArtifact(args: {
     return exportPddl(args.task, args.state, args.domainModel);
 }
 
+function sameKindAndArgs(a: DomainPredicate | DomainEffect, b: DomainPredicate | DomainEffect): boolean {
+    return a.kind === b.kind && JSON.stringify(a.args) === JSON.stringify(b.args);
+}
+
+function addPrecondition(action: LearnedActionSchema, precondition: DomainPredicate): LearnedActionSchema {
+    if (action.preconditions.some(existing => sameKindAndArgs(existing, precondition))) return action;
+    return { ...action, preconditions: [...action.preconditions, precondition] };
+}
+
+function addEffect(action: LearnedActionSchema, actionEffect: DomainEffect): LearnedActionSchema {
+    if (action.effects.some(existing => sameKindAndArgs(existing, actionEffect))) return action;
+    return { ...action, effects: [...action.effects, actionEffect] };
+}
+
+function lessonFromObservation(args: {
+    actionSchemaId?: string;
+    observation: string;
+    inference: string;
+    suggestedDomainChange: string;
+    confidence?: number;
+}): LearnedDomainLesson {
+    return {
+        actionSchemaId: args.actionSchemaId,
+        observation: args.observation,
+        inference: args.inference,
+        suggestedDomainChange: args.suggestedDomainChange,
+        confidence: args.confidence ?? 0.8,
+        provenance: [{
+            source: 'environment',
+            reference: 'run-episode observed execution trace',
+            confidence: args.confidence ?? 0.8,
+            observedAt: new Date().toISOString(),
+        }],
+    };
+}
+
+function applyEnvironmentEvidence(args: {
+    task: TaskSpec;
+    domainModel: LearnedDomainModel;
+    step: PlanStep;
+    executed: ExecutionStep;
+    allowExplore: boolean;
+}): { domainModel: LearnedDomainModel; lessons: LearnedDomainLesson[] } {
+    const lessons: LearnedDomainLesson[] = [];
+    let domainModel = sanitizeLearnedDomainModel(args.domainModel, args.task, defaultCookShrimpDomain(args.task.id), { includeRecoveryActions: true });
+    const actions = domainModel.actions.map(action => ({ ...action, negativeEvidence: [...(action.negativeEvidence ?? [])] }));
+    const actionIndex = actions.findIndex(action => action.id === args.step.actionSchemaId);
+    const targetAction = actionIndex >= 0 ? actions[actionIndex]! : undefined;
+    const resultMessage = args.executed.result.message;
+
+    if (targetAction && shouldAttemptReachabilityRecovery(args.executed.result)) {
+        const reachablePrecondition = predicate('reachable', { target: 'Range|Fire' }, 0.8);
+        let updatedAction = addPrecondition(targetAction, reachablePrecondition);
+        updatedAction = {
+            ...updatedAction,
+            negativeEvidence: [
+                ...updatedAction.negativeEvidence,
+                {
+                    observation: resultMessage,
+                    inferredMissingPrecondition: reachablePrecondition,
+                    stateBeforeHash: JSON.stringify(args.executed.before.position ?? {}),
+                    stateAfterHash: JSON.stringify(args.executed.after.position ?? {}),
+                    provenance: [{
+                        source: 'environment',
+                        reference: 'reachability failure during run-episode',
+                        confidence: 0.85,
+                        observedAt: new Date().toISOString(),
+                    }],
+                },
+            ],
+        };
+        actions[actionIndex] = updatedAction;
+        lessons.push(lessonFromObservation({
+            actionSchemaId: targetAction.id,
+            observation: resultMessage,
+            inference: 'Cooking source visibility is not enough; direct cooking also requires the source to be reachable.',
+            suggestedDomainChange: 'Add reachable(Range|Fire) as a precondition for use_item_on_cooking_source and plan open_nearby_door/explore_for_cooking_source before retrying.',
+            confidence: 0.85,
+        }));
+    }
+
+    if (/no nearby range or fire found/i.test(resultMessage) || /no cooking source/i.test(resultMessage)) {
+        lessons.push(lessonFromObservation({
+            actionSchemaId: args.step.actionSchemaId,
+            observation: resultMessage,
+            inference: 'When no Range or Fire is nearby, the symbolic model needs an exploration/navigation action before cooking.',
+            suggestedDomainChange: 'Use explore_for_cooking_source to establish near_loc(Range|Fire) and reachable(Range|Fire).',
+            confidence: 0.75,
+        }));
+    }
+
+    for (let i = 0; i < actions.length; i++) {
+        if (actions[i]!.id === 'open_nearby_door') {
+            actions[i] = addEffect(actions[i]!, effect('reachable', { target: 'Range|Fire' }, 0.7));
+        }
+        if (actions[i]!.id === 'explore_for_cooking_source') {
+            actions[i] = addEffect(addEffect(actions[i]!, effect('near_loc', { name: 'Range|Fire' }, 0.6)), effect('reachable', { target: 'Range|Fire' }, 0.6));
+        }
+    }
+
+    if (/burned|burnt/i.test(resultMessage)) {
+        lessons.push(lessonFromObservation({
+            actionSchemaId: args.step.actionSchemaId,
+            observation: resultMessage,
+            inference: 'Burning food is a stochastic outcome of a valid cooking action, not evidence that the action preconditions were wrong.',
+            suggestedDomainChange: 'Keep the successful cooking effects but preserve retry behavior for stochastic burn outcomes.',
+            confidence: 0.8,
+        }));
+    }
+
+    if (args.executed.result.success && args.step.actionSchemaId === 'open_nearby_door') {
+        lessons.push(lessonFromObservation({
+            actionSchemaId: 'open_nearby_door',
+            observation: resultMessage,
+            inference: 'Opening a nearby door or gate can resolve reachability failures for blocked cooking sources.',
+            suggestedDomainChange: 'Keep open_nearby_door as an executable recovery action with effect reachable(Range|Fire).',
+            confidence: 0.8,
+        }));
+    }
+
+    if (args.executed.result.success && args.step.actionSchemaId === 'explore_for_cooking_source') {
+        lessons.push(lessonFromObservation({
+            actionSchemaId: 'explore_for_cooking_source',
+            observation: resultMessage,
+            inference: 'Bounded exploration can establish a reachable nearby cooking source before retrying cooking.',
+            suggestedDomainChange: 'Keep explore_for_cooking_source as an executable recovery action with effects near_loc(Range|Fire) and reachable(Range|Fire).',
+            confidence: 0.75,
+        }));
+    }
+
+    domainModel = appendDomainLessons({ ...domainModel, actions }, lessons);
+    return { domainModel: sanitizeLearnedDomainModel(domainModel, args.task, defaultCookShrimpDomain(args.task.id), { includeRecoveryActions: true }), lessons };
+}
+
+async function symbolicPlanFromDomain(args: {
+    method: PlannerMethod;
+    task: TaskSpec;
+    state: StateSummary;
+    domainModel: LearnedDomainModel;
+    remainingSteps: number;
+}): Promise<PlanStep[]> {
+    const replanningTask = { ...args.task, maxSteps: Math.max(1, args.remainingSteps) };
+    const replanner = createPlanner(args.method, args.domainModel);
+    const output = await replanner.plan({
+        task: replanningTask,
+        state: args.state,
+        learnedActions: args.domainModel.actions,
+    });
+    console.log(`[Episode] Symbolic replanner after domain update: ${output.notes ?? 'none'}`);
+    return output.plan.slice(0, args.remainingSteps).map((step, index) => ({
+        ...step,
+        stepIndex: index,
+        naturalLanguage: `Symbolic recovery ${index + 1}: ${step.naturalLanguage}`,
+    }));
+}
+
 async function retrieveReplanRagContext(task: TaskSpec, trigger: ActionResult): Promise<{ query: string; context: string }> {
     const query = `RuneScape 2004 planning recovery for task "${task.description}" after failed action: ${trigger.message}. Include cooking ranges, doors/gates, and navigation hints.`;
     console.log(`[AgenticReplan] Querying Graph RAG with search: ${query}`);
@@ -417,6 +573,9 @@ Return ONLY JSON in this exact shape:
 {
   "notes": "brief reason for the replan",
   "domainModel": { "id": "...", "taskId": "...", "description": "...", "provenance": [], "notes": [], "actions": [] },
+  "learnedLessons": [
+    { "observation": "what happened", "inference": "domain rule learned from it", "actionSchemaId": "use_item_on_cooking_source", "suggestedDomainChange": "specific precondition/effect/action update", "confidence": 0.8, "provenance": [{ "source": "environment", "reference": "episode trace", "confidence": 0.8 }] }
+  ],
   "plan": [
 ${actionShapeExample}
   ]
@@ -427,6 +586,7 @@ Rules:
 ${timeoutRule}
 - ${allowedActionText}
 - Preserve the learned domain model, but add/refine actions for reachability, exploration, doors, and failed/no-progress observations.
+- If you solve the failure with a recovery step, write a learnedLessons entry and encode the same lesson in domainModel preconditions/effects so future initial symbolic plans can use it.
 `.trim();
 }
 
@@ -486,7 +646,8 @@ async function requestAgenticReplan(args: {
         ragContext: rag?.context,
         notes: typeof parsed.notes === 'string' ? parsed.notes : undefined,
         plan,
-        domainModel: parsed.domainModel,
+        domainModel: parsed.domainModel ? sanitizeLearnedDomainModel(parsed.domainModel, args.task, args.domainModel, { includeRecoveryActions: true }) : undefined,
+        learnedLessons: Array.isArray(parsed.learnedLessons) ? parsed.learnedLessons : undefined,
         rawResponse,
     };
 }
@@ -498,7 +659,7 @@ async function main() {
         task.maxSteps = maxStepsOverride;
     }
     const domainModel = readDomain(domainPath);
-    let effectiveDomainModel = domainModel ?? defaultCookShrimpDomain(task.id);
+    let effectiveDomainModel = sanitizeLearnedDomainModel(domainModel ?? defaultCookShrimpDomain(task.id), task);
     const planner = createPlanner(method, effectiveDomainModel);
     const conn = await connectExperimentBot(botName, server);
     const startedAt = Date.now();
@@ -517,6 +678,7 @@ async function main() {
             state: before,
             domainModel: effectiveDomainModel,
         });
+        const initialDomainModel = structuredClone(effectiveDomainModel);
         const plannerOutput = await planner.plan({
             task,
             state: before,
@@ -557,6 +719,21 @@ async function main() {
                 after: stepAfter,
                 delta,
             });
+            const executedStep = execution[execution.length - 1]!;
+            const evidenceUpdate = applyEnvironmentEvidence({
+                task,
+                domainModel: effectiveDomainModel,
+                step,
+                executed: executedStep,
+                allowExplore: agenticExplore,
+            });
+            effectiveDomainModel = evidenceUpdate.domainModel;
+            if (evidenceUpdate.lessons.length > 0) {
+                console.log(`[Episode] Learned ${evidenceUpdate.lessons.length} environment lesson(s) from step ${step.stepIndex}.`);
+                for (const lesson of evidenceUpdate.lessons) {
+                    console.log(`[Episode]   lesson: ${lesson.inference}`);
+                }
+            }
 
             verifier = evaluateVerifiers(stepAfter, task.success, diffStateSummaries(before, stepAfter));
             if (verifier.success) break;
@@ -579,14 +756,30 @@ async function main() {
                 });
                 agenticReplans.push(replan);
                 if (replan.domainModel) {
-                    effectiveDomainModel = replan.domainModel;
+                    effectiveDomainModel = sanitizeLearnedDomainModel(appendDomainLessons(replan.domainModel, replan.learnedLessons ?? []), task, effectiveDomainModel, { includeRecoveryActions: true });
+                } else if (replan.learnedLessons?.length) {
+                    effectiveDomainModel = sanitizeLearnedDomainModel(appendDomainLessons(effectiveDomainModel, replan.learnedLessons), task, effectiveDomainModel, { includeRecoveryActions: true });
                 }
-                if (replan.plan.length > 0) {
+                const symbolicRecoveryPlan = await symbolicPlanFromDomain({
+                    method,
+                    task,
+                    state: currentState,
+                    domainModel: effectiveDomainModel,
+                    remainingSteps: task.maxSteps - execution.length,
+                });
+                replan.symbolicReplan = {
+                    notes: symbolicRecoveryPlan.length > 0
+                        ? 'Generated by symbolic planner from updated in-episode domain.'
+                        : 'No symbolic recovery plan found from updated domain; falling back to LLM-authored recovery steps.',
+                    plan: symbolicRecoveryPlan,
+                };
+                const recoveryPlan = symbolicRecoveryPlan.length > 0 ? symbolicRecoveryPlan : replan.plan;
+                if (recoveryPlan.length > 0) {
                     console.log(`[Episode] Agentic replan #${replanningCount}: ${replan.notes ?? 'no notes'}`);
-                    for (const plannedStep of replan.plan) {
+                    for (const plannedStep of recoveryPlan) {
                         console.log(`[Episode]   replan ${plannedStep.stepIndex}: ${plannedStep.actionSchemaId ?? 'unknown'} - ${plannedStep.naturalLanguage}`);
                     }
-                    plan.splice(cursor + 1, 0, ...replan.plan);
+                    plan.splice(cursor + 1, 0, ...recoveryPlan);
                     continue;
                 }
                 console.log(`[Episode] Agentic replan #${replanningCount} returned no executable steps.`);
@@ -619,13 +812,31 @@ async function main() {
                     after: explorationAfter,
                     delta: explorationDelta,
                 });
+                const explorationEvidence = applyEnvironmentEvidence({
+                    task,
+                    domainModel: effectiveDomainModel,
+                    step: explorationStep,
+                    executed: execution[execution.length - 1]!,
+                    allowExplore: agenticExplore,
+                });
+                effectiveDomainModel = explorationEvidence.domainModel;
+                for (const lesson of explorationEvidence.lessons) {
+                    console.log(`[Episode]   lesson: ${lesson.inference}`);
+                }
 
                 if (explorationResult.success) {
-                    plan.splice(cursor + 1, 0, {
+                    const symbolicAfterExplore = await symbolicPlanFromDomain({
+                        method,
+                        task,
+                        state: explorationAfter,
+                        domainModel: effectiveDomainModel,
+                        remainingSteps: task.maxSteps - execution.length,
+                    });
+                    plan.splice(cursor + 1, 0, ...(symbolicAfterExplore.length > 0 ? symbolicAfterExplore : [{
                         stepIndex: step.stepIndex,
                         naturalLanguage: 'Retry cooking after exploration recovery.',
                         actionSchemaId: 'use_item_on_cooking_source',
-                    });
+                    }]));
                     continue;
                 }
                 if (!explorationResult.success && !shouldAttemptReachabilityRecovery(result)) break;
@@ -660,8 +871,29 @@ async function main() {
                     after: recoveryAfter,
                     delta: recoveryDelta,
                 });
+                const recoveryEvidence = applyEnvironmentEvidence({
+                    task,
+                    domainModel: effectiveDomainModel,
+                    step: recoveryStep,
+                    executed: execution[execution.length - 1]!,
+                    allowExplore: agenticExplore,
+                });
+                effectiveDomainModel = recoveryEvidence.domainModel;
+                for (const lesson of recoveryEvidence.lessons) {
+                    console.log(`[Episode]   lesson: ${lesson.inference}`);
+                }
 
                 if (!recoveryResult.success) break;
+                const symbolicAfterRecovery = await symbolicPlanFromDomain({
+                    method,
+                    task,
+                    state: recoveryAfter,
+                    domainModel: effectiveDomainModel,
+                    remainingSteps: task.maxSteps - execution.length,
+                });
+                if (symbolicAfterRecovery.length > 0) {
+                    plan.splice(cursor + 1, 0, ...symbolicAfterRecovery);
+                }
             }
         }
 
@@ -700,6 +932,10 @@ async function main() {
                 initialProblem: initialPddl.problem,
                 finalDomain: finalPddl.domain,
                 finalProblem: finalPddl.problem,
+            },
+            domainArtifacts: {
+                initialDomainModel,
+                finalDomainModel: effectiveDomainModel,
             },
         };
 

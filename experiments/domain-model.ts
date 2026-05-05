@@ -3,10 +3,17 @@ import type {
     DomainPredicate,
     LearnedActionSchema,
     LearnedDomainModel,
+    LearnedDomainLesson,
     StateSummary,
     TaskSpec,
     VerifierSpec,
 } from './schemas';
+
+export const EXECUTABLE_ACTION_IDS = [
+    'use_item_on_cooking_source',
+    'open_nearby_door',
+    'explore_for_cooking_source',
+] as const;
 
 export const ACTION_DOCS = `
 Available executable SDK actions for this vertical slice:
@@ -37,6 +44,7 @@ export function defaultCookShrimpDomain(taskId = 'cook_shrimp_alkharid'): Learne
         notes: [
             'Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.',
         ],
+        lessons: [],
         actions: [
             {
                 id: 'use_item_on_cooking_source',
@@ -77,6 +85,13 @@ export function normalizeFactName(value: unknown): string {
         .replace(/^_+|_+$/g, '');
 }
 
+function splitFactAlternatives(value: unknown): string[] {
+    return String(value ?? '')
+        .split('|')
+        .map(normalizeFactName)
+        .filter(Boolean);
+}
+
 export function stateFacts(summary: StateSummary): Set<string> {
     const facts = new Set<string>();
 
@@ -101,9 +116,12 @@ export function goalFacts(task: TaskSpec): Set<string> {
 
     for (const [item, count] of Object.entries({
         ...(task.goalState?.inventoryContains ?? {}),
-        ...(task.goalState?.inventoryGained ?? {}),
     })) {
         if (count > 0) facts.add(`has_item:${normalizeFactName(item)}`);
+    }
+
+    for (const [item, count] of Object.entries(task.goalState?.inventoryGained ?? {})) {
+        if (count > 0) facts.add(`item_gained:${normalizeFactName(item)}`);
     }
 
     for (const [skill, xp] of Object.entries(task.goalState?.xpGained ?? {})) {
@@ -122,7 +140,7 @@ function verifierGoalFacts(spec: VerifierSpec): string[] {
         case 'inventory_contains':
             return [`has_item:${normalizeFactName(spec.item.replace(/[\^$]/g, ''))}`];
         case 'inventory_gained':
-            return [`has_item:${normalizeFactName(spec.item.replace(/[\^$]/g, ''))}`];
+            return [`item_gained:${normalizeFactName(spec.item.replace(/[\^$]/g, ''))}`];
         case 'xp_gained':
             return [`xp_gained:${normalizeFactName(spec.skill)}`];
         default:
@@ -135,16 +153,14 @@ export function predicateToFacts(predicateValue: DomainPredicate): string[] {
         case 'has_item':
             return [`has_item:${normalizeFactName(predicateValue.args.item)}`];
         case 'near_loc': {
-            const names = String(predicateValue.args.name ?? predicateValue.args.loc ?? '')
-                .split('|')
-                .map(normalizeFactName)
-                .filter(Boolean);
+            const names = splitFactAlternatives(predicateValue.args.name ?? predicateValue.args.loc);
             return names.map(name => `near_loc:${name}`);
         }
         case 'skill_at_least':
             return [`skill_at_least:${normalizeFactName(predicateValue.args.skill)}:${predicateValue.args.level ?? 1}`];
         case 'reachable':
-            return [`reachable:${normalizeFactName(predicateValue.args.target ?? predicateValue.args.name ?? predicateValue.args.loc)}`];
+            return splitFactAlternatives(predicateValue.args.target ?? predicateValue.args.name ?? predicateValue.args.loc)
+                .map(name => `reachable:${name}`);
         default:
             return [];
     }
@@ -153,11 +169,18 @@ export function predicateToFacts(predicateValue: DomainPredicate): string[] {
 export function effectToFacts(effectValue: DomainEffect): string[] {
     switch (effectValue.kind) {
         case 'item_added':
-            return [`has_item:${normalizeFactName(effectValue.args.item)}`];
+            return [
+                `has_item:${normalizeFactName(effectValue.args.item)}`,
+                `item_gained:${normalizeFactName(effectValue.args.item)}`,
+            ];
         case 'xp_gained':
             return [`xp_gained:${normalizeFactName(effectValue.args.skill)}`];
+        case 'near_loc':
+            return splitFactAlternatives(effectValue.args.name ?? effectValue.args.loc)
+                .map(name => `near_loc:${name}`);
         case 'reachable':
-            return [`reachable:${normalizeFactName(effectValue.args.target ?? effectValue.args.name ?? effectValue.args.loc)}`];
+            return splitFactAlternatives(effectValue.args.target ?? effectValue.args.name ?? effectValue.args.loc)
+                .map(name => `reachable:${name}`);
         case 'message_observed':
             return [`message_observed:${normalizeFactName(effectValue.args.pattern ?? effectValue.args.message)}`];
         case 'position_changed':
@@ -181,4 +204,112 @@ export function effectToFacts(effectValue: DomainEffect): string[] {
 
 export function safeModelName(model: string): string {
     return model.replace(/[^a-zA-Z0-9_.-]+/g, '_');
+}
+
+export function isExecutableActionId(actionId: string | undefined): boolean {
+    return EXECUTABLE_ACTION_IDS.includes(actionId as typeof EXECUTABLE_ACTION_IDS[number]);
+}
+
+function sameKindAndArgs(a: DomainPredicate | DomainEffect, b: DomainPredicate | DomainEffect): boolean {
+    return a.kind === b.kind && JSON.stringify(a.args) === JSON.stringify(b.args);
+}
+
+function mergeAction(base: LearnedActionSchema, update: Partial<LearnedActionSchema>): LearnedActionSchema {
+    return {
+        ...base,
+        ...update,
+        parameters: update.parameters?.length ? update.parameters : base.parameters,
+        preconditions: [
+            ...base.preconditions,
+            ...(update.preconditions ?? []).filter(candidate => !base.preconditions.some(existing => sameKindAndArgs(existing, candidate))),
+        ],
+        effects: [
+            ...base.effects,
+            ...(update.effects ?? []).filter(candidate => !base.effects.some(existing => sameKindAndArgs(existing, candidate))),
+        ],
+        negativeEvidence: [
+            ...(base.negativeEvidence ?? []),
+            ...(update.negativeEvidence ?? []),
+        ],
+    };
+}
+
+export function recoveryActionSchemas(): LearnedActionSchema[] {
+    return [
+        {
+            id: 'open_nearby_door',
+            name: 'Open nearby door or gate',
+            description: 'Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.',
+            parameters: [{ name: 'door', type: 'loc', description: 'Visible door or gate with Open option' }],
+            preconditions: [predicate('near_loc', { name: 'Door|Gate|Large door' }, 0.7)],
+            effects: [
+                effect('reachable', { target: 'Range|Fire' }, 0.6),
+                effect('message_observed', { pattern: 'door opened or reachability changed' }, 0.4),
+            ],
+            negativeEvidence: [],
+        },
+        {
+            id: 'explore_for_cooking_source',
+            name: 'Explore for a cooking source',
+            description: 'Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.',
+            parameters: [{ name: 'source', type: 'facility', description: 'Range or Fire' }],
+            preconditions: [predicate('has_item', { item: 'Raw shrimps', count: 1 }, 0.6)],
+            effects: [
+                effect('near_loc', { name: 'Range|Fire' }, 0.5),
+                effect('reachable', { target: 'Range|Fire' }, 0.5),
+            ],
+            negativeEvidence: [],
+        },
+    ];
+}
+
+export function sanitizeLearnedDomainModel(
+    model: LearnedDomainModel,
+    task: TaskSpec,
+    fallback: LearnedDomainModel = defaultCookShrimpDomain(task.id),
+    options: { includeRecoveryActions?: boolean } = {},
+): LearnedDomainModel {
+    const executableActions = model.actions.filter(action => isExecutableActionId(action.id));
+    const mergedById = new Map<string, LearnedActionSchema>();
+    const recoveryActions = options.includeRecoveryActions ? recoveryActionSchemas() : [];
+    for (const action of [...fallback.actions, ...executableActions, ...recoveryActions]) {
+        const existing = mergedById.get(action.id);
+        mergedById.set(action.id, existing ? mergeAction(existing, action) : {
+            ...action,
+            negativeEvidence: action.negativeEvidence ?? [],
+        });
+    }
+
+    return {
+        ...fallback,
+        ...model,
+        taskId: model.taskId || task.id,
+        provenance: model.provenance?.length ? model.provenance : fallback.provenance,
+        notes: [...(fallback.notes ?? []), ...(model.notes ?? [])],
+        lessons: [...(fallback.lessons ?? []), ...(model.lessons ?? [])],
+        actions: [...mergedById.values()],
+    };
+}
+
+export function appendDomainLessons(model: LearnedDomainModel, lessons: LearnedDomainLesson[]): LearnedDomainModel {
+    if (lessons.length === 0) return model;
+    const existing = model.lessons ?? [];
+    const seen = new Set(existing.map(lesson => `${lesson.actionSchemaId ?? ''}|${lesson.observation}|${lesson.inference}`));
+    const nextLessons = [
+        ...existing,
+        ...lessons.filter(lesson => {
+            const key = `${lesson.actionSchemaId ?? ''}|${lesson.observation}|${lesson.inference}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        }),
+    ];
+    return {
+        ...model,
+        lessons: nextLessons,
+        notes: [
+            ...(model.notes ?? []),
+            ...lessons.map(lesson => `Observed lesson: ${lesson.inference}`),
+        ],
+    };
 }

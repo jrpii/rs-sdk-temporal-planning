@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { ACTION_DOCS, defaultCookShrimpDomain, safeModelName } from './domain-model';
+import { ACTION_DOCS, defaultCookShrimpDomain, safeModelName, sanitizeLearnedDomainModel } from './domain-model';
 import { exportPddl } from './pddl';
 import { chatCompletion, extractJsonObject } from './llm';
 import type { LearnedDomainModel, StateSummary, TaskSpec } from './schemas';
@@ -131,6 +131,7 @@ Return ONLY JSON matching this TypeScript shape:
   "description": "string",
   "provenance": [{ "source": "llm", "reference": "model name", "confidence": 0.0 }],
   "notes": ["uncertainties or stochastic outcomes"],
+  "lessons": [],
   "actions": [{
     "id": "use_item_on_cooking_source",
     "name": "Use raw shrimps on cooking source",
@@ -178,13 +179,13 @@ Return ONLY JSON matching this TypeScript shape:
 function normalizeDomain(raw: unknown, task: TaskSpec, model: string): LearnedDomainModel {
     const value = raw as Partial<LearnedDomainModel>;
     const fallback = defaultCookShrimpDomain(task.id);
-    return {
+    return sanitizeLearnedDomainModel({
         ...fallback,
         ...value,
         taskId: value.taskId || task.id,
         provenance: value.provenance?.length ? value.provenance : [{ source: 'llm', reference: model, confidence: 0.5 }],
         actions: value.actions?.length ? value.actions : fallback.actions,
-    };
+    }, task, fallback);
 }
 
 async function main() {

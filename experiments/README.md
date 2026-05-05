@@ -689,9 +689,14 @@ For `learned_domain / <model>`, `run-batch.ts` also enables `run-episode.ts
 --agentic-replan --agentic-explore` by default. When a step fails or makes no
 progress, the episode controller sends the current domain, task, plan, execution
 trace, current state, and optionally Graph RAG context back to the LLM. The LLM
-returns a short revised plan and optionally a revised domain model. The episode
-then continues without resetting the checkpoint. Exploration can be ablated
-separately with `--no-agentic-explore`; replanning can be ablated separately with
+returns a short revised plan, structured learned lessons, and optionally a revised
+domain model. Environment failures also add deterministic lessons for common
+cases such as unreachable cooking sources, no visible `Range`/`Fire`, and
+stochastic burns. After an in-episode domain update, `run-episode.ts` re-runs the
+symbolic planner against the updated domain and current world state. It only
+falls back to the LLM-authored short plan if the updated symbolic domain still
+cannot produce executable recovery steps. Exploration can be ablated separately
+with `--no-agentic-explore`; replanning can be ablated separately with
 `--no-agentic-replan`.
 
 Current method semantics:
@@ -714,12 +719,15 @@ Current method semantics:
   context when `--rag` is passed, then calls `refine-domain.ts` after each
   episode and feeds the refined model into the next run. During an episode it can
   also trigger bounded agentic replanning with `use_item_on_cooking_source`,
-  `open_nearby_door`, and `explore_for_cooking_source`.
+  `open_nearby_door`, and `explore_for_cooking_source`. In-episode replans are
+  now converted back into the domain as `lessons`, negative evidence, and
+  executable symbolic action effects before the runner chooses the next steps.
 
 The batch console logs the major LLM/retrieval events: live state snapshot
 capture, domain extraction, Graph RAG query text, use of a refined learned model,
-domain refinement, planned steps, in-episode agentic replans, exploration
-actions, reachability recovery replans, and per-step execution results.
+domain refinement, planned steps, in-episode agentic replans, symbolic replans
+from updated domains, learned environment lessons, exploration actions,
+reachability recovery replans, and per-step execution results.
 
 The current exploration action is intentionally bounded for reproducibility. It
 scans for a `Range`/`Fire` in a larger radius, tries an obvious nearby openable
@@ -730,7 +738,9 @@ turning the experiment into an unbounded wander.
 Every episode trace records `pddlArtifacts` with initial/final domain and problem
 PDDL embedded directly in the trace JSON. The initial problem captures the start
 facts for that trial; the final problem captures the observed end-state facts
-against the same goal.
+against the same goal. Traces also include `domainArtifacts.initialDomainModel`
+and `domainArtifacts.finalDomainModel`, so you can inspect the learned JSON
+domain before and after environment feedback, agentic replans, and refinement.
 
 ### Creating More Tasks
 

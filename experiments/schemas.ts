@@ -35,6 +35,7 @@ export type EffectKind =
     | 'item_equipped'
     | 'xp_gained'
     | 'level_changed'
+    | 'near_loc'
     | 'position_changed'
     | 'dialog_opened'
     | 'dialog_closed'
@@ -88,6 +89,16 @@ export interface LearnedActionSchema {
     }>;
 }
 
+export interface LearnedDomainLesson {
+    id?: string;
+    observation: string;
+    inference: string;
+    actionSchemaId?: string;
+    suggestedDomainChange?: string;
+    confidence: number;
+    provenance: Provenance[];
+}
+
 export interface LearnedDomainModel {
     id: string;
     taskId?: string;
@@ -95,6 +106,7 @@ export interface LearnedDomainModel {
     actions: LearnedActionSchema[];
     provenance: Provenance[];
     notes?: string[];
+    lessons?: LearnedDomainLesson[];
 }
 
 export interface StateSummary {
@@ -227,6 +239,11 @@ export interface AgenticReplanEvent {
     notes?: string;
     plan: PlanStep[];
     domainModel?: LearnedDomainModel;
+    learnedLessons?: LearnedDomainLesson[];
+    symbolicReplan?: {
+        notes?: string;
+        plan: PlanStep[];
+    };
     rawResponse?: string;
 }
 
@@ -258,5 +275,9 @@ export interface EpisodeTrace {
         initialProblem: string;
         finalDomain: string;
         finalProblem: string;
+    };
+    domainArtifacts?: {
+        initialDomainModel: LearnedDomainModel;
+        finalDomainModel: LearnedDomainModel;
     };
 }

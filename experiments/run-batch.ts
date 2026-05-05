@@ -177,6 +177,10 @@ function readTraceSummary(tracePath: string | undefined): Record<string, unknown
         pddlDomainModelId: envelope.trace.pddlArtifacts?.domainModelId,
         pddlEmbedded: Boolean(envelope.trace.pddlArtifacts),
         agenticReplans: envelope.trace.agenticReplans?.length ?? 0,
+        learnedLessons: envelope.trace.agenticReplans?.reduce((total, replan) => total + (replan.learnedLessons?.length ?? 0), 0) ?? 0,
+        finalDomainLessons: envelope.trace.domainArtifacts?.finalDomainModel.lessons?.length ?? 0,
+        finalDomainActions: envelope.trace.domainArtifacts?.finalDomainModel.actions?.length ?? 0,
+        symbolicReplans: envelope.trace.agenticReplans?.filter(replan => (replan.symbolicReplan?.plan.length ?? 0) > 0).length ?? 0,
         verifierEvidence: envelope.verifier?.evidence?.join(' | ') ?? '',
     };
 }
