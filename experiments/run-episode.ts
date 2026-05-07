@@ -23,9 +23,9 @@ import type {
     EpisodeTrace,
     ExecutionPhase,
     ExecutionStep,
+    LearnedDomainModel,
     LearnedActionSchema,
     LearnedDomainLesson,
-    LearnedDomainModel,
     PlannerMethod,
     PlanStep,
     StateSummary,
@@ -266,12 +266,39 @@ async function executeStep(
     conn: Awaited<ReturnType<typeof connectExperimentBot>>,
     step: PlanStep,
     kb?: KnowledgeBase,
+    domainModel?: LearnedDomainModel,
 ): Promise<ActionResult> {
-    if (step.actionSchemaId === 'explore_for_cooking_source') {
+    if (step.actionSchemaId === 'explore_for_cooking_source' || step.actionSchemaId === 'explore_for_loc') {
         const state = conn.sdk.getState();
         if (!state?.player) return { success: false, message: 'No game state available' };
 
         const targetPattern = extractTargetLocPattern(step) ?? /^(Range|Fire)$/i;
+
+        // 0) Prefer LLM-written knownFacilities if present.
+        if (domainModel?.knownFacilities?.length) {
+            const candidates = domainModel.knownFacilities
+                .filter(f => {
+                    if (f.level !== state.player!.level) return false;
+                    try {
+                        return targetPattern.test(f.namePattern);
+                    } catch {
+                        return false;
+                    }
+                })
+                .sort((a, b) => {
+                    const da = Math.max(Math.abs(a.x - state.player!.worldX), Math.abs(a.z - state.player!.worldZ));
+                    const db = Math.max(Math.abs(b.x - state.player!.worldX), Math.abs(b.z - state.player!.worldZ));
+                    return da - db;
+                });
+            if (candidates.length > 0) {
+                const best = candidates[0]!;
+                const walkResult = await conn.bot.walkTo(best.x, best.z, 3);
+                return {
+                    ...walkResult,
+                    message: `Exploration used knownFacilities target ${best.namePattern} at (${best.x}, ${best.z}): ${walkResult.message}`,
+                };
+            }
+        }
 
         // 1) If KB has a known target location, bias movement to the nearest known coordinate first.
         if (kb) {
@@ -964,7 +991,7 @@ async function main() {
             const stepBefore = await currentSummary(conn, readyTimeout);
             const startedTick = stepBefore.tick;
             console.log(`[Episode] Executing step ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
-            const result = await executeStep(conn, step, kb);
+            const result = await executeStep(conn, step, kb, effectiveDomainModel);
             const stepAfter = await currentSummary(conn, readyTimeout);
             const delta = diffStateSummaries(stepBefore, stepAfter);
             console.log(`[Episode] Result step ${step.stepIndex}: ${result.success ? 'ok' : 'failed'} - ${result.message}`);
@@ -1066,7 +1093,7 @@ async function main() {
                 console.log(`[Episode] Executing exploration step: ${explorationStep.actionSchemaId} - ${explorationStep.naturalLanguage}`);
                 const explorationBefore = await currentSummary(conn, readyTimeout);
                 const explorationStartedTick = explorationBefore.tick;
-                const explorationResult = await executeStep(conn, explorationStep, kb);
+                const explorationResult = await executeStep(conn, explorationStep, kb, effectiveDomainModel);
                 const explorationAfter = await currentSummary(conn, readyTimeout);
                 const explorationDelta = diffStateSummaries(explorationBefore, explorationAfter);
                 console.log(`[Episode] Result exploration step: ${explorationResult.success ? 'ok' : 'failed'} - ${explorationResult.message}`);
@@ -1131,7 +1158,7 @@ async function main() {
 
                 const recoveryBefore = await currentSummary(conn, readyTimeout);
                 const recoveryStartedTick = recoveryBefore.tick;
-                const recoveryResult = await executeStep(conn, recoveryStep, kb);
+                const recoveryResult = await executeStep(conn, recoveryStep, kb, effectiveDomainModel);
                 const recoveryAfter = await currentSummary(conn, readyTimeout);
                 const recoveryDelta = diffStateSummaries(recoveryBefore, recoveryAfter);
                 console.log(`[Episode] Result recovery step: ${recoveryResult.success ? 'ok' : 'failed'} - ${recoveryResult.message}`);

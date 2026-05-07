@@ -179,6 +179,8 @@ export const EXECUTABLE_ACTION_IDS = [
     'use_item_on_cooking_source',
     'open_nearby_door',
     'explore_for_cooking_source',
+    // Task-agnostic alias. Executor treats this the same as explore_for_cooking_source.
+    'explore_for_loc',
 ] as const;
 
 export const ACTION_DOCS = `
@@ -187,7 +189,8 @@ Available executable SDK actions for this vertical slice:
 - bot.walkTo(x, z, tolerance?): pathfind to coordinates. Returns { success, message }.
 - bot.openDoor(target?): open a nearby door or gate, walking to it if needed.
 - bot.useItemOnLoc(item, loc): use an inventory item on a nearby location. Good examples: raw fish on range/fire.
-- explore_for_cooking_source: bounded experiment executor that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.
+- explore_for_cooking_source: bounded experiment executor that scans a wider radius, opens obvious doors/gates, and walks short probes to find a target location (default Range|Fire).
+- explore_for_loc: task-agnostic alias of explore_for_cooking_source (uses actionParams.targetLocNamePattern when provided).
 - sdk.findInventoryItem(pattern): find an item in inventory by name.
 - sdk.findNearbyLoc(pattern): find a visible location/object by name.
 - sdk.scanNearbyLocs(radius?): scan a larger area for nearby locations/objects.
