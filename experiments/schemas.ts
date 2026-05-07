@@ -18,6 +18,7 @@ export type PredicateKind =
     | 'equipped_item'
     | 'skill_at_least'
     | 'near_loc'
+    | 'near_loc_option'
     | 'near_npc'
     | 'at_position'
     | 'bank_open'
@@ -208,6 +209,15 @@ export interface TaskSpec {
         checkpointPath?: string;
         checkpointProfile?: string;
         notes?: string;
+    };
+    /** Optional hints to keep the system task-agnostic while still steerable. */
+    taskHints?: {
+        /** High-level exploration targets as regex-like strings (e.g. ["Rock", "Tree", "Furnace|Range"]). */
+        explorationTargets?: string[];
+        /** Allowed actionSchemaId set for LLM planning/replanning (enforced). */
+        preferredActions?: string[];
+        /** Canonical goal item names to help LLM map verifiers to entities (optional). */
+        goalItems?: string[];
     };
     goalState?: MinimalGoalState;
     success: VerifierSpec[];

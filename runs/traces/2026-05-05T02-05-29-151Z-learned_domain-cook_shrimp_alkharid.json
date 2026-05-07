@@ -1,0 +1,2346 @@
+{
+  "trace": {
+    "episodeId": "learned_domain-cook_shrimp_alkharid-1777946729155",
+    "method": "learned_domain",
+    "task": {
+      "id": "cook_shrimp_alkharid",
+      "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+      "maxSteps": 12,
+      "startState": {
+        "checkpointPath": "runs/checkpoints/McPlan-cook-shrimp-alkharid.sav",
+        "checkpointProfile": "experiments",
+        "notes": "Install before each episode with: bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-cook-shrimp-alkharid.sav --api http://localhost:8888. Then relog with: bun sdk/cli.ts McPlan --server localhost --timeout 15000 --launch."
+      },
+      "goalState": {
+        "description": "Inventory gains cooked Shrimps and Cooking XP increases.",
+        "inventoryGained": {
+          "Shrimps": 1
+        },
+        "xpGained": {
+          "Cooking": 1
+        }
+      },
+      "success": [
+        {
+          "kind": "inventory_gained",
+          "item": "^Shrimps$",
+          "count": 1
+        },
+        {
+          "kind": "xp_gained",
+          "skill": "Cooking",
+          "minXp": 1
+        }
+      ]
+    },
+    "model": {
+      "provider": "ollama",
+      "name": "gemma3:12b"
+    },
+    "plan": [],
+    "agenticReplans": [],
+    "execution": [],
+    "metrics": {
+      "success": false,
+      "totalDurationMs": 20,
+      "invalidActionCount": 0,
+      "replanningCount": 0
+    },
+    "finalState": {
+      "tick": 12,
+      "inGame": true,
+      "position": {
+        "x": 3330,
+        "z": 3176,
+        "level": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10
+      },
+      "run": {
+        "energy": 100,
+        "weight": 9
+      },
+      "combat": {
+        "inCombat": false,
+        "targetIndex": -1,
+        "lastDamageTick": 0
+      },
+      "skills": {
+        "Attack": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 16
+        },
+        "Defence": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Strength": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Hitpoints": {
+          "level": 10,
+          "baseLevel": 10,
+          "xp": 985
+        },
+        "Ranged": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Prayer": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Magic": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Cooking": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Woodcutting": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Fletching": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Fishing": {
+          "level": 2,
+          "baseLevel": 2,
+          "xp": 80
+        },
+        "Firemaking": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Crafting": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Smithing": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Mining": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Herblore": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Agility": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Thieving": {
+          "level": 2,
+          "baseLevel": 2,
+          "xp": 136
+        },
+        "Stat18": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Stat19": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Runecraft": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        }
+      },
+      "inventory": {
+        "Coins": 41,
+        "Tinderbox": 1,
+        "Small fishing net": 1,
+        "Bread": 1,
+        "Raw shrimps": 8
+      },
+      "equipment": [
+        "Bronze axe",
+        "Wooden shield",
+        "Bronze arrow"
+      ],
+      "nearbyNpcs": [
+        {
+          "name": "Louie legs",
+          "distance": 13,
+          "options": [
+            "Talk-to",
+            "Trade"
+          ]
+        },
+        {
+          "name": "Shop assistant",
+          "distance": 13,
+          "options": [
+            "Talk-to",
+            "Trade"
+          ]
+        }
+      ],
+      "nearbyLocs": [
+        {
+          "name": "Rockslide",
+          "distance": 1,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 2,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 2,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 2,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 2,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 3,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 4,
+          "options": []
+        },
+        {
+          "name": "Cactus",
+          "distance": 5,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 5,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 6,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 6,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 6,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 6,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 8,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 8,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 8,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 8,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 9,
+          "options": []
+        },
+        {
+          "name": "Cactus",
+          "distance": 10,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 10,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 10,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 10,
+          "options": []
+        },
+        {
+          "name": "Rockslide",
+          "distance": 10,
+          "options": []
+        },
+        {
+          "name": "Bush",
+          "distance": 11,
+          "options": []
+        }
+      ],
+      "groundItems": [],
+      "ui": {
+        "dialogOpen": false,
+        "interfaceOpen": false,
+        "shopOpen": false,
+        "bankOpen": false,
+        "modalOpen": false
+      },
+      "recentMessages": [
+        "Welcome to RuneScape."
+      ]
+    },
+    "rawFinalState": {
+      "tick": 12,
+      "player": {
+        "name": "Mcplan",
+        "combatLevel": 3,
+        "hp": 10,
+        "maxHp": 10,
+        "x": 6464,
+        "z": 6208,
+        "worldX": 3330,
+        "worldZ": 3176,
+        "level": 0,
+        "runEnergy": 100,
+        "runWeight": 9,
+        "animId": -1,
+        "spotanimId": -1,
+        "combat": {
+          "inCombat": false,
+          "targetIndex": -1,
+          "lastDamageTick": 0
+        }
+      },
+      "skills": [
+        {
+          "name": "Attack",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 16
+        },
+        {
+          "name": "Defence",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Strength",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Hitpoints",
+          "level": 10,
+          "baseLevel": 10,
+          "experience": 985
+        },
+        {
+          "name": "Ranged",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Prayer",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Magic",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Cooking",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Woodcutting",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Fletching",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Fishing",
+          "level": 2,
+          "baseLevel": 2,
+          "experience": 80
+        },
+        {
+          "name": "Firemaking",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Crafting",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Smithing",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Mining",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Herblore",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Agility",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Thieving",
+          "level": 2,
+          "baseLevel": 2,
+          "experience": 136
+        },
+        {
+          "name": "Stat18",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Stat19",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Runecraft",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        }
+      ],
+      "inventory": [
+        {
+          "slot": 0,
+          "id": 995,
+          "name": "Coins",
+          "count": 41,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 1,
+          "id": 590,
+          "name": "Tinderbox",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 2,
+          "id": 303,
+          "name": "Small fishing net",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 3,
+          "id": 2309,
+          "name": "Bread",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Eat",
+              "opIndex": 1
+            }
+          ]
+        },
+        {
+          "slot": 4,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 5,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 6,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 7,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 8,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 9,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 10,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 11,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        }
+      ],
+      "equipment": [
+        {
+          "slot": 3,
+          "id": 1351,
+          "name": "Bronze axe",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        },
+        {
+          "slot": 5,
+          "id": 1171,
+          "name": "Wooden shield",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        },
+        {
+          "slot": 13,
+          "id": 882,
+          "name": "Bronze arrow",
+          "count": 25,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        }
+      ],
+      "combatStyle": {
+        "currentStyle": 0,
+        "weaponName": "Bronze axe",
+        "styles": [
+          {
+            "index": 0,
+            "name": "Stab",
+            "type": "Accurate",
+            "trainedSkill": "Attack"
+          },
+          {
+            "index": 1,
+            "name": "Lunge",
+            "type": "Aggressive",
+            "trainedSkill": "Strength"
+          },
+          {
+            "index": 2,
+            "name": "Slash",
+            "type": "Controlled",
+            "trainedSkill": "Shared"
+          },
+          {
+            "index": 3,
+            "name": "Block",
+            "type": "Defensive",
+            "trainedSkill": "Defence"
+          }
+        ]
+      },
+      "nearbyNpcs": [
+        {
+          "index": 5576,
+          "name": "Louie legs",
+          "combatLevel": 0,
+          "x": 3317,
+          "z": 3174,
+          "distance": 13,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Talk-to",
+              "opIndex": 1
+            },
+            {
+              "text": "Trade",
+              "opIndex": 3
+            }
+          ],
+          "options": [
+            "Talk-to",
+            "Trade"
+          ]
+        },
+        {
+          "index": 5577,
+          "name": "Shop assistant",
+          "combatLevel": 0,
+          "x": 3317,
+          "z": 3181,
+          "distance": 13,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Talk-to",
+              "opIndex": 1
+            },
+            {
+              "text": "Trade",
+              "opIndex": 3
+            }
+          ],
+          "options": [
+            "Talk-to",
+            "Trade"
+          ]
+        }
+      ],
+      "nearbyPlayers": [],
+      "nearbyLocs": [
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3176,
+          "distance": 1,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3329,
+          "z": 3178,
+          "distance": 2,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3174,
+          "distance": 2,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3174,
+          "distance": 2,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3178,
+          "distance": 2,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3176,
+          "distance": 3,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3172,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3180,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3172,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3180,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3334,
+          "z": 3172,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3334,
+          "z": 3174,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3334,
+          "z": 3178,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1404,
+          "name": "Cactus",
+          "x": 3325,
+          "z": 3178,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3335,
+          "z": 3176,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3170,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3182,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3170,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3334,
+          "z": 3182,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3168,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3184,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3168,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3184,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3335,
+          "z": 3185,
+          "distance": 9,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1396,
+          "name": "Cactus",
+          "x": 3325,
+          "z": 3166,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3166,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3186,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3166,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3186,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3341,
+          "z": 3165,
+          "distance": 11,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1158,
+          "name": "Potted plant",
+          "x": 3318,
+          "z": 3165,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 911,
+          "name": "Glyphs",
+          "x": 3318,
+          "z": 3175,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 356,
+          "name": "Crate",
+          "x": 3318,
+          "z": 3176,
+          "distance": 12,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3318,
+          "z": 3177,
+          "distance": 12,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 1016,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3178,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3318,
+          "z": 3179,
+          "distance": 12,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 358,
+          "name": "Crate",
+          "x": 3318,
+          "z": 3180,
+          "distance": 12,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 1018,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3182,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1015,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3183,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1017,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3184,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1016,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3185,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1018,
+          "name": "Warehouse shelves",
+          "x": 3318,
+          "z": 3186,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3329,
+          "z": 3164,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3164,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3188,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3334,
+          "z": 3188,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3336,
+          "z": 3164,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3338,
+          "z": 3164,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3342,
+          "z": 3165,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 365,
+          "name": "Sacks",
+          "x": 3317,
+          "z": 3173,
+          "distance": 13,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 358,
+          "name": "Crate",
+          "x": 3317,
+          "z": 3176,
+          "distance": 13,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3317,
+          "z": 3177,
+          "distance": 13,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 382,
+          "name": "Basket",
+          "x": 3317,
+          "z": 3178,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 358,
+          "name": "Crate",
+          "x": 3317,
+          "z": 3179,
+          "distance": 13,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3317,
+          "z": 3186,
+          "distance": 13,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 911,
+          "name": "Glyphs",
+          "x": 3318,
+          "z": 3163,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3337,
+          "z": 3163,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3339,
+          "z": 3163,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3340,
+          "z": 3163,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3342,
+          "z": 3189,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 580,
+          "name": "Statue",
+          "x": 3316,
+          "z": 3166,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 911,
+          "name": "Glyphs",
+          "x": 3316,
+          "z": 3173,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 356,
+          "name": "Crate",
+          "x": 3316,
+          "z": 3177,
+          "distance": 14,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 911,
+          "name": "Glyphs",
+          "x": 3316,
+          "z": 3178,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1088,
+          "name": "Chair",
+          "x": 3316,
+          "z": 3185,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3316,
+          "z": 3186,
+          "distance": 14,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 911,
+          "name": "Glyphs",
+          "x": 3316,
+          "z": 3186,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1106,
+          "name": "Bench",
+          "x": 3318,
+          "z": 3162,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 362,
+          "name": "Barrel",
+          "x": 3318,
+          "z": 3190,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 362,
+          "name": "Barrel",
+          "x": 3319,
+          "z": 3190,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3162,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3162,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3190,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3335,
+          "z": 3190,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3336,
+          "z": 3162,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3340,
+          "z": 3190,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 614,
+          "name": "Table",
+          "x": 3315,
+          "z": 3162,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1529,
+          "name": "Curtain",
+          "x": 3315,
+          "z": 3166,
+          "distance": 15,
+          "optionsWithIndex": [
+            {
+              "text": "Close",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Close"
+          ]
+        },
+        {
+          "id": 595,
+          "name": "Table",
+          "x": 3315,
+          "z": 3182,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 595,
+          "name": "Table",
+          "x": 3315,
+          "z": 3184,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1088,
+          "name": "Chair",
+          "x": 3316,
+          "z": 3161,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1158,
+          "name": "Potted plant",
+          "x": 3318,
+          "z": 3191,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 604,
+          "name": "Table",
+          "x": 3321,
+          "z": 3191,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1102,
+          "name": "Stool",
+          "x": 3322,
+          "z": 3191,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3338,
+          "z": 3161,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3340,
+          "z": 3161,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        }
+      ],
+      "groundItems": [],
+      "gameMessages": [
+        {
+          "type": 0,
+          "text": "Welcome to RuneScape.",
+          "sender": "",
+          "tick": 33
+        }
+      ],
+      "recentDialogs": [],
+      "menuActions": [
+        {
+          "option": "Cancel",
+          "actionCode": 1252,
+          "paramA": 0,
+          "paramB": 0,
+          "paramC": 0
+        }
+      ],
+      "shop": {
+        "isOpen": false,
+        "title": "",
+        "shopItems": [],
+        "playerItems": []
+      },
+      "bank": {
+        "isOpen": false,
+        "items": []
+      },
+      "inGame": true,
+      "combatEvents": [],
+      "dialog": {
+        "isOpen": false,
+        "options": [],
+        "isWaiting": false,
+        "allComponents": []
+      },
+      "interface": {
+        "isOpen": false,
+        "interfaceId": -1,
+        "options": [],
+        "debugInfo": []
+      },
+      "modalOpen": false,
+      "modalInterface": -1,
+      "prayers": {
+        "activePrayers": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "prayerPoints": 1,
+        "prayerLevel": 1
+      }
+    },
+    "pddlArtifacts": {
+      "domainModelId": "short-model-id-shrimp-cooking",
+      "initialDomain": "(define (domain short_model_id_shrimp_cooking)\n  (:requirements :strips)\n  (:predicates\n    (has_item_bread)\n    (has_item_coins)\n    (has_item_raw_shrimp)\n    (has_item_raw_shrimps)\n    (has_item_shrimp)\n    (has_item_shrimps)\n    (has_item_small_fishing_net)\n    (has_item_tinderbox)\n    (has_xp_attack)\n    (has_xp_fishing)\n    (has_xp_hitpoints)\n    (has_xp_thieving)\n    (item_gained_shrimp)\n    (item_gained_shrimps)\n    (message_observed_door_opened_or_reachability_changed)\n    (near_loc_bush)\n    (near_loc_cactus)\n    (near_loc_door)\n    (near_loc_fire)\n    (near_loc_gate)\n    (near_loc_large_door)\n    (near_loc_range)\n    (near_loc_rockslide)\n    (reachable_blocked_destination_beyond_door_or_gate)\n    (reachable_fire)\n    (reachable_range)\n    (skill_at_least_agility_1)\n    (skill_at_least_attack_1)\n    (skill_at_least_cooking_1)\n    (skill_at_least_crafting_1)\n    (skill_at_least_defence_1)\n    (skill_at_least_firemaking_1)\n    (skill_at_least_fishing_2)\n    (skill_at_least_fletching_1)\n    (skill_at_least_herblore_1)\n    (skill_at_least_hitpoints_10)\n    (skill_at_least_magic_1)\n    (skill_at_least_mining_1)\n    (skill_at_least_prayer_1)\n    (skill_at_least_ranged_1)\n    (skill_at_least_runecraft_1)\n    (skill_at_least_smithing_1)\n    (skill_at_least_stat18_1)\n    (skill_at_least_stat19_1)\n    (skill_at_least_strength_1)\n    (skill_at_least_thieving_2)\n    (skill_at_least_woodcutting_1)\n    (xp_gained_cooking)\n  )\n  (:action use_item_on_cooking_source\n    :precondition (and (has_item_raw_shrimps) (or (near_loc_range) (near_loc_fire)) (has_item_raw_shrimp))\n    :effect (and (has_item_shrimps) (item_gained_shrimps) (xp_gained_cooking) (has_item_shrimp) (item_gained_shrimp))\n  )\n  (:action explore_for_cooking_source\n    :precondition (and (has_item_raw_shrimp) (has_item_raw_shrimps))\n    :effect (and (reachable_range) (reachable_fire) (near_loc_range) (near_loc_fire))\n  )\n  (:action open_nearby_door\n    :precondition (and (or (near_loc_door) (near_loc_gate) (near_loc_large_door)))\n    :effect (and (reachable_blocked_destination_beyond_door_or_gate) (reachable_range) (reachable_fire) (message_observed_door_opened_or_reachability_changed))\n  )\n)",
+      "initialProblem": "(define (problem cook_shrimp_alkharid)\n  (:domain short_model_id_shrimp_cooking)\n  (:init (has_item_bread) (has_item_coins) (has_item_raw_shrimps) (has_item_small_fishing_net) (has_item_tinderbox) (has_xp_attack) (has_xp_fishing) (has_xp_hitpoints) (has_xp_thieving) (near_loc_bush) (near_loc_cactus) (near_loc_rockslide) (skill_at_least_agility_1) (skill_at_least_attack_1) (skill_at_least_cooking_1) (skill_at_least_crafting_1) (skill_at_least_defence_1) (skill_at_least_firemaking_1) (skill_at_least_fishing_2) (skill_at_least_fletching_1) (skill_at_least_herblore_1) (skill_at_least_hitpoints_10) (skill_at_least_magic_1) (skill_at_least_mining_1) (skill_at_least_prayer_1) (skill_at_least_ranged_1) (skill_at_least_runecraft_1) (skill_at_least_smithing_1) (skill_at_least_stat18_1) (skill_at_least_stat19_1) (skill_at_least_strength_1) (skill_at_least_thieving_2) (skill_at_least_woodcutting_1))\n  (:goal (and (item_gained_shrimps) (xp_gained_cooking)))\n)",
+      "finalDomain": "(define (domain short_model_id_shrimp_cooking)\n  (:requirements :strips)\n  (:predicates\n    (has_item_bread)\n    (has_item_coins)\n    (has_item_raw_shrimp)\n    (has_item_raw_shrimps)\n    (has_item_shrimp)\n    (has_item_shrimps)\n    (has_item_small_fishing_net)\n    (has_item_tinderbox)\n    (has_xp_attack)\n    (has_xp_fishing)\n    (has_xp_hitpoints)\n    (has_xp_thieving)\n    (item_gained_shrimp)\n    (item_gained_shrimps)\n    (message_observed_door_opened_or_reachability_changed)\n    (near_loc_bush)\n    (near_loc_cactus)\n    (near_loc_door)\n    (near_loc_fire)\n    (near_loc_gate)\n    (near_loc_large_door)\n    (near_loc_range)\n    (near_loc_rockslide)\n    (reachable_blocked_destination_beyond_door_or_gate)\n    (reachable_fire)\n    (reachable_range)\n    (skill_at_least_agility_1)\n    (skill_at_least_attack_1)\n    (skill_at_least_cooking_1)\n    (skill_at_least_crafting_1)\n    (skill_at_least_defence_1)\n    (skill_at_least_firemaking_1)\n    (skill_at_least_fishing_2)\n    (skill_at_least_fletching_1)\n    (skill_at_least_herblore_1)\n    (skill_at_least_hitpoints_10)\n    (skill_at_least_magic_1)\n    (skill_at_least_mining_1)\n    (skill_at_least_prayer_1)\n    (skill_at_least_ranged_1)\n    (skill_at_least_runecraft_1)\n    (skill_at_least_smithing_1)\n    (skill_at_least_stat18_1)\n    (skill_at_least_stat19_1)\n    (skill_at_least_strength_1)\n    (skill_at_least_thieving_2)\n    (skill_at_least_woodcutting_1)\n    (xp_gained_cooking)\n  )\n  (:action use_item_on_cooking_source\n    :precondition (and (has_item_raw_shrimps) (or (near_loc_range) (near_loc_fire)) (has_item_raw_shrimp))\n    :effect (and (has_item_shrimps) (item_gained_shrimps) (xp_gained_cooking) (has_item_shrimp) (item_gained_shrimp))\n  )\n  (:action explore_for_cooking_source\n    :precondition (and (has_item_raw_shrimp) (has_item_raw_shrimps))\n    :effect (and (reachable_range) (reachable_fire) (near_loc_range) (near_loc_fire))\n  )\n  (:action open_nearby_door\n    :precondition (and (or (near_loc_door) (near_loc_gate) (near_loc_large_door)))\n    :effect (and (reachable_blocked_destination_beyond_door_or_gate) (reachable_range) (reachable_fire) (message_observed_door_opened_or_reachability_changed))\n  )\n)",
+      "finalProblem": "(define (problem cook_shrimp_alkharid)\n  (:domain short_model_id_shrimp_cooking)\n  (:init (has_item_bread) (has_item_coins) (has_item_raw_shrimps) (has_item_small_fishing_net) (has_item_tinderbox) (has_xp_attack) (has_xp_fishing) (has_xp_hitpoints) (has_xp_thieving) (near_loc_bush) (near_loc_cactus) (near_loc_rockslide) (skill_at_least_agility_1) (skill_at_least_attack_1) (skill_at_least_cooking_1) (skill_at_least_crafting_1) (skill_at_least_defence_1) (skill_at_least_firemaking_1) (skill_at_least_fishing_2) (skill_at_least_fletching_1) (skill_at_least_herblore_1) (skill_at_least_hitpoints_10) (skill_at_least_magic_1) (skill_at_least_mining_1) (skill_at_least_prayer_1) (skill_at_least_ranged_1) (skill_at_least_runecraft_1) (skill_at_least_smithing_1) (skill_at_least_stat18_1) (skill_at_least_stat19_1) (skill_at_least_strength_1) (skill_at_least_thieving_2) (skill_at_least_woodcutting_1))\n  (:goal (and (item_gained_shrimps) (xp_gained_cooking)))\n)"
+    },
+    "domainArtifacts": {
+      "initialDomainModel": {
+        "id": "short-model-id-shrimp-cooking",
+        "taskId": "cook_shrimp_alkharid",
+        "description": "Cook one raw shrimp near an Al Kharid range.",
+        "provenance": [
+          {
+            "source": "llm",
+            "reference": "model",
+            "confidence": 0.9
+          }
+        ],
+        "notes": [
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "If pathing says a target cannot be reached and a nearby door/gate has an Open option, opening the door/gate is a valid recovery action."
+        ],
+        "lessons": [
+          {
+            "description": "Explore for cooking source when initial preconditions are not met.",
+            "actionId": "explore_for_cooking_source"
+          },
+          {
+            "description": "Explore for cooking source when initial preconditions are not met.",
+            "actionId": "explore_for_cooking_source"
+          }
+        ],
+        "actions": [
+          {
+            "id": "use_item_on_cooking_source",
+            "name": "Use raw shrimp on cooking source",
+            "description": "Use a raw shrimp on a nearby range or fire to cook it.",
+            "parameters": [
+              {
+                "name": "raw_item",
+                "type": "item"
+              },
+              {
+                "name": "source",
+                "type": "facility"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.8
+                  }
+                ],
+                "confidence": 0.8
+              }
+            ],
+            "effects": [
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "xp_gained",
+                "args": {
+                  "skill": "Cooking",
+                  "minXp": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.7
+                  }
+                ],
+                "confidence": 0.7
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.6
+                  }
+                ],
+                "confidence": 0.6
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "explore_for_cooking_source",
+            "name": "Explore for a cooking source",
+            "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+            "parameters": [
+              {
+                "name": "source",
+                "type": "facility",
+                "description": "Range or Fire"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "open_nearby_door",
+            "name": "Open nearby door or gate",
+            "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+            "parameters": [
+              {
+                "name": "door",
+                "type": "loc",
+                "description": "Visible door or gate with Open option"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Door|Gate|Large door"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "blocked destination beyond door or gate"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              },
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "message_observed",
+                "args": {
+                  "pattern": "door opened or reachability changed"
+                },
+                "confidence": 0.4,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          }
+        ]
+      },
+      "finalDomainModel": {
+        "id": "short-model-id-shrimp-cooking",
+        "taskId": "cook_shrimp_alkharid",
+        "description": "Cook one raw shrimp near an Al Kharid range.",
+        "provenance": [
+          {
+            "source": "llm",
+            "reference": "model",
+            "confidence": 0.9
+          }
+        ],
+        "notes": [
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "If pathing says a target cannot be reached and a nearby door/gate has an Open option, opening the door/gate is a valid recovery action."
+        ],
+        "lessons": [
+          {
+            "description": "Explore for cooking source when initial preconditions are not met.",
+            "actionId": "explore_for_cooking_source"
+          },
+          {
+            "description": "Explore for cooking source when initial preconditions are not met.",
+            "actionId": "explore_for_cooking_source"
+          }
+        ],
+        "actions": [
+          {
+            "id": "use_item_on_cooking_source",
+            "name": "Use raw shrimp on cooking source",
+            "description": "Use a raw shrimp on a nearby range or fire to cook it.",
+            "parameters": [
+              {
+                "name": "raw_item",
+                "type": "item"
+              },
+              {
+                "name": "source",
+                "type": "facility"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.8
+                  }
+                ],
+                "confidence": 0.8
+              }
+            ],
+            "effects": [
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "xp_gained",
+                "args": {
+                  "skill": "Cooking",
+                  "minXp": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.7
+                  }
+                ],
+                "confidence": 0.7
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.6
+                  }
+                ],
+                "confidence": 0.6
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "explore_for_cooking_source",
+            "name": "Explore for a cooking source",
+            "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+            "parameters": [
+              {
+                "name": "source",
+                "type": "facility",
+                "description": "Range or Fire"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimp",
+                  "count": 1
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "open_nearby_door",
+            "name": "Open nearby door or gate",
+            "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+            "parameters": [
+              {
+                "name": "door",
+                "type": "loc",
+                "description": "Visible door or gate with Open option"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Door|Gate|Large door"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "blocked destination beyond door or gate"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              },
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "message_observed",
+                "args": {
+                  "pattern": "door opened or reachability changed"
+                },
+                "confidence": 0.4,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          }
+        ]
+      }
+    }
+  },
+  "verifier": {
+    "success": false,
+    "passed": [],
+    "failed": [
+      {
+        "kind": "inventory_gained",
+        "item": "^Shrimps$",
+        "count": 1
+      },
+      {
+        "kind": "xp_gained",
+        "skill": "Cooking",
+        "minXp": 1
+      }
+    ],
+    "evidence": [
+      "inventory gained ^Shrimps$: 0/1",
+      "Cooking xp gained: 0"
+    ]
+  }
+}

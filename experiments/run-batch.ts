@@ -13,6 +13,7 @@ Usage:
         [--episode-transition-log-task] [--episode-transition-log-task-dir DIR] [--episode-transition-log-trial-dir DIR] [--episode-no-transition-log-global]
         [--episode-kb-task] [--episode-kb-task-dir DIR] [--episode-kb-trial-dir DIR] [--episode-no-kb-global]
         [--wipe-global-kb-each-trial]
+        [--fresh-domain-each-run]
 
 This wraps, per trial:
   1. load-save.ts <bot> <task.startState.checkpointPath> --api <api>
@@ -65,6 +66,7 @@ function parseArgs() {
     let episodeKbTrialDir = '';
     let episodeNoKbGlobal = false;
     let wipeGlobalKbEachTrial = false;
+    let freshDomainEachRun = false;
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -102,6 +104,7 @@ function parseArgs() {
         else if (arg === '--episode-kb-trial-dir') episodeKbTrialDir = args[++i] ?? '';
         else if (arg === '--episode-no-kb-global') episodeNoKbGlobal = true;
         else if (arg === '--wipe-global-kb-each-trial') wipeGlobalKbEachTrial = true;
+        else if (arg === '--fresh-domain-each-run') freshDomainEachRun = true;
     }
 
     if (!taskPath || !botName || !Number.isFinite(runs) || runs < 1) usage();
@@ -138,6 +141,7 @@ function parseArgs() {
         episodeKbTrialDir,
         episodeNoKbGlobal,
         wipeGlobalKbEachTrial,
+        freshDomainEachRun,
     };
 }
 
@@ -307,7 +311,7 @@ async function main() {
 
         const key = domainKey(method, model);
         const cached = domainByConfig.get(key);
-        if (method === 'learned_domain' && cached) {
+        if (!options.freshDomainEachRun && method === 'learned_domain' && cached) {
             console.log(`[Batch] Using learned/refined domain model: ${cached}`);
             return { path: cached, generated: false, use: domainUseLabel(method, model, options.rag, cached) };
         }
@@ -547,7 +551,7 @@ async function main() {
                             ? (() => {
                                 const kbTaskPath = join(options.episodeKbTaskDir || defaultEpisodeKbTaskDir, 'by-task', `${task.id}.json`);
                                 const kbTrialPath = options.episodeKbTrialDir
-                                    ? join(options.episodeKbTrialDir, `${task.id}-trial-${trialIndex}-run-${run}.json`)
+                                    ? join(options.episodeKbTrialDir, `${task.id}-${method}-trial-${trialIndex}-run-${run}.json`)
                                     : '';
                                 const kbPath = options.episodeKbTrialDir ? kbTrialPath : kbTaskPath;
                                 return kbPath ? ['--kb', kbPath] : [];

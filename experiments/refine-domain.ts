@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
-import { ACTION_DOCS, safeModelName, sanitizeLearnedDomainModel } from './domain-model';
+import { ACTION_DOCS, EXECUTABLE_ACTION_IDS, safeModelName, sanitizeLearnedDomainModel } from './domain-model';
 import { exportPddl } from './pddl';
 import { chatCompletion, extractJsonObject } from './llm';
 import type { EpisodeTrace, LearnedDomainModel } from './schemas';
@@ -143,13 +143,18 @@ ${JSON.stringify(compactTrace, null, 2)}
 
 Return ONLY a revised LearnedDomainModel JSON object.
 Rules:
-- Preserve valid action IDs that the executor can run, especially "use_item_on_cooking_source".
-- Keep actions executable. For this vertical slice, use only these action ids unless executor support has been added: "use_item_on_cooking_source", "open_nearby_door", "explore_for_cooking_source".
+- Preserve valid action IDs that the executor can run. Use only executable action ids from this set:
+  ${EXECUTABLE_ACTION_IDS.join(', ')}
+- Keep actions executable: if you add a new action schema id not in that set, it will be ignored/broken.
 - If an action was valid but stochastic (e.g. burned food), do not add a false missing precondition.
 - Use negativeEvidence for true failed preconditions/reachability/action mismatch.
 - If the trace shows a reachability failure followed by a recovery action such as opening a door/gate, add or refine an action schema for that recovery when executable.
 - If an agentic replan or exploration step solved a failure, encode that as symbolic action preconditions/effects and a "lessons" entry so the next episode's first plan can include it.
 - If the knowledge base contains stable facility coordinates (e.g. Range/Fire), encode them in "knownFacilities" so future episodes can exploit them without re-discovering.
+- Evidence-to-effects mapping (critical):
+  - If a step is "interact_loc" with optionPattern matching "Mine" and delta.xpGained.Mining > 0, add an "xp_gained" effect with { skill: "Mining", minXp: 1 }.
+  - If a step is "interact_loc" with optionPattern matching "Mine" and delta.inventoryAdded includes "Iron ore", add an "item_added" effect with { item: "Iron ore", count: 1 }.
+  - For interact_loc in general, prefer preconditions using "near_loc_option" when available: { kind: "near_loc_option", args: { loc: "<LocName>", option: "<Option>" } }.
 - Prefer observed environment evidence over wiki priors when they conflict.
 - If the trace shows repeated direct-action failure, consider whether a missing precondition, tool, location, or intermediate navigation action should be represented.
 - Update confidence values and notes based on observed success/failure.

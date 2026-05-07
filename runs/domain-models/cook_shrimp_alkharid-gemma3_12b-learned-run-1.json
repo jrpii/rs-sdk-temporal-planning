@@ -1,0 +1,437 @@
+{
+  "id": "cook_shrimp_model_v2",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "gpt-4",
+      "confidence": 0.7
+    }
+  ],
+  "notes": [
+    "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish. A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish. A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Exploration may be needed to find a cooking source if initial probes fail."
+  ],
+  "lessons": [
+    {
+      "observation": "Initial exploration failed to find a cooking range.",
+      "inference": "The initial exploration radius may be too small or the range may be obscured. Need to expand search.",
+      "actionSchemaId": "explore_for_loc",
+      "suggestedDomainChange": "Increase the default exploration radius for explore_for_loc.",
+      "confidence": 0.8,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "observation": "Cooking attempt timed out.",
+      "inference": "The cooking range may be obscured or unreachable. Exploration is needed.",
+      "actionSchemaId": "explore_for_loc",
+      "suggestedDomainChange": "Add a precondition to use_item_on_cooking_source that requires the range to be reachable.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "use_item_on_cooking_source",
+      "name": "Use raw shrimps on cooking source",
+      "description": "Use Raw shrimps on a nearby Range or Fire to attempt cooking.",
+      "parameters": [
+        {
+          "name": "raw_item",
+          "type": "item",
+          "description": "Raw shrimps"
+        },
+        {
+          "name": "source",
+          "type": "facility",
+          "description": "Range or Fire"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "item_removed",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "item_added",
+          "args": {
+            "item": "Shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Cooking",
+            "minXp": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": [
+        {
+          "kind": "stochastic_failure",
+          "args": {
+            "outcome": "burnt_fish"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "id": "explore_for_loc",
+      "name": "Explore for a target location",
+      "description": "Scan/move to find a useful target location (target chosen at execution via actionParams.targetLocNamePattern).",
+      "parameters": [
+        {
+          "name": "target",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_loc",
+      "name": "Interact with location",
+      "description": "Interact with a nearby location using an option (e.g. Mine, Chop down, Fish, Smelt).",
+      "parameters": [
+        {
+          "name": "loc",
+          "type": "loc"
+        },
+        {
+          "name": "option",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "pickup_ground_item",
+      "name": "Pick up ground item",
+      "description": "Pick up a ground item by name pattern (target chosen at execution via actionParams.itemNamePattern).",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc",
+          "description": "Visible door or gate with Open option"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door|Gate|Large door"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "blocked destination beyond door or gate"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.6,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "message_observed",
+          "args": {
+            "pattern": "door opened or reachability changed"
+          },
+          "confidence": 0.4,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "use_item_on_loc",
+      "name": "Use item on location",
+      "description": "Use an inventory item on a nearby location (e.g., raw fish on range).",
+      "parameters": [
+        {
+          "name": "itemNamePattern",
+          "type": "item"
+        },
+        {
+          "name": "locNamePattern",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "locNamePattern"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": [
+        {
+          "kind": "stochastic_failure",
+          "args": {
+            "outcome": "burnt_fish"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "id": "explore_for_cooking_source",
+      "name": "Explore for a cooking source",
+      "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "facility",
+          "description": "Range or Fire"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 0.6,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ],
+  "knownFacilities": [
+    {
+      "namePattern": "Range|Fire",
+      "x": 0,
+      "z": 0,
+      "level": 0,
+      "locId": 0,
+      "confidence": 0.8,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "task description",
+          "confidence": 0.9
+        }
+      ],
+      "observedAtTick": 0
+    }
+  ]
+}

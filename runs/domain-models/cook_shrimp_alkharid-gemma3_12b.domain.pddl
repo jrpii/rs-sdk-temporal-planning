@@ -1,0 +1,15 @@
+(define (domain short_model_id_001)
+  (:requirements :strips)
+  (:predicates
+    (has_item_raw_shrimps)
+    (has_item_shrimps)
+    (near_loc_fire)
+    (near_loc_range)
+    (skill_at_least_cooking_1)
+    (xp_gained_cooking)
+  )
+  (:action use_item_on_cooking_source
+    :precondition (and (has_item_raw_shrimps) (or (near_loc_range) (near_loc_fire)))
+    :effect (and (has_item_shrimps) (xp_gained_cooking))
+  )
+)

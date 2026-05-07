@@ -1,0 +1,5 @@
+(define (problem cook_shrimp_alkharid)
+  (:domain short_model_id_001)
+  (:init (has_item_bread) (has_item_coins) (has_item_raw_shrimps) (has_item_shrimps) (has_item_small_fishing_net) (has_item_tinderbox) (has_xp_attack) (has_xp_cooking) (has_xp_fishing) (has_xp_hitpoints) (has_xp_thieving) (near_loc_broom) (near_loc_bush) (near_loc_cactus) (near_loc_chair) (near_loc_crate) (near_loc_door) (near_loc_fireplace) (near_loc_range) (near_loc_rockslide) (near_loc_table) (near_loc_wardrobe) (skill_at_least_agility_1) (skill_at_least_attack_1) (skill_at_least_cooking_1) (skill_at_least_crafting_1) (skill_at_least_defence_1) (skill_at_least_firemaking_1) (skill_at_least_fishing_2) (skill_at_least_fletching_1) (skill_at_least_herblore_1) (skill_at_least_hitpoints_10) (skill_at_least_magic_1) (skill_at_least_mining_1) (skill_at_least_prayer_1) (skill_at_least_ranged_1) (skill_at_least_runecraft_1) (skill_at_least_smithing_1) (skill_at_least_stat18_1) (skill_at_least_stat19_1) (skill_at_least_strength_1) (skill_at_least_thieving_2) (skill_at_least_woodcutting_1))
+  (:goal (and (item_gained_shrimps) (xp_gained_cooking)))
+)

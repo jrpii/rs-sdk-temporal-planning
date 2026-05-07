@@ -1,0 +1,691 @@
+{
+  "capturedAt": "2026-05-07T06:39:14.691Z",
+  "botName": "McPlan",
+  "summary": {
+    "tick": 11,
+    "inGame": true,
+    "position": {
+      "x": 3286,
+      "z": 3363,
+      "level": 0
+    },
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "run": {
+      "energy": 100,
+      "weight": 13
+    },
+    "combat": {
+      "inCombat": false,
+      "targetIndex": -1,
+      "lastDamageTick": 0
+    },
+    "skills": {
+      "Attack": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 16
+      },
+      "Defence": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Strength": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Hitpoints": {
+        "level": 10,
+        "baseLevel": 10,
+        "xp": 985
+      },
+      "Ranged": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Prayer": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Magic": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Cooking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Woodcutting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fletching": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fishing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Firemaking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Crafting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Smithing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Mining": {
+        "level": 21,
+        "baseLevel": 21,
+        "xp": 3500
+      },
+      "Herblore": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Agility": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Thieving": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 136
+      },
+      "Stat18": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Stat19": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Runecraft": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      }
+    },
+    "inventory": {
+      "Bronze pickaxe": 1,
+      "Tinderbox": 1,
+      "Small fishing net": 1,
+      "Coins": 41,
+      "Tin ore": 1,
+      "Copper ore": 1
+    },
+    "equipment": [
+      "Wooden shield",
+      "Bronze arrow"
+    ],
+    "nearbyNpcs": {
+      "Unicorn": {
+        "name": "Unicorn",
+        "variants": {
+          "15|Attack": {
+            "combatLevel": 15,
+            "options": [
+              "Attack"
+            ],
+            "instances": [
+              {
+                "index": 5618,
+                "x": 3295,
+                "z": 3362,
+                "distance": 8,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              },
+              {
+                "index": 5620,
+                "x": 3286,
+                "z": 3351,
+                "distance": 12,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      },
+      "Bear": {
+        "name": "Bear",
+        "variants": {
+          "19|Attack": {
+            "combatLevel": 19,
+            "options": [
+              "Attack"
+            ],
+            "instances": [
+              {
+                "index": 5622,
+                "x": 3298,
+                "z": 3353,
+                "distance": 11,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      },
+      "Giant rat": {
+        "name": "Giant rat",
+        "variants": {
+          "6|Attack": {
+            "combatLevel": 6,
+            "options": [
+              "Attack"
+            ],
+            "instances": [
+              {
+                "index": 5621,
+                "x": 3290,
+                "z": 3376,
+                "distance": 12,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "nearbyLocs": {
+      "Rocks": {
+        "name": "Rocks",
+        "variants": {
+          "2090|Mine|Prospect": {
+            "id": 2090,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3286,
+                "z": 3364,
+                "distance": 1
+              },
+              {
+                "x": 3286,
+                "z": 3361,
+                "distance": 2
+              },
+              {
+                "x": 3287,
+                "z": 3365,
+                "distance": 2
+              },
+              {
+                "x": 3288,
+                "z": 3361,
+                "distance": 2
+              },
+              {
+                "x": 3289,
+                "z": 3361,
+                "distance": 3
+              },
+              {
+                "x": 3289,
+                "z": 3363,
+                "distance": 3
+              },
+              {
+                "x": 3282,
+                "z": 3367,
+                "distance": 4
+              },
+              {
+                "x": 3282,
+                "z": 3368,
+                "distance": 5
+              }
+            ]
+          },
+          "2094|Mine|Prospect": {
+            "id": 2094,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3284,
+                "z": 3363,
+                "distance": 2
+              },
+              {
+                "x": 3284,
+                "z": 3364,
+                "distance": 2
+              },
+              {
+                "x": 3283,
+                "z": 3365,
+                "distance": 3
+              },
+              {
+                "x": 3283,
+                "z": 3366,
+                "distance": 3
+              },
+              {
+                "x": 3288,
+                "z": 3366,
+                "distance": 3
+              }
+            ]
+          },
+          "2091|Mine|Prospect": {
+            "id": 2091,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3290,
+                "z": 3362,
+                "distance": 4
+              }
+            ]
+          },
+          "2092|Mine|Prospect": {
+            "id": 2092,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3285,
+                "z": 3368,
+                "distance": 5
+              },
+              {
+                "x": 3285,
+                "z": 3369,
+                "distance": 6
+              },
+              {
+                "x": 3286,
+                "z": 3369,
+                "distance": 6
+              }
+            ]
+          },
+          "2095|Mine|Prospect": {
+            "id": 2095,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3289,
+                "z": 3368,
+                "distance": 5
+              }
+            ]
+          },
+          "2093|Mine|Prospect": {
+            "id": 2093,
+            "options": [
+              "Mine",
+              "Prospect"
+            ],
+            "instances": [
+              {
+                "x": 3288,
+                "z": 3370,
+                "distance": 7
+              }
+            ]
+          }
+        }
+      },
+      "Boulder": {
+        "name": "Boulder",
+        "variants": {
+          "445|": {
+            "id": 445,
+            "options": [],
+            "instances": [
+              {
+                "x": 3277,
+                "z": 3366,
+                "distance": 9
+              }
+            ]
+          },
+          "444|": {
+            "id": 444,
+            "options": [],
+            "instances": [
+              {
+                "x": 3274,
+                "z": 3365,
+                "distance": 12
+              }
+            ]
+          }
+        }
+      },
+      "Tree": {
+        "name": "Tree",
+        "variants": {
+          "1278|Chop down": {
+            "id": 1278,
+            "options": [
+              "Chop down"
+            ],
+            "instances": [
+              {
+                "x": 3279,
+                "z": 3354,
+                "distance": 9
+              },
+              {
+                "x": 3295,
+                "z": 3366,
+                "distance": 9
+              },
+              {
+                "x": 3276,
+                "z": 3353,
+                "distance": 10
+              },
+              {
+                "x": 3283,
+                "z": 3353,
+                "distance": 10
+              },
+              {
+                "x": 3296,
+                "z": 3368,
+                "distance": 10
+              },
+              {
+                "x": 3297,
+                "z": 3354,
+                "distance": 11
+              },
+              {
+                "x": 3279,
+                "z": 3351,
+                "distance": 12
+              },
+              {
+                "x": 3295,
+                "z": 3351,
+                "distance": 12
+              },
+              {
+                "x": 3278,
+                "z": 3348,
+                "distance": 15
+              },
+              {
+                "x": 3283,
+                "z": 3348,
+                "distance": 15
+              },
+              {
+                "x": 3301,
+                "z": 3368,
+                "distance": 15
+              }
+            ]
+          },
+          "1276|Chop down": {
+            "id": 1276,
+            "options": [
+              "Chop down"
+            ],
+            "instances": [
+              {
+                "x": 3273,
+                "z": 3354,
+                "distance": 13
+              },
+              {
+                "x": 3295,
+                "z": 3376,
+                "distance": 13
+              },
+              {
+                "x": 3300,
+                "z": 3365,
+                "distance": 14
+              },
+              {
+                "x": 3271,
+                "z": 3371,
+                "distance": 15
+              }
+            ]
+          }
+        }
+      },
+      "Bush": {
+        "name": "Bush",
+        "variants": {
+          "1122|": {
+            "id": 1122,
+            "options": [],
+            "instances": [
+              {
+                "x": 3293,
+                "z": 3372,
+                "distance": 9
+              },
+              {
+                "x": 3300,
+                "z": 3377,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Tree stump": {
+        "name": "Tree stump",
+        "variants": {
+          "1341|": {
+            "id": 1341,
+            "options": [],
+            "instances": [
+              {
+                "x": 3276,
+                "z": 3368,
+                "distance": 10
+              },
+              {
+                "x": 3273,
+                "z": 3373,
+                "distance": 13
+              },
+              {
+                "x": 3271,
+                "z": 3363,
+                "distance": 15
+              }
+            ]
+          }
+        }
+      },
+      "Small fern": {
+        "name": "Small fern",
+        "variants": {
+          "1173|": {
+            "id": 1173,
+            "options": [],
+            "instances": [
+              {
+                "x": 3297,
+                "z": 3367,
+                "distance": 11
+              },
+              {
+                "x": 3292,
+                "z": 3376,
+                "distance": 13
+              }
+            ]
+          }
+        }
+      },
+      "Stones": {
+        "name": "Stones",
+        "variants": {
+          "447|": {
+            "id": 447,
+            "options": [],
+            "instances": [
+              {
+                "x": 3274,
+                "z": 3367,
+                "distance": 12
+              }
+            ]
+          }
+        }
+      },
+      "Thistle": {
+        "name": "Thistle",
+        "variants": {
+          "1174|": {
+            "id": 1174,
+            "options": [],
+            "instances": [
+              {
+                "x": 3298,
+                "z": 3364,
+                "distance": 12
+              }
+            ]
+          }
+        }
+      },
+      "Plant": {
+        "name": "Plant",
+        "variants": {
+          "1393|": {
+            "id": 1393,
+            "options": [],
+            "instances": [
+              {
+                "x": 3299,
+                "z": 3351,
+                "distance": 13
+              },
+              {
+                "x": 3301,
+                "z": 3360,
+                "distance": 15
+              }
+            ]
+          },
+          "1392|": {
+            "id": 1392,
+            "options": [],
+            "instances": [
+              {
+                "x": 3301,
+                "z": 3372,
+                "distance": 15
+              }
+            ]
+          }
+        }
+      },
+      "Oak": {
+        "name": "Oak",
+        "variants": {
+          "1281|Chop down": {
+            "id": 1281,
+            "options": [
+              "Chop down"
+            ],
+            "instances": [
+              {
+                "x": 3300,
+                "z": 3353,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      }
+    },
+    "groundItems": [
+      {
+        "name": "Cadaver berries",
+        "count": 1,
+        "distance": 9,
+        "x": 3277,
+        "z": 3370
+      },
+      {
+        "name": "Redberries",
+        "count": 1,
+        "distance": 11,
+        "x": 3278,
+        "z": 3374
+      },
+      {
+        "name": "Cadaver berries",
+        "count": 1,
+        "distance": 13,
+        "x": 3273,
+        "z": 3375
+      },
+      {
+        "name": "Redberries",
+        "count": 1,
+        "distance": 15,
+        "x": 3271,
+        "z": 3366
+      }
+    ],
+    "ui": {
+      "dialogOpen": false,
+      "interfaceOpen": false,
+      "shopOpen": false,
+      "bankOpen": false,
+      "modalOpen": false
+    },
+    "recentMessages": [
+      "Welcome to RuneScape."
+    ]
+  }
+}

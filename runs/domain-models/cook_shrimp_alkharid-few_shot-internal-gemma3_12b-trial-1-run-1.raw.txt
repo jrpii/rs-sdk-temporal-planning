@@ -1,0 +1,174 @@
+```json
+{
+  "id": "short-model-id-shrimp-cooking",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp on a range near Al Kharid.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "gpt-4",
+      "confidence": 0.9
+    }
+  ],
+  "notes": [
+    "Cooking success is stochastic; burnt shrimp is a possible outcome.",
+    "Pathfinding may be required to reach the range.",
+    "Exploration is needed if no range is initially visible."
+  ],
+  "actions": [
+    {
+      "id": "use_item_on_cooking_source",
+      "name": "Use raw shrimp on range",
+      "description": "Uses a raw shrimp on a nearby range to cook it.",
+      "parameters": [
+        {
+          "name": "raw_shrimp",
+          "type": "item"
+        },
+        {
+          "name": "range",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.9
+            }
+          ],
+          "confidence": 0.9
+        },
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "effects": [
+        {
+          "kind": "item_removed",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.9
+            }
+          ],
+          "confidence": 0.9
+        },
+        {
+          "kind": "item_added",
+          "args": {
+            "item": "Shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        },
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Cooking",
+            "minXp": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "explore_for_cooking_source",
+      "name": "Explore for a range",
+      "description": "Explores the area to find a range if one is not immediately visible.",
+      "parameters": [
+        {
+          "name": "range",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "not_near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        },
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ]
+}
+```

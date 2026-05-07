@@ -5,7 +5,7 @@ import type { ActionResult, BotWorldState, NearbyLoc } from '../sdk/types';
 import { connectExperimentBot } from './connect';
 import { buildDiscoveryPlanSteps } from './discovery-plan';
 import { KnowledgeBase } from './knowledge-base';
-import { ACTION_DOCS, appendDomainLessons, defaultCookShrimpDomain, effect, predicate, sanitizeLearnedDomainModel } from './domain-model';
+import { ACTION_DOCS, appendDomainLessons, defaultDomainForTask, effect, predicate, sanitizeLearnedDomainModel } from './domain-model';
 import { chatCompletion, extractJsonObject } from './llm';
 import { exportPddl } from './pddl';
 import { createPlanner } from './planner';
@@ -268,17 +268,46 @@ async function executeStep(
     kb?: KnowledgeBase,
     domainModel?: LearnedDomainModel,
 ): Promise<ActionResult> {
+    if (step.actionSchemaId === 'wait_ticks') {
+        const ticks = Number(step.actionParams?.ticks ?? 1);
+        if (!Number.isFinite(ticks) || ticks <= 0) {
+            return { success: false, message: `wait_ticks invalid ticks=${String(step.actionParams?.ticks)}` };
+        }
+        await conn.sdk.waitForTicks(Math.min(50, Math.floor(ticks)));
+        return { success: true, message: `Waited ${Math.min(50, Math.floor(ticks))} tick(s)` };
+    }
+
+    if (step.actionSchemaId === 'walk_to') {
+        const x = Number(step.actionParams?.x);
+        const z = Number(step.actionParams?.z);
+        const toleranceRaw = step.actionParams?.tolerance;
+        const tolerance = typeof toleranceRaw === 'number' ? toleranceRaw : Number(toleranceRaw ?? 3);
+        if (!Number.isFinite(x) || !Number.isFinite(z)) {
+            return { success: false, message: 'walk_to missing numeric actionParams.x/z' };
+        }
+        return await conn.bot.walkTo(Math.floor(x), Math.floor(z), Number.isFinite(tolerance) ? tolerance : 3);
+    }
+
     if (step.actionSchemaId === 'explore_for_cooking_source' || step.actionSchemaId === 'explore_for_loc') {
         const state = conn.sdk.getState();
         if (!state?.player) return { success: false, message: 'No game state available' };
 
-        const targetPattern = extractTargetLocPattern(step) ?? /^(Range|Fire)$/i;
+        const extracted = extractTargetLocPattern(step);
+        if (step.actionSchemaId === 'explore_for_loc' && !extracted) {
+            return { success: false, message: 'explore_for_loc missing actionParams.targetLocNamePattern' };
+        }
+        const targetPattern = extracted ?? /^(Range|Fire)$/i;
 
         // 0) Prefer LLM-written knownFacilities if present.
+        // Safety: ignore placeholder/bogus coordinates from LLM (commonly x=0,z=0 with low confidence).
         if (domainModel?.knownFacilities?.length) {
             const candidates = domainModel.knownFacilities
                 .filter(f => {
                     if (f.level !== state.player!.level) return false;
+                    if (!Number.isFinite(f.x) || !Number.isFinite(f.z)) return false;
+                    if ((f.x === 0 && f.z === 0) || (f.confidence ?? 0) <= 0) return false;
+                    // Extra conservative guard: ignore extremely low-confidence entries.
+                    if ((f.confidence ?? 0) < 0.05) return false;
                     try {
                         return targetPattern.test(f.namePattern);
                     } catch {
@@ -402,6 +431,89 @@ async function executeStep(
             ...result,
             message: `Reachability recovery via ${door.name}: ${result.message}`,
         };
+    }
+
+    if (step.actionSchemaId === 'interact_loc') {
+        const state = conn.sdk.getState();
+        if (!state?.player) return { success: false, message: 'No game state available' };
+        const locName = String(step.actionParams?.locNamePattern ?? step.actionParams?.locName ?? '').trim();
+        const optionText = String(step.actionParams?.option ?? step.actionParams?.optionPattern ?? '').trim();
+        if (!locName) return { success: false, message: 'interact_loc missing actionParams.locNamePattern' };
+        if (!optionText) return { success: false, message: 'interact_loc missing actionParams.option/optionPattern' };
+        const locRegex = new RegExp(locName, 'i');
+        const optRegex = new RegExp(optionText, 'i');
+        const target = state.nearbyLocs.find(l => locRegex.test(l.name) && l.optionsWithIndex.some(o => optRegex.test(o.text)))
+            ?? (await conn.sdk.scanNearbyLocs(30)).find(l => locRegex.test(l.name) && l.optionsWithIndex.some(o => optRegex.test(o.text)));
+        if (!target) return { success: false, message: `No loc found matching ${locRegex} with option ${optRegex}` };
+        const opt = target.optionsWithIndex.find(o => optRegex.test(o.text));
+        if (!opt) return { success: false, message: `Loc ${target.name} missing option ${optRegex}` };
+        const result = await conn.bot.interactLoc(target, opt.text);
+        return result;
+    }
+
+    if (step.actionSchemaId === 'interact_npc') {
+        const state = conn.sdk.getState();
+        if (!state?.player) return { success: false, message: 'No game state available' };
+        const npcName = String(step.actionParams?.npcNamePattern ?? step.actionParams?.npcName ?? '').trim();
+        const optionText = String(step.actionParams?.option ?? step.actionParams?.optionPattern ?? '').trim();
+        if (!npcName) return { success: false, message: 'interact_npc missing actionParams.npcNamePattern' };
+        if (!optionText) return { success: false, message: 'interact_npc missing actionParams.option/optionPattern' };
+        const npcRegex = new RegExp(npcName, 'i');
+        const optRegex = new RegExp(optionText, 'i');
+        const target = state.nearbyNpcs.find(n => npcRegex.test(n.name) && n.optionsWithIndex.some(o => optRegex.test(o.text)));
+        if (!target) return { success: false, message: `No npc found matching ${npcRegex} with option ${optRegex}` };
+        const opt = target.optionsWithIndex.find(o => optRegex.test(o.text));
+        if (!opt) return { success: false, message: `Npc ${target.name} missing option ${optRegex}` };
+        return await conn.bot.interactNpc(target, opt.text);
+    }
+
+    if (step.actionSchemaId === 'use_item_on_loc') {
+        const state = conn.sdk.getState();
+        if (!state?.player) return { success: false, message: 'No game state available' };
+        const itemName = String(step.actionParams?.itemNamePattern ?? step.actionParams?.itemName ?? '').trim();
+        const locName = String(step.actionParams?.locNamePattern ?? step.actionParams?.locName ?? '').trim();
+        const locId = step.actionParams?.locId;
+        if (!itemName) return { success: false, message: 'use_item_on_loc missing actionParams.itemNamePattern' };
+        if (!locName) return { success: false, message: 'use_item_on_loc missing actionParams.locNamePattern' };
+        const item = conn.sdk.findInventoryItem(new RegExp(itemName, 'i'));
+        if (!item) return { success: false, message: `Missing inventory item matching /${itemName}/i` };
+        const locRegex = new RegExp(locName, 'i');
+        const candidates = [...state.nearbyLocs, ...(await conn.sdk.scanNearbyLocs(30))]
+            .filter(l => locRegex.test(l.name))
+            .filter(l => (typeof locId === 'number' ? l.id === locId : true))
+            .sort((a, b) => a.distance - b.distance);
+        const target = candidates[0];
+        if (!target) return { success: false, message: `No loc found matching /${locName}/i` };
+        return await conn.bot.useItemOnLoc(item, target);
+    }
+
+    if (step.actionSchemaId === 'pickup_ground_item') {
+        const state = conn.sdk.getState();
+        if (!state?.player) return { success: false, message: 'No game state available' };
+        const itemName = String(step.actionParams?.itemNamePattern ?? step.actionParams?.itemName ?? '').trim();
+        if (!itemName) return { success: false, message: 'pickup_ground_item missing actionParams.itemNamePattern' };
+        const regex = new RegExp(itemName, 'i');
+        const initialItem = state.groundItems.find(g => regex.test(g.name))
+            ?? (await conn.sdk.scanGroundItems(12)).find(g => regex.test(g.name));
+        if (initialItem) return await conn.bot.pickupItem(initialItem);
+
+        // Generic delayed-drop handling:
+        // Sometimes mining/chopping/cooking produces the drop with a small delay.
+        // If pickup is attempted too early, wait briefly for the ground item to appear and retry once.
+        try {
+            await conn.sdk.waitForCondition(
+                s => (s.groundItems ?? []).some(g => regex.test(g.name)),
+                6_000,
+            );
+            const retryState = conn.sdk.getState() ?? state;
+            const retryItem = retryState.groundItems.find(g => regex.test(g.name))
+                ?? (await conn.sdk.scanGroundItems(12)).find(g => regex.test(g.name));
+            if (retryItem) return await conn.bot.pickupItem(retryItem);
+        } catch {
+            // Timed out waiting for the ground item to appear.
+        }
+
+        return { success: false, message: `No ground item found matching ${regex}` };
     }
 
     if (step.actionSchemaId !== 'use_item_on_cooking_source') {
@@ -535,13 +647,19 @@ function applyEnvironmentEvidence(args: {
     allowExplore: boolean;
 }): { domainModel: LearnedDomainModel; lessons: LearnedDomainLesson[] } {
     const lessons: LearnedDomainLesson[] = [];
-    let domainModel = sanitizeLearnedDomainModel(args.domainModel, args.task, defaultCookShrimpDomain(args.task.id), { includeRecoveryActions: true });
+    const fallbackDomain = defaultDomainForTask(args.task);
+    let domainModel = sanitizeLearnedDomainModel(args.domainModel, args.task, fallbackDomain, { includeRecoveryActions: true });
     const actions = domainModel.actions.map(action => ({ ...action, negativeEvidence: [...(action.negativeEvidence ?? [])] }));
     const actionIndex = actions.findIndex(action => action.id === args.step.actionSchemaId);
     const targetAction = actionIndex >= 0 ? actions[actionIndex]! : undefined;
     const resultMessage = args.executed.result.message;
 
-    if (targetAction && shouldAttemptReachabilityRecovery(args.executed.result)) {
+    const isCookingTask = args.task.id.includes('cook_shrimp');
+    const isCookingAction =
+        args.step.actionSchemaId === 'use_item_on_cooking_source'
+        || args.step.actionSchemaId === 'explore_for_cooking_source';
+
+    if (isCookingTask && targetAction && shouldAttemptReachabilityRecovery(args.executed.result)) {
         const reachablePrecondition = predicate('reachable', { target: 'Range|Fire' }, 0.8);
         let updatedAction = addPrecondition(targetAction, reachablePrecondition);
         updatedAction = {
@@ -572,7 +690,7 @@ function applyEnvironmentEvidence(args: {
         }));
     }
 
-    if (/no nearby range or fire found/i.test(resultMessage) || /no cooking source/i.test(resultMessage)) {
+    if (isCookingTask && (/no nearby range or fire found/i.test(resultMessage) || /no cooking source/i.test(resultMessage))) {
         lessons.push(lessonFromObservation({
             actionSchemaId: args.step.actionSchemaId,
             observation: resultMessage,
@@ -582,16 +700,18 @@ function applyEnvironmentEvidence(args: {
         }));
     }
 
-    for (let i = 0; i < actions.length; i++) {
-        if (actions[i]!.id === 'open_nearby_door') {
-            actions[i] = addEffect(actions[i]!, effect('reachable', { target: 'Range|Fire' }, 0.7));
-        }
-        if (actions[i]!.id === 'explore_for_cooking_source') {
-            actions[i] = addEffect(addEffect(actions[i]!, effect('near_loc', { name: 'Range|Fire' }, 0.6)), effect('reachable', { target: 'Range|Fire' }, 0.6));
+    if (isCookingTask) {
+        for (let i = 0; i < actions.length; i++) {
+            if (actions[i]!.id === 'open_nearby_door') {
+                actions[i] = addEffect(actions[i]!, effect('reachable', { target: 'Range|Fire' }, 0.7));
+            }
+            if (actions[i]!.id === 'explore_for_cooking_source') {
+                actions[i] = addEffect(addEffect(actions[i]!, effect('near_loc', { name: 'Range|Fire' }, 0.6)), effect('reachable', { target: 'Range|Fire' }, 0.6));
+            }
         }
     }
 
-    if (/burned|burnt/i.test(resultMessage)) {
+    if (isCookingTask && /burned|burnt/i.test(resultMessage)) {
         lessons.push(lessonFromObservation({
             actionSchemaId: args.step.actionSchemaId,
             observation: resultMessage,
@@ -601,7 +721,7 @@ function applyEnvironmentEvidence(args: {
         }));
     }
 
-    if (args.executed.result.success && args.step.actionSchemaId === 'open_nearby_door') {
+    if (isCookingTask && args.executed.result.success && args.step.actionSchemaId === 'open_nearby_door') {
         lessons.push(lessonFromObservation({
             actionSchemaId: 'open_nearby_door',
             observation: resultMessage,
@@ -611,7 +731,7 @@ function applyEnvironmentEvidence(args: {
         }));
     }
 
-    if (args.executed.result.success && args.step.actionSchemaId === 'explore_for_cooking_source') {
+    if (isCookingTask && args.executed.result.success && args.step.actionSchemaId === 'explore_for_cooking_source') {
         lessons.push(lessonFromObservation({
             actionSchemaId: 'explore_for_cooking_source',
             observation: resultMessage,
@@ -622,7 +742,7 @@ function applyEnvironmentEvidence(args: {
     }
 
     domainModel = appendDomainLessons({ ...domainModel, actions }, lessons);
-    return { domainModel: sanitizeLearnedDomainModel(domainModel, args.task, defaultCookShrimpDomain(args.task.id), { includeRecoveryActions: true }), lessons };
+    return { domainModel: sanitizeLearnedDomainModel(domainModel, args.task, fallbackDomain, { includeRecoveryActions: true }), lessons };
 }
 
 async function symbolicPlanFromDomain(args: {
@@ -686,23 +806,24 @@ function replanPrompt(args: {
     allowExplore: boolean;
 }): string {
     const executableActions = [
-        '- use_item_on_cooking_source: use Raw shrimps on a visible/reachable Range or Fire.',
         '- open_nearby_door: open the nearest visible door/gate with an Open option.',
-        ...(args.allowExplore
-            ? ['- explore_for_cooking_source: bounded exploration that scans a wider radius, opens obvious doors/gates, and walks short probes to find a Range or Fire.']
-            : []),
+        '- explore_for_loc: bounded exploration that scans a wider radius, opens obvious doors/gates, and walks short probes (use actionParams.targetLocNamePattern when supported).',
+        '- interact_loc: interact with a location using an option (use actionParams.locNamePattern + actionParams.optionPattern).',
+        '- pickup_ground_item: pick up a ground item (use actionParams.itemNamePattern).',
+        '- use_item_on_cooking_source: shrimp vertical-slice cook action (still supported).',
     ].join('\n');
-    const actionShapeExample = args.allowExplore
-        ? `    { "stepIndex": 0, "naturalLanguage": "explore/open/cook step", "actionSchemaId": "explore_for_cooking_source" },
-    { "stepIndex": 1, "naturalLanguage": "cook after recovery", "actionSchemaId": "use_item_on_cooking_source" }`
-        : `    { "stepIndex": 0, "naturalLanguage": "open a nearby blocking door", "actionSchemaId": "open_nearby_door" },
-    { "stepIndex": 1, "naturalLanguage": "retry cooking after recovery", "actionSchemaId": "use_item_on_cooking_source" }`;
-    const timeoutRule = args.allowExplore
-        ? '- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try exploration or door opening before retrying cooking.'
-        : '- If the prior cook attempt timed out with no inventory or XP change, do not just repeat cooking first. Try door opening before retrying cooking.';
-    const allowedActionText = args.allowExplore
-        ? 'Use only these executable actionSchemaId values: use_item_on_cooking_source, open_nearby_door, explore_for_cooking_source.'
-        : 'Use only these executable actionSchemaId values: use_item_on_cooking_source, open_nearby_door.';
+    const actionShapeExample =
+        `    { "stepIndex": 0, "naturalLanguage": "explore for target", "actionSchemaId": "explore_for_loc", "actionParams": { "targetLocNamePattern": "Range|Fire" } },
+    { "stepIndex": 1, "naturalLanguage": "mine a rock", "actionSchemaId": "interact_loc", "actionParams": { "locNamePattern": "Rock", "optionPattern": "Mine" } }`;
+    const timeoutRule =
+        '- If the prior attempt made no progress (no inventory/XP change), do not just repeat the same action. Prefer explore/open-door/pickup/interact variations.';
+    const preferred = args.task.taskHints?.preferredActions?.length
+        ? args.task.taskHints.preferredActions
+        : undefined;
+    const allowedActionText =
+        preferred
+            ? `Use only these executable actionSchemaId values: ${preferred.join(', ')}.`
+            : 'Use only these executable actionSchemaId values: open_nearby_door, explore_for_loc, interact_loc, pickup_ground_item, use_item_on_cooking_source.';
 
     return `
 You are the within-episode controller for a RuneScape planning experiment.
@@ -810,15 +931,24 @@ async function requestAgenticReplan(args: {
         temperature: 0.2,
     });
     const parsed = extractJsonObject(rawResponse) as Partial<AgenticReplanEvent>;
-    const allowedActions = args.allowExplore
-        ? ['use_item_on_cooking_source', 'open_nearby_door', 'explore_for_cooking_source']
-        : ['use_item_on_cooking_source', 'open_nearby_door'];
+    const defaultAllowedActions = [
+        'open_nearby_door',
+        'explore_for_loc',
+        'explore_for_cooking_source',
+        'interact_loc',
+        'pickup_ground_item',
+        'use_item_on_cooking_source',
+    ];
+    const allowedActions = args.task.taskHints?.preferredActions?.length
+        ? args.task.taskHints.preferredActions
+        : defaultAllowedActions;
     const plan = (parsed.plan ?? [])
         .filter(step => allowedActions.includes(step.actionSchemaId ?? ''))
         .map((step, index) => ({
             stepIndex: index,
             naturalLanguage: step.naturalLanguage || `Agentic recovery step ${index + 1}`,
             actionSchemaId: step.actionSchemaId,
+            actionParams: step.actionParams,
             expectedEffects: step.expectedEffects,
         }));
 
@@ -872,10 +1002,11 @@ async function main() {
         task.maxSteps = maxStepsOverride;
     }
     const domainModel = readDomain(domainPath);
+    const fallbackDomain = defaultDomainForTask(task);
     let effectiveDomainModel = sanitizeLearnedDomainModel(
-        domainModel ?? defaultCookShrimpDomain(task.id),
+        domainModel ?? fallbackDomain,
         task,
-        defaultCookShrimpDomain(task.id),
+        fallbackDomain,
         { includeRecoveryActions: true },
     );
     const planner =
@@ -970,7 +1101,16 @@ async function main() {
                 plannerNotes: plannerOutput.notes,
                 budgetSteps: Math.max(0, Math.min(budget, task.maxSteps)),
             };
-            plan = buildDiscoveryPlanSteps(task.id, task.maxSteps, discoveryPhase.budgetSteps);
+            plan = buildDiscoveryPlanSteps(
+                task.id,
+                task.maxSteps,
+                discoveryPhase.budgetSteps,
+                {
+                    exploreTargets: task.taskHints?.explorationTargets,
+                    goalItems: task.taskHints?.goalItems,
+                    actionCycle: task.taskHints?.preferredActions,
+                },
+            );
             console.warn(
                 `[Episode] Symbolic planner returned no plan; discovery bootstrap will run ${plan.length} step(s) (budget=${discoveryPhase.budgetSteps}).`,
             );

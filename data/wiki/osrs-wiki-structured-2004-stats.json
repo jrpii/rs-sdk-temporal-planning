@@ -1,0 +1,351 @@
+{
+  "input": "data/wiki/osrs-wiki-structured.jsonl",
+  "output": "data/wiki/osrs-wiki-structured-2004.jsonl",
+  "cutoff": "2004-09-07",
+  "includeUnknownAdded": false,
+  "read": 35003,
+  "written": 3915,
+  "parseErrors": 0,
+  "excluded": {
+    "added_after_cutoff": 23900,
+    "unknown_added_date": 7138,
+    "removed_on_or_before_cutoff": 50
+  },
+  "includedByPrimaryType": {
+    "item": 1615,
+    "scenery": 657,
+    "npc": 547,
+    "shop": 112,
+    "music": 243,
+    "location": 292,
+    "skill": 19,
+    "monster": 263,
+    "quest": 59,
+    "prayer": 20,
+    "article": 32,
+    "spell": 51,
+    "minigame": 4,
+    "guide": 1
+  },
+  "excludedByPrimaryType": {
+    "combat_achievement": 651,
+    "item": 10774,
+    "npc": 3628,
+    "article": 5866,
+    "event": 122,
+    "skill": 16,
+    "guide": 792,
+    "music": 985,
+    "scenery": 4904,
+    "monster": 1389,
+    "quest": 399,
+    "location": 816,
+    "achievement_diary": 25,
+    "spell": 211,
+    "shop": 372,
+    "prayer": 88,
+    "minigame": 50
+  },
+  "sampleExcluded": [
+    {
+      "title": "... 'til Dawn",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2021-07-21",
+      "dateRemoved": null
+    },
+    {
+      "title": "'24-carat' sword",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2020-04-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Beedy-eye' Jones",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Beefy' Burns",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Betty' B.Boppin",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Birds-Eye' Jack",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Black-eye'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Currency' The Alchemist",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Eagle-eye' Shultz",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Gummy'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Lecherous' Lee",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'No fingers'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'perfect' gold",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "'Picarron' Pete",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Squawking' Steve Beanie",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2025-11-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Sticky' Sanders",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'The Guns'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Transmute' The Alchemist",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "(-)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(+)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(a)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(attuned)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(b)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(basic)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(beginner)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(bh)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(blue)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(broken)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(c)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(cr)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(d)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(dark)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(deadman)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(dry)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(dusk)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(e)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(easy)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(elite)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(empty)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(f)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(full)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(g)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(green)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h1)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h2)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h3)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h4)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(h5)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    },
+    {
+      "title": "(hard)",
+      "reason": "unknown_added_date",
+      "dateAdded": null,
+      "dateRemoved": null
+    }
+  ]
+}

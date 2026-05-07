@@ -1,0 +1,259 @@
+```json
+{
+  "id": "cook_shrimp_model_v1",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "gpt-4",
+      "confidence": 0.7
+    }
+  ],
+  "notes": [
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish. A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared."
+  ],
+  "lessons": [],
+  "knownFacilities": [
+    {
+      "namePattern": "Range|Fire",
+      "x": 0,
+      "z": 0,
+      "level": 0,
+      "locId": 0,
+      "confidence": 0.8,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "task description",
+          "confidence": 0.9
+        }
+      ],
+      "observedAtTick": 0
+    }
+  ],
+  "actions": [
+    {
+      "id": "explore_for_loc",
+      "name": "Explore for a target location",
+      "description": "Scan/move to find a useful target location (target chosen at execution via actionParams.targetLocNamePattern).",
+      "parameters": [
+        {
+          "name": "target",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_loc",
+      "name": "Interact with location",
+      "description": "Interact with a nearby location using an option (e.g. Mine, Chop down, Fish, Smelt).",
+      "parameters": [
+        {
+          "name": "loc",
+          "type": "loc"
+        },
+        {
+          "name": "option",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "pickup_ground_item",
+      "name": "Pick up ground item",
+      "description": "Pick up a ground item by name pattern (target chosen at execution via actionParams.itemNamePattern).",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Optional reachability recovery action when a door or gate blocks access.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door|Gate|Large door"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "blocked destination beyond door or gate"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "use_item_on_loc",
+      "name": "Use item on location",
+      "description": "Use an item from inventory on a nearby location.",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        },
+        {
+          "name": "loc",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "inventory_contains",
+          "args": {
+            "item": "item"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5
+        },
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "loc"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "effects": [
+        {
+          "kind": "cooking_xp_gained",
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        },
+        {
+          "kind": "inventory_change",
+          "args": {
+            "item": "item",
+            "count": -1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        },
+        {
+          "kind": "inventory_gained",
+          "args": {
+            "item": "cooked Shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        }
+      ],
+      "negativeEvidence": [
+        {
+          "kind": "burnt_fish_produced",
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ]
+    }
+  ]
+}
+```

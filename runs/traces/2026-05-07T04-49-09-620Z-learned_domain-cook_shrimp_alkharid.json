@@ -1,0 +1,5715 @@
+{
+  "trace": {
+    "episodeId": "2026-05-07T04-49-09-620Z-learned_domain-cook_shrimp_alkharid",
+    "tracePath": "runs\\traces\\2026-05-07T04-49-09-620Z-learned_domain-cook_shrimp_alkharid.json",
+    "method": "learned_domain",
+    "task": {
+      "id": "cook_shrimp_alkharid",
+      "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+      "maxSteps": 12,
+      "startState": {
+        "checkpointPath": "runs/checkpoints/McPlan-cook-shrimp-alkharid.sav",
+        "checkpointProfile": "experiments",
+        "notes": "Install before each episode with: bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-cook-shrimp-alkharid.sav --api http://localhost:8888. Then relog with: bun sdk/cli.ts McPlan --server localhost --timeout 15000 --launch."
+      },
+      "goalState": {
+        "description": "Inventory gains cooked Shrimps and Cooking XP increases.",
+        "inventoryGained": {
+          "Shrimps": 1
+        },
+        "xpGained": {
+          "Cooking": 1
+        }
+      },
+      "success": [
+        {
+          "kind": "inventory_gained",
+          "item": "^Shrimps$",
+          "count": 1
+        },
+        {
+          "kind": "xp_gained",
+          "skill": "Cooking",
+          "minXp": 1
+        }
+      ]
+    },
+    "model": {
+      "provider": "ollama",
+      "name": "gemma3:12b"
+    },
+    "plan": [
+      {
+        "stepIndex": 0,
+        "naturalLanguage": "1. Explore for a cooking source",
+        "actionSchemaId": "explore_for_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "reachable",
+            "args": {
+              "target": "Range|Fire"
+            },
+            "provenance": [
+              {
+                "source": "llm",
+                "reference": "model",
+                "confidence": 0.5
+              }
+            ],
+            "confidence": 0.5
+          },
+          {
+            "kind": "near_loc",
+            "args": {
+              "name": "Range|Fire"
+            },
+            "confidence": 0.5,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 0,
+        "naturalLanguage": "1. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 1,
+        "naturalLanguage": "2. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 2,
+        "naturalLanguage": "3. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 3,
+        "naturalLanguage": "4. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 4,
+        "naturalLanguage": "5. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 5,
+        "naturalLanguage": "6. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 6,
+        "naturalLanguage": "7. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 7,
+        "naturalLanguage": "8. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 8,
+        "naturalLanguage": "9. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 9,
+        "naturalLanguage": "10. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepIndex": 10,
+        "naturalLanguage": "11. Use raw shrimps on cooking source",
+        "actionSchemaId": "use_item_on_cooking_source",
+        "expectedEffects": [
+          {
+            "kind": "item_removed",
+            "args": {
+              "item": "Raw shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "item_added",
+            "args": {
+              "item": "Shrimps",
+              "count": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          },
+          {
+            "kind": "xp_gained",
+            "args": {
+              "skill": "Cooking",
+              "minXp": 1
+            },
+            "confidence": 1,
+            "provenance": [
+              {
+                "source": "human",
+                "reference": "experiments/domain-model.ts",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "agenticReplans": [],
+    "execution": [
+      {
+        "stepIndex": 0,
+        "action": "1. Explore for a cooking source",
+        "startedTick": 11,
+        "endedTick": 64,
+        "result": {
+          "success": true,
+          "message": "Exploration used KB target Range at (3318, 3138): Arrived"
+        },
+        "before": {
+          "tick": 11,
+          "inGame": true,
+          "position": {
+            "x": 3330,
+            "z": 3176,
+            "level": 0
+          },
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "run": {
+            "energy": 100,
+            "weight": 9
+          },
+          "combat": {
+            "inCombat": false,
+            "targetIndex": -1,
+            "lastDamageTick": 0
+          },
+          "skills": {
+            "Attack": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 16
+            },
+            "Defence": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Strength": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Hitpoints": {
+              "level": 10,
+              "baseLevel": 10,
+              "xp": 985
+            },
+            "Ranged": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Prayer": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Magic": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Cooking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Woodcutting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fletching": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fishing": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 80
+            },
+            "Firemaking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Crafting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Smithing": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Mining": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Herblore": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Agility": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Thieving": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 136
+            },
+            "Stat18": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Stat19": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Runecraft": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            }
+          },
+          "inventory": {
+            "Coins": 41,
+            "Tinderbox": 1,
+            "Small fishing net": 1,
+            "Bread": 1,
+            "Raw shrimps": 8
+          },
+          "equipment": [
+            "Bronze axe",
+            "Wooden shield",
+            "Bronze arrow"
+          ],
+          "nearbyNpcs": {
+            "Louie legs": {
+              "name": "Louie legs",
+              "variants": {
+                "0|Talk-to|Trade": {
+                  "options": [
+                    "Talk-to",
+                    "Trade"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5576,
+                      "x": 3317,
+                      "z": 3174,
+                      "distance": 13,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Shop keeper": {
+              "name": "Shop keeper",
+              "variants": {
+                "0|Talk-to|Trade": {
+                  "options": [
+                    "Talk-to",
+                    "Trade"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5578,
+                      "x": 3316,
+                      "z": 3184,
+                      "distance": 14,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Ranael": {
+              "name": "Ranael",
+              "variants": {
+                "0|Talk-to|Trade": {
+                  "options": [
+                    "Talk-to",
+                    "Trade"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5575,
+                      "x": 3318,
+                      "z": 3161,
+                      "distance": 15,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Shop assistant": {
+              "name": "Shop assistant",
+              "variants": {
+                "0|Talk-to|Trade": {
+                  "options": [
+                    "Talk-to",
+                    "Trade"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5577,
+                      "x": 3315,
+                      "z": 3180,
+                      "distance": 15,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "nearbyLocs": {
+            "Rockslide": {
+              "name": "Rockslide",
+              "variants": {
+                "474|": {
+                  "id": 474,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3331,
+                      "z": 3176,
+                      "distance": 1
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3174,
+                      "distance": 2
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3172,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3180,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3168,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3184,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3166,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3186,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3190,
+                      "distance": 14
+                    }
+                  ]
+                },
+                "472|": {
+                  "id": 472,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3329,
+                      "z": 3178,
+                      "distance": 2
+                    },
+                    {
+                      "x": 3334,
+                      "z": 3172,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3334,
+                      "z": 3174,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3170,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3184,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3335,
+                      "z": 3185,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3166,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3186,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3162,
+                      "distance": 14
+                    }
+                  ]
+                },
+                "473|": {
+                  "id": 473,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3332,
+                      "z": 3174,
+                      "distance": 2
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3178,
+                      "distance": 2
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3176,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3182,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3329,
+                      "z": 3164,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3188,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3162,
+                      "distance": 14
+                    }
+                  ]
+                },
+                "471|": {
+                  "id": 471,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3332,
+                      "z": 3172,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3180,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3334,
+                      "z": 3178,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3335,
+                      "z": 3176,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3170,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3334,
+                      "z": 3182,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3168,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3164,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3334,
+                      "z": 3188,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3342,
+                      "z": 3189,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3335,
+                      "z": 3190,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3340,
+                      "z": 3190,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Cactus": {
+              "name": "Cactus",
+              "variants": {
+                "1404|": {
+                  "id": 1404,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3325,
+                      "z": 3178,
+                      "distance": 5
+                    }
+                  ]
+                },
+                "1396|": {
+                  "id": 1396,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3325,
+                      "z": 3166,
+                      "distance": 10
+                    }
+                  ]
+                }
+              }
+            },
+            "Bush": {
+              "name": "Bush",
+              "variants": {
+                "1123|": {
+                  "id": 1123,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3341,
+                      "z": 3165,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3336,
+                      "z": 3164,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3338,
+                      "z": 3164,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3342,
+                      "z": 3165,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3337,
+                      "z": 3163,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3339,
+                      "z": 3163,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3340,
+                      "z": 3163,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3336,
+                      "z": 3162,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Potted plant": {
+              "name": "Potted plant",
+              "variants": {
+                "1158|": {
+                  "id": 1158,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3165,
+                      "distance": 12
+                    }
+                  ]
+                }
+              }
+            },
+            "Glyphs": {
+              "name": "Glyphs",
+              "variants": {
+                "911|": {
+                  "id": 911,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3175,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3318,
+                      "z": 3163,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3173,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3178,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3186,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Crate": {
+              "name": "Crate",
+              "variants": {
+                "356|Search": {
+                  "id": 356,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3176,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3177,
+                      "distance": 14
+                    }
+                  ]
+                },
+                "357|Search": {
+                  "id": 357,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3177,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3318,
+                      "z": 3179,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3317,
+                      "z": 3177,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3317,
+                      "z": 3186,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3186,
+                      "distance": 14
+                    }
+                  ]
+                },
+                "358|Search": {
+                  "id": 358,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3180,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3317,
+                      "z": 3176,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3317,
+                      "z": 3179,
+                      "distance": 13
+                    }
+                  ]
+                }
+              }
+            },
+            "Warehouse shelves": {
+              "name": "Warehouse shelves",
+              "variants": {
+                "1016|": {
+                  "id": 1016,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3178,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3318,
+                      "z": 3185,
+                      "distance": 12
+                    }
+                  ]
+                },
+                "1018|": {
+                  "id": 1018,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3182,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3318,
+                      "z": 3186,
+                      "distance": 12
+                    }
+                  ]
+                },
+                "1015|": {
+                  "id": 1015,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3183,
+                      "distance": 12
+                    }
+                  ]
+                },
+                "1017|": {
+                  "id": 1017,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3184,
+                      "distance": 12
+                    }
+                  ]
+                }
+              }
+            },
+            "Sacks": {
+              "name": "Sacks",
+              "variants": {
+                "365|Search": {
+                  "id": 365,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3317,
+                      "z": 3173,
+                      "distance": 13
+                    }
+                  ]
+                }
+              }
+            },
+            "Basket": {
+              "name": "Basket",
+              "variants": {
+                "382|": {
+                  "id": 382,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3317,
+                      "z": 3178,
+                      "distance": 13
+                    }
+                  ]
+                }
+              }
+            },
+            "Statue": {
+              "name": "Statue",
+              "variants": {
+                "580|": {
+                  "id": 580,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3166,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Chair": {
+              "name": "Chair",
+              "variants": {
+                "1088|": {
+                  "id": 1088,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3185,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Bench": {
+              "name": "Bench",
+              "variants": {
+                "1106|": {
+                  "id": 1106,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3162,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Barrel": {
+              "name": "Barrel",
+              "variants": {
+                "362|": {
+                  "id": 362,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3190,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3319,
+                      "z": 3190,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Table": {
+              "name": "Table",
+              "variants": {
+                "614|": {
+                  "id": 614,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3315,
+                      "z": 3162,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "595|": {
+                  "id": 595,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3315,
+                      "z": 3182,
+                      "distance": 15
+                    },
+                    {
+                      "x": 3315,
+                      "z": 3184,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            },
+            "Curtain": {
+              "name": "Curtain",
+              "variants": {
+                "1529|Close": {
+                  "id": 1529,
+                  "options": [
+                    "Close"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3315,
+                      "z": 3166,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "groundItems": [],
+          "ui": {
+            "dialogOpen": false,
+            "interfaceOpen": false,
+            "shopOpen": false,
+            "bankOpen": false,
+            "modalOpen": false
+          },
+          "recentMessages": [
+            "Welcome to RuneScape."
+          ]
+        },
+        "after": {
+          "tick": 64,
+          "inGame": true,
+          "position": {
+            "x": 3319,
+            "z": 3138,
+            "level": 0
+          },
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "run": {
+            "energy": 100,
+            "weight": 9
+          },
+          "combat": {
+            "inCombat": false,
+            "targetIndex": -1,
+            "lastDamageTick": 0
+          },
+          "skills": {
+            "Attack": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 16
+            },
+            "Defence": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Strength": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Hitpoints": {
+              "level": 10,
+              "baseLevel": 10,
+              "xp": 985
+            },
+            "Ranged": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Prayer": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Magic": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Cooking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Woodcutting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fletching": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fishing": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 80
+            },
+            "Firemaking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Crafting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Smithing": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Mining": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Herblore": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Agility": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Thieving": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 136
+            },
+            "Stat18": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Stat19": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Runecraft": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            }
+          },
+          "inventory": {
+            "Coins": 41,
+            "Tinderbox": 1,
+            "Small fishing net": 1,
+            "Bread": 1,
+            "Raw shrimps": 8
+          },
+          "equipment": [
+            "Bronze axe",
+            "Wooden shield",
+            "Bronze arrow"
+          ],
+          "nearbyNpcs": {
+            "Spider": {
+              "name": "Spider",
+              "variants": {
+                "1|Attack": {
+                  "combatLevel": 1,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5579,
+                      "x": 3318,
+                      "z": 3140,
+                      "distance": 2,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5581,
+                      "x": 3324,
+                      "z": 3138,
+                      "distance": 5,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5583,
+                      "x": 3329,
+                      "z": 3145,
+                      "distance": 10,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Witch": {
+              "name": "Witch",
+              "variants": {
+                "20|Attack": {
+                  "combatLevel": 20,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5580,
+                      "x": 3323,
+                      "z": 3137,
+                      "distance": 4,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Shantay Guard": {
+              "name": "Shantay Guard",
+              "variants": {
+                "22|Talk-to|Attack": {
+                  "combatLevel": 22,
+                  "options": [
+                    "Talk-to",
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5542,
+                      "x": 3307,
+                      "z": 3128,
+                      "distance": 12,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "nearbyLocs": {
+            "Range": {
+              "name": "Range",
+              "variants": {
+                "2728|": {
+                  "id": 2728,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3138,
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "Wardrobe": {
+              "name": "Wardrobe",
+              "variants": {
+                "388|Open": {
+                  "id": 388,
+                  "options": [
+                    "Open"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3137,
+                      "distance": 1
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3137,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Fireplace": {
+              "name": "Fireplace",
+              "variants": {
+                "2724|": {
+                  "id": 2724,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3137,
+                      "distance": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "Rockslide": {
+              "name": "Rockslide",
+              "variants": {
+                "471|": {
+                  "id": 471,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3136,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3314,
+                      "z": 3136,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3143,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3137,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3311,
+                      "z": 3142,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3137,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3310,
+                      "z": 3136,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3308,
+                      "z": 3136,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3151,
+                      "distance": 13
+                    }
+                  ]
+                },
+                "473|": {
+                  "id": 473,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3140,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3145,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3147,
+                      "distance": 9
+                    }
+                  ]
+                },
+                "474|": {
+                  "id": 474,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3314,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3326,
+                      "z": 3143,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3309,
+                      "z": 3142,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3329,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "472|": {
+                  "id": 472,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3329,
+                      "z": 3137,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3139,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3141,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3143,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3306,
+                      "z": 3137,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3145,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3147,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3149,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            },
+            "Table": {
+              "name": "Table",
+              "variants": {
+                "616|": {
+                  "id": 616,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3141,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3140,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Broom": {
+              "name": "Broom",
+              "variants": {
+                "693|": {
+                  "id": 693,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3322,
+                      "z": 3137,
+                      "distance": 3
+                    }
+                  ]
+                }
+              }
+            },
+            "Door": {
+              "name": "Door",
+              "variants": {
+                "1534|Close": {
+                  "id": 1534,
+                  "options": [
+                    "Close"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3142,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Chair": {
+              "name": "Chair",
+              "variants": {
+                "1111|": {
+                  "id": 1111,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3323,
+                      "z": 3139,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3139,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3140,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3141,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Cactus": {
+              "name": "Cactus",
+              "variants": {
+                "1403|": {
+                  "id": 1403,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3313,
+                      "z": 3142,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "1404|": {
+                  "id": 1404,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3310,
+                      "z": 3148,
+                      "distance": 10
+                    }
+                  ]
+                }
+              }
+            },
+            "Bush": {
+              "name": "Bush",
+              "variants": {
+                "1123|": {
+                  "id": 1123,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3152,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Crate": {
+              "name": "Crate",
+              "variants": {
+                "357|Search": {
+                  "id": 357,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3309,
+                      "z": 3123,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "groundItems": [
+            {
+              "name": "Bronze mace",
+              "count": 1,
+              "distance": 1,
+              "x": 3320,
+              "z": 3137
+            }
+          ],
+          "ui": {
+            "dialogOpen": false,
+            "interfaceOpen": false,
+            "shopOpen": false,
+            "bankOpen": false,
+            "modalOpen": false
+          },
+          "recentMessages": [
+            "Welcome to RuneScape."
+          ]
+        },
+        "delta": {
+          "ticksElapsed": 53,
+          "positionChanged": true,
+          "inventoryAdded": {},
+          "inventoryRemoved": {},
+          "equipmentAdded": [],
+          "equipmentRemoved": [],
+          "xpGained": {},
+          "levelChanges": {},
+          "uiChanges": [],
+          "newMessages": []
+        },
+        "phase": "planned",
+        "actionSchemaId": "explore_for_cooking_source"
+      },
+      {
+        "stepIndex": 0,
+        "action": "1. Use raw shrimps on cooking source",
+        "startedTick": 64,
+        "endedTick": 68,
+        "result": {
+          "success": true,
+          "message": "Cooking attempt produced Shrimps (+30 Cooking XP)"
+        },
+        "before": {
+          "tick": 64,
+          "inGame": true,
+          "position": {
+            "x": 3319,
+            "z": 3138,
+            "level": 0
+          },
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "run": {
+            "energy": 100,
+            "weight": 9
+          },
+          "combat": {
+            "inCombat": false,
+            "targetIndex": -1,
+            "lastDamageTick": 0
+          },
+          "skills": {
+            "Attack": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 16
+            },
+            "Defence": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Strength": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Hitpoints": {
+              "level": 10,
+              "baseLevel": 10,
+              "xp": 985
+            },
+            "Ranged": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Prayer": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Magic": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Cooking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Woodcutting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fletching": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fishing": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 80
+            },
+            "Firemaking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Crafting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Smithing": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Mining": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Herblore": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Agility": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Thieving": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 136
+            },
+            "Stat18": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Stat19": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Runecraft": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            }
+          },
+          "inventory": {
+            "Coins": 41,
+            "Tinderbox": 1,
+            "Small fishing net": 1,
+            "Bread": 1,
+            "Raw shrimps": 8
+          },
+          "equipment": [
+            "Bronze axe",
+            "Wooden shield",
+            "Bronze arrow"
+          ],
+          "nearbyNpcs": {
+            "Spider": {
+              "name": "Spider",
+              "variants": {
+                "1|Attack": {
+                  "combatLevel": 1,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5579,
+                      "x": 3318,
+                      "z": 3140,
+                      "distance": 2,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5581,
+                      "x": 3324,
+                      "z": 3138,
+                      "distance": 5,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5583,
+                      "x": 3329,
+                      "z": 3145,
+                      "distance": 10,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Witch": {
+              "name": "Witch",
+              "variants": {
+                "20|Attack": {
+                  "combatLevel": 20,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5580,
+                      "x": 3323,
+                      "z": 3137,
+                      "distance": 4,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Shantay Guard": {
+              "name": "Shantay Guard",
+              "variants": {
+                "22|Talk-to|Attack": {
+                  "combatLevel": 22,
+                  "options": [
+                    "Talk-to",
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5542,
+                      "x": 3307,
+                      "z": 3128,
+                      "distance": 12,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "nearbyLocs": {
+            "Range": {
+              "name": "Range",
+              "variants": {
+                "2728|": {
+                  "id": 2728,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3138,
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "Wardrobe": {
+              "name": "Wardrobe",
+              "variants": {
+                "388|Open": {
+                  "id": 388,
+                  "options": [
+                    "Open"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3137,
+                      "distance": 1
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3137,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Fireplace": {
+              "name": "Fireplace",
+              "variants": {
+                "2724|": {
+                  "id": 2724,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3137,
+                      "distance": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "Rockslide": {
+              "name": "Rockslide",
+              "variants": {
+                "471|": {
+                  "id": 471,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3136,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3314,
+                      "z": 3136,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3143,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3137,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3311,
+                      "z": 3142,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3137,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3310,
+                      "z": 3136,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3308,
+                      "z": 3136,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3151,
+                      "distance": 13
+                    }
+                  ]
+                },
+                "473|": {
+                  "id": 473,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3140,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3145,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3147,
+                      "distance": 9
+                    }
+                  ]
+                },
+                "474|": {
+                  "id": 474,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3314,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3326,
+                      "z": 3143,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3309,
+                      "z": 3142,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3329,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "472|": {
+                  "id": 472,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3329,
+                      "z": 3137,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3139,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3141,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3143,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3306,
+                      "z": 3137,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3145,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3147,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3149,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            },
+            "Table": {
+              "name": "Table",
+              "variants": {
+                "616|": {
+                  "id": 616,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3141,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3140,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Broom": {
+              "name": "Broom",
+              "variants": {
+                "693|": {
+                  "id": 693,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3322,
+                      "z": 3137,
+                      "distance": 3
+                    }
+                  ]
+                }
+              }
+            },
+            "Door": {
+              "name": "Door",
+              "variants": {
+                "1534|Close": {
+                  "id": 1534,
+                  "options": [
+                    "Close"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3142,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Chair": {
+              "name": "Chair",
+              "variants": {
+                "1111|": {
+                  "id": 1111,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3323,
+                      "z": 3139,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3139,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3140,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3141,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Cactus": {
+              "name": "Cactus",
+              "variants": {
+                "1403|": {
+                  "id": 1403,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3313,
+                      "z": 3142,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "1404|": {
+                  "id": 1404,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3310,
+                      "z": 3148,
+                      "distance": 10
+                    }
+                  ]
+                }
+              }
+            },
+            "Bush": {
+              "name": "Bush",
+              "variants": {
+                "1123|": {
+                  "id": 1123,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3152,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Crate": {
+              "name": "Crate",
+              "variants": {
+                "357|Search": {
+                  "id": 357,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3309,
+                      "z": 3123,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "groundItems": [
+            {
+              "name": "Bronze mace",
+              "count": 1,
+              "distance": 1,
+              "x": 3320,
+              "z": 3137
+            }
+          ],
+          "ui": {
+            "dialogOpen": false,
+            "interfaceOpen": false,
+            "shopOpen": false,
+            "bankOpen": false,
+            "modalOpen": false
+          },
+          "recentMessages": [
+            "Welcome to RuneScape."
+          ]
+        },
+        "after": {
+          "tick": 68,
+          "inGame": true,
+          "position": {
+            "x": 3319,
+            "z": 3138,
+            "level": 0
+          },
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "run": {
+            "energy": 100,
+            "weight": 9
+          },
+          "combat": {
+            "inCombat": false,
+            "targetIndex": -1,
+            "lastDamageTick": 0
+          },
+          "skills": {
+            "Attack": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 16
+            },
+            "Defence": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Strength": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Hitpoints": {
+              "level": 10,
+              "baseLevel": 10,
+              "xp": 985
+            },
+            "Ranged": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Prayer": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Magic": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Cooking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 30
+            },
+            "Woodcutting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fletching": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Fishing": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 80
+            },
+            "Firemaking": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Crafting": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Smithing": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Mining": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Herblore": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Agility": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Thieving": {
+              "level": 2,
+              "baseLevel": 2,
+              "xp": 136
+            },
+            "Stat18": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Stat19": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            },
+            "Runecraft": {
+              "level": 1,
+              "baseLevel": 1,
+              "xp": 0
+            }
+          },
+          "inventory": {
+            "Coins": 41,
+            "Tinderbox": 1,
+            "Small fishing net": 1,
+            "Bread": 1,
+            "Shrimps": 1,
+            "Raw shrimps": 7
+          },
+          "equipment": [
+            "Bronze axe",
+            "Wooden shield",
+            "Bronze arrow"
+          ],
+          "nearbyNpcs": {
+            "Spider": {
+              "name": "Spider",
+              "variants": {
+                "1|Attack": {
+                  "combatLevel": 1,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5579,
+                      "x": 3318,
+                      "z": 3140,
+                      "distance": 2,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5581,
+                      "x": 3324,
+                      "z": 3138,
+                      "distance": 5,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    },
+                    {
+                      "index": 5583,
+                      "x": 3327,
+                      "z": 3141,
+                      "distance": 8,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Witch": {
+              "name": "Witch",
+              "variants": {
+                "20|Attack": {
+                  "combatLevel": 20,
+                  "options": [
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5580,
+                      "x": 3323,
+                      "z": 3137,
+                      "distance": 4,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            },
+            "Shantay Guard": {
+              "name": "Shantay Guard",
+              "variants": {
+                "22|Talk-to|Attack": {
+                  "combatLevel": 22,
+                  "options": [
+                    "Talk-to",
+                    "Attack"
+                  ],
+                  "instances": [
+                    {
+                      "index": 5542,
+                      "x": 3304,
+                      "z": 3129,
+                      "distance": 15,
+                      "inCombat": false,
+                      "hp": 0,
+                      "maxHp": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "nearbyLocs": {
+            "Range": {
+              "name": "Range",
+              "variants": {
+                "2728|": {
+                  "id": 2728,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3138,
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "Wardrobe": {
+              "name": "Wardrobe",
+              "variants": {
+                "388|Open": {
+                  "id": 388,
+                  "options": [
+                    "Open"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3137,
+                      "distance": 1
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3137,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Fireplace": {
+              "name": "Fireplace",
+              "variants": {
+                "2724|": {
+                  "id": 2724,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3137,
+                      "distance": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "Rockslide": {
+              "name": "Rockslide",
+              "variants": {
+                "471|": {
+                  "id": 471,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3136,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3314,
+                      "z": 3136,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3143,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3137,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3311,
+                      "z": 3142,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3137,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3310,
+                      "z": 3136,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3308,
+                      "z": 3136,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3151,
+                      "distance": 13
+                    }
+                  ]
+                },
+                "473|": {
+                  "id": 473,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3316,
+                      "z": 3140,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3327,
+                      "z": 3145,
+                      "distance": 8
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3147,
+                      "distance": 9
+                    }
+                  ]
+                },
+                "474|": {
+                  "id": 474,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3314,
+                      "z": 3145,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3326,
+                      "z": 3143,
+                      "distance": 7
+                    },
+                    {
+                      "x": 3316,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3325,
+                      "z": 3147,
+                      "distance": 9
+                    },
+                    {
+                      "x": 3309,
+                      "z": 3142,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3329,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "472|": {
+                  "id": 472,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3329,
+                      "z": 3137,
+                      "distance": 10
+                    },
+                    {
+                      "x": 3330,
+                      "z": 3139,
+                      "distance": 11
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3141,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3331,
+                      "z": 3143,
+                      "distance": 12
+                    },
+                    {
+                      "x": 3306,
+                      "z": 3137,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3332,
+                      "z": 3145,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3147,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3149,
+                      "distance": 14
+                    },
+                    {
+                      "x": 3333,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            },
+            "Table": {
+              "name": "Table",
+              "variants": {
+                "616|": {
+                  "id": 616,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3318,
+                      "z": 3141,
+                      "distance": 3
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3140,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Broom": {
+              "name": "Broom",
+              "variants": {
+                "693|": {
+                  "id": 693,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3322,
+                      "z": 3137,
+                      "distance": 3
+                    }
+                  ]
+                }
+              }
+            },
+            "Door": {
+              "name": "Door",
+              "variants": {
+                "1534|Close": {
+                  "id": 1534,
+                  "options": [
+                    "Close"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3321,
+                      "z": 3142,
+                      "distance": 4
+                    }
+                  ]
+                }
+              }
+            },
+            "Chair": {
+              "name": "Chair",
+              "variants": {
+                "1111|": {
+                  "id": 1111,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3323,
+                      "z": 3139,
+                      "distance": 4
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3139,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3140,
+                      "distance": 5
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3141,
+                      "distance": 5
+                    }
+                  ]
+                }
+              }
+            },
+            "Cactus": {
+              "name": "Cactus",
+              "variants": {
+                "1403|": {
+                  "id": 1403,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3313,
+                      "z": 3142,
+                      "distance": 6
+                    },
+                    {
+                      "x": 3323,
+                      "z": 3151,
+                      "distance": 13
+                    },
+                    {
+                      "x": 3324,
+                      "z": 3153,
+                      "distance": 15
+                    }
+                  ]
+                },
+                "1404|": {
+                  "id": 1404,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3310,
+                      "z": 3148,
+                      "distance": 10
+                    }
+                  ]
+                }
+              }
+            },
+            "Bush": {
+              "name": "Bush",
+              "variants": {
+                "1123|": {
+                  "id": 1123,
+                  "options": [],
+                  "instances": [
+                    {
+                      "x": 3319,
+                      "z": 3152,
+                      "distance": 14
+                    }
+                  ]
+                }
+              }
+            },
+            "Crate": {
+              "name": "Crate",
+              "variants": {
+                "357|Search": {
+                  "id": 357,
+                  "options": [
+                    "Search"
+                  ],
+                  "instances": [
+                    {
+                      "x": 3309,
+                      "z": 3123,
+                      "distance": 15
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "groundItems": [
+            {
+              "name": "Bronze mace",
+              "count": 1,
+              "distance": 1,
+              "x": 3320,
+              "z": 3137
+            }
+          ],
+          "ui": {
+            "dialogOpen": false,
+            "interfaceOpen": false,
+            "shopOpen": false,
+            "bankOpen": false,
+            "modalOpen": false
+          },
+          "recentMessages": [
+            "The shrimps are now nicely cooked.",
+            "You put the shrimps on the stove.",
+            "Welcome to RuneScape."
+          ]
+        },
+        "delta": {
+          "ticksElapsed": 4,
+          "positionChanged": false,
+          "inventoryAdded": {
+            "Shrimps": 1
+          },
+          "inventoryRemoved": {
+            "Raw shrimps": 1
+          },
+          "equipmentAdded": [],
+          "equipmentRemoved": [],
+          "xpGained": {
+            "Cooking": 30
+          },
+          "levelChanges": {},
+          "uiChanges": [],
+          "newMessages": [
+            "The shrimps are now nicely cooked.",
+            "You put the shrimps on the stove."
+          ]
+        },
+        "phase": "planned",
+        "actionSchemaId": "use_item_on_cooking_source"
+      }
+    ],
+    "metrics": {
+      "success": true,
+      "totalDurationMs": 33805,
+      "invalidActionCount": 0,
+      "replanningCount": 0
+    },
+    "finalState": {
+      "tick": 68,
+      "inGame": true,
+      "position": {
+        "x": 3319,
+        "z": 3138,
+        "level": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10
+      },
+      "run": {
+        "energy": 100,
+        "weight": 9
+      },
+      "combat": {
+        "inCombat": false,
+        "targetIndex": -1,
+        "lastDamageTick": 0
+      },
+      "skills": {
+        "Attack": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 16
+        },
+        "Defence": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Strength": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Hitpoints": {
+          "level": 10,
+          "baseLevel": 10,
+          "xp": 985
+        },
+        "Ranged": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Prayer": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Magic": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Cooking": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 30
+        },
+        "Woodcutting": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Fletching": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Fishing": {
+          "level": 2,
+          "baseLevel": 2,
+          "xp": 80
+        },
+        "Firemaking": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Crafting": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Smithing": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Mining": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Herblore": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Agility": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Thieving": {
+          "level": 2,
+          "baseLevel": 2,
+          "xp": 136
+        },
+        "Stat18": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Stat19": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        },
+        "Runecraft": {
+          "level": 1,
+          "baseLevel": 1,
+          "xp": 0
+        }
+      },
+      "inventory": {
+        "Coins": 41,
+        "Tinderbox": 1,
+        "Small fishing net": 1,
+        "Bread": 1,
+        "Shrimps": 1,
+        "Raw shrimps": 7
+      },
+      "equipment": [
+        "Bronze axe",
+        "Wooden shield",
+        "Bronze arrow"
+      ],
+      "nearbyNpcs": {
+        "Spider": {
+          "name": "Spider",
+          "variants": {
+            "1|Attack": {
+              "combatLevel": 1,
+              "options": [
+                "Attack"
+              ],
+              "instances": [
+                {
+                  "index": 5579,
+                  "x": 3318,
+                  "z": 3140,
+                  "distance": 2,
+                  "inCombat": false,
+                  "hp": 0,
+                  "maxHp": 0
+                },
+                {
+                  "index": 5581,
+                  "x": 3324,
+                  "z": 3138,
+                  "distance": 5,
+                  "inCombat": false,
+                  "hp": 0,
+                  "maxHp": 0
+                },
+                {
+                  "index": 5583,
+                  "x": 3327,
+                  "z": 3141,
+                  "distance": 8,
+                  "inCombat": false,
+                  "hp": 0,
+                  "maxHp": 0
+                }
+              ]
+            }
+          }
+        },
+        "Witch": {
+          "name": "Witch",
+          "variants": {
+            "20|Attack": {
+              "combatLevel": 20,
+              "options": [
+                "Attack"
+              ],
+              "instances": [
+                {
+                  "index": 5580,
+                  "x": 3323,
+                  "z": 3137,
+                  "distance": 4,
+                  "inCombat": false,
+                  "hp": 0,
+                  "maxHp": 0
+                }
+              ]
+            }
+          }
+        },
+        "Shantay Guard": {
+          "name": "Shantay Guard",
+          "variants": {
+            "22|Talk-to|Attack": {
+              "combatLevel": 22,
+              "options": [
+                "Talk-to",
+                "Attack"
+              ],
+              "instances": [
+                {
+                  "index": 5542,
+                  "x": 3304,
+                  "z": 3129,
+                  "distance": 15,
+                  "inCombat": false,
+                  "hp": 0,
+                  "maxHp": 0
+                }
+              ]
+            }
+          }
+        }
+      },
+      "nearbyLocs": {
+        "Range": {
+          "name": "Range",
+          "variants": {
+            "2728|": {
+              "id": 2728,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3318,
+                  "z": 3138,
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "Wardrobe": {
+          "name": "Wardrobe",
+          "variants": {
+            "388|Open": {
+              "id": 388,
+              "options": [
+                "Open"
+              ],
+              "instances": [
+                {
+                  "x": 3319,
+                  "z": 3137,
+                  "distance": 1
+                },
+                {
+                  "x": 3324,
+                  "z": 3137,
+                  "distance": 5
+                }
+              ]
+            }
+          }
+        },
+        "Fireplace": {
+          "name": "Fireplace",
+          "variants": {
+            "2724|": {
+              "id": 2724,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3321,
+                  "z": 3137,
+                  "distance": 2
+                }
+              ]
+            }
+          }
+        },
+        "Rockslide": {
+          "name": "Rockslide",
+          "variants": {
+            "471|": {
+              "id": 471,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3316,
+                  "z": 3136,
+                  "distance": 3
+                },
+                {
+                  "x": 3314,
+                  "z": 3136,
+                  "distance": 5
+                },
+                {
+                  "x": 3324,
+                  "z": 3143,
+                  "distance": 5
+                },
+                {
+                  "x": 3325,
+                  "z": 3137,
+                  "distance": 6
+                },
+                {
+                  "x": 3316,
+                  "z": 3145,
+                  "distance": 7
+                },
+                {
+                  "x": 3325,
+                  "z": 3145,
+                  "distance": 7
+                },
+                {
+                  "x": 3311,
+                  "z": 3142,
+                  "distance": 8
+                },
+                {
+                  "x": 3327,
+                  "z": 3137,
+                  "distance": 8
+                },
+                {
+                  "x": 3310,
+                  "z": 3136,
+                  "distance": 9
+                },
+                {
+                  "x": 3308,
+                  "z": 3136,
+                  "distance": 11
+                },
+                {
+                  "x": 3332,
+                  "z": 3151,
+                  "distance": 13
+                }
+              ]
+            },
+            "473|": {
+              "id": 473,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3316,
+                  "z": 3140,
+                  "distance": 3
+                },
+                {
+                  "x": 3327,
+                  "z": 3145,
+                  "distance": 8
+                },
+                {
+                  "x": 3323,
+                  "z": 3147,
+                  "distance": 9
+                }
+              ]
+            },
+            "474|": {
+              "id": 474,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3314,
+                  "z": 3145,
+                  "distance": 7
+                },
+                {
+                  "x": 3326,
+                  "z": 3143,
+                  "distance": 7
+                },
+                {
+                  "x": 3316,
+                  "z": 3147,
+                  "distance": 9
+                },
+                {
+                  "x": 3325,
+                  "z": 3147,
+                  "distance": 9
+                },
+                {
+                  "x": 3309,
+                  "z": 3142,
+                  "distance": 10
+                },
+                {
+                  "x": 3330,
+                  "z": 3151,
+                  "distance": 13
+                },
+                {
+                  "x": 3329,
+                  "z": 3153,
+                  "distance": 15
+                }
+              ]
+            },
+            "472|": {
+              "id": 472,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3329,
+                  "z": 3137,
+                  "distance": 10
+                },
+                {
+                  "x": 3330,
+                  "z": 3139,
+                  "distance": 11
+                },
+                {
+                  "x": 3331,
+                  "z": 3141,
+                  "distance": 12
+                },
+                {
+                  "x": 3331,
+                  "z": 3143,
+                  "distance": 12
+                },
+                {
+                  "x": 3306,
+                  "z": 3137,
+                  "distance": 13
+                },
+                {
+                  "x": 3332,
+                  "z": 3145,
+                  "distance": 13
+                },
+                {
+                  "x": 3333,
+                  "z": 3147,
+                  "distance": 14
+                },
+                {
+                  "x": 3333,
+                  "z": 3149,
+                  "distance": 14
+                },
+                {
+                  "x": 3333,
+                  "z": 3153,
+                  "distance": 15
+                }
+              ]
+            }
+          }
+        },
+        "Table": {
+          "name": "Table",
+          "variants": {
+            "616|": {
+              "id": 616,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3318,
+                  "z": 3141,
+                  "distance": 3
+                },
+                {
+                  "x": 3323,
+                  "z": 3140,
+                  "distance": 4
+                }
+              ]
+            }
+          }
+        },
+        "Broom": {
+          "name": "Broom",
+          "variants": {
+            "693|": {
+              "id": 693,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3322,
+                  "z": 3137,
+                  "distance": 3
+                }
+              ]
+            }
+          }
+        },
+        "Door": {
+          "name": "Door",
+          "variants": {
+            "1534|Close": {
+              "id": 1534,
+              "options": [
+                "Close"
+              ],
+              "instances": [
+                {
+                  "x": 3321,
+                  "z": 3142,
+                  "distance": 4
+                }
+              ]
+            }
+          }
+        },
+        "Chair": {
+          "name": "Chair",
+          "variants": {
+            "1111|": {
+              "id": 1111,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3323,
+                  "z": 3139,
+                  "distance": 4
+                },
+                {
+                  "x": 3324,
+                  "z": 3139,
+                  "distance": 5
+                },
+                {
+                  "x": 3324,
+                  "z": 3140,
+                  "distance": 5
+                },
+                {
+                  "x": 3324,
+                  "z": 3141,
+                  "distance": 5
+                }
+              ]
+            }
+          }
+        },
+        "Cactus": {
+          "name": "Cactus",
+          "variants": {
+            "1403|": {
+              "id": 1403,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3313,
+                  "z": 3142,
+                  "distance": 6
+                },
+                {
+                  "x": 3323,
+                  "z": 3151,
+                  "distance": 13
+                },
+                {
+                  "x": 3324,
+                  "z": 3153,
+                  "distance": 15
+                }
+              ]
+            },
+            "1404|": {
+              "id": 1404,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3310,
+                  "z": 3148,
+                  "distance": 10
+                }
+              ]
+            }
+          }
+        },
+        "Bush": {
+          "name": "Bush",
+          "variants": {
+            "1123|": {
+              "id": 1123,
+              "options": [],
+              "instances": [
+                {
+                  "x": 3319,
+                  "z": 3152,
+                  "distance": 14
+                }
+              ]
+            }
+          }
+        },
+        "Crate": {
+          "name": "Crate",
+          "variants": {
+            "357|Search": {
+              "id": 357,
+              "options": [
+                "Search"
+              ],
+              "instances": [
+                {
+                  "x": 3309,
+                  "z": 3123,
+                  "distance": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "groundItems": [
+        {
+          "name": "Bronze mace",
+          "count": 1,
+          "distance": 1,
+          "x": 3320,
+          "z": 3137
+        }
+      ],
+      "ui": {
+        "dialogOpen": false,
+        "interfaceOpen": false,
+        "shopOpen": false,
+        "bankOpen": false,
+        "modalOpen": false
+      },
+      "recentMessages": [
+        "The shrimps are now nicely cooked.",
+        "You put the shrimps on the stove.",
+        "Welcome to RuneScape."
+      ]
+    },
+    "rawFinalState": {
+      "tick": 68,
+      "player": {
+        "name": "Mcplan",
+        "combatLevel": 3,
+        "hp": 10,
+        "maxHp": 10,
+        "x": 6080,
+        "z": 6464,
+        "worldX": 3319,
+        "worldZ": 3138,
+        "level": 0,
+        "runEnergy": 100,
+        "runWeight": 9,
+        "animId": -1,
+        "spotanimId": -1,
+        "combat": {
+          "inCombat": false,
+          "targetIndex": -1,
+          "lastDamageTick": 0
+        }
+      },
+      "skills": [
+        {
+          "name": "Attack",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 16
+        },
+        {
+          "name": "Defence",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Strength",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Hitpoints",
+          "level": 10,
+          "baseLevel": 10,
+          "experience": 985
+        },
+        {
+          "name": "Ranged",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Prayer",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Magic",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Cooking",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 30
+        },
+        {
+          "name": "Woodcutting",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Fletching",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Fishing",
+          "level": 2,
+          "baseLevel": 2,
+          "experience": 80
+        },
+        {
+          "name": "Firemaking",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Crafting",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Smithing",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Mining",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Herblore",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Agility",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Thieving",
+          "level": 2,
+          "baseLevel": 2,
+          "experience": 136
+        },
+        {
+          "name": "Stat18",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Stat19",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        },
+        {
+          "name": "Runecraft",
+          "level": 1,
+          "baseLevel": 1,
+          "experience": 0
+        }
+      ],
+      "inventory": [
+        {
+          "slot": 0,
+          "id": 995,
+          "name": "Coins",
+          "count": 41,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 1,
+          "id": 590,
+          "name": "Tinderbox",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 2,
+          "id": 303,
+          "name": "Small fishing net",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 3,
+          "id": 2309,
+          "name": "Bread",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Eat",
+              "opIndex": 1
+            }
+          ]
+        },
+        {
+          "slot": 4,
+          "id": 315,
+          "name": "Shrimps",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Eat",
+              "opIndex": 1
+            }
+          ]
+        },
+        {
+          "slot": 5,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 6,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 7,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 8,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 9,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 10,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        },
+        {
+          "slot": 11,
+          "id": 317,
+          "name": "Raw shrimps",
+          "count": 1,
+          "optionsWithIndex": []
+        }
+      ],
+      "equipment": [
+        {
+          "slot": 3,
+          "id": 1351,
+          "name": "Bronze axe",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        },
+        {
+          "slot": 5,
+          "id": 1171,
+          "name": "Wooden shield",
+          "count": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        },
+        {
+          "slot": 13,
+          "id": 882,
+          "name": "Bronze arrow",
+          "count": 25,
+          "optionsWithIndex": [
+            {
+              "text": "Wield",
+              "opIndex": 2
+            }
+          ]
+        }
+      ],
+      "combatStyle": {
+        "currentStyle": 0,
+        "weaponName": "Bronze axe",
+        "styles": [
+          {
+            "index": 0,
+            "name": "Stab",
+            "type": "Accurate",
+            "trainedSkill": "Attack"
+          },
+          {
+            "index": 1,
+            "name": "Lunge",
+            "type": "Aggressive",
+            "trainedSkill": "Strength"
+          },
+          {
+            "index": 2,
+            "name": "Slash",
+            "type": "Controlled",
+            "trainedSkill": "Shared"
+          },
+          {
+            "index": 3,
+            "name": "Block",
+            "type": "Defensive",
+            "trainedSkill": "Defence"
+          }
+        ]
+      },
+      "nearbyNpcs": [
+        {
+          "index": 5579,
+          "name": "Spider",
+          "combatLevel": 1,
+          "x": 3318,
+          "z": 3140,
+          "distance": 2,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Attack",
+              "opIndex": 2
+            }
+          ],
+          "options": [
+            "Attack"
+          ]
+        },
+        {
+          "index": 5580,
+          "name": "Witch",
+          "combatLevel": 20,
+          "x": 3323,
+          "z": 3137,
+          "distance": 4,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Attack",
+              "opIndex": 2
+            }
+          ],
+          "options": [
+            "Attack"
+          ]
+        },
+        {
+          "index": 5581,
+          "name": "Spider",
+          "combatLevel": 1,
+          "x": 3324,
+          "z": 3138,
+          "distance": 5,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Attack",
+              "opIndex": 2
+            }
+          ],
+          "options": [
+            "Attack"
+          ]
+        },
+        {
+          "index": 5583,
+          "name": "Spider",
+          "combatLevel": 1,
+          "x": 3327,
+          "z": 3141,
+          "distance": 8,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Attack",
+              "opIndex": 2
+            }
+          ],
+          "options": [
+            "Attack"
+          ]
+        },
+        {
+          "index": 5542,
+          "name": "Shantay Guard",
+          "combatLevel": 22,
+          "x": 3304,
+          "z": 3129,
+          "distance": 15,
+          "hp": 0,
+          "maxHp": 0,
+          "healthPercent": null,
+          "targetIndex": -1,
+          "inCombat": false,
+          "combatCycle": -1000,
+          "animId": -1,
+          "spotanimId": -1,
+          "optionsWithIndex": [
+            {
+              "text": "Talk-to",
+              "opIndex": 1
+            },
+            {
+              "text": "Attack",
+              "opIndex": 2
+            }
+          ],
+          "options": [
+            "Talk-to",
+            "Attack"
+          ]
+        }
+      ],
+      "nearbyPlayers": [],
+      "nearbyLocs": [
+        {
+          "id": 2728,
+          "name": "Range",
+          "x": 3318,
+          "z": 3138,
+          "distance": 1,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 388,
+          "name": "Wardrobe",
+          "x": 3319,
+          "z": 3137,
+          "distance": 1,
+          "optionsWithIndex": [
+            {
+              "text": "Open",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Open"
+          ]
+        },
+        {
+          "id": 2724,
+          "name": "Fireplace",
+          "x": 3321,
+          "z": 3137,
+          "distance": 2,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3316,
+          "z": 3136,
+          "distance": 3,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3316,
+          "z": 3140,
+          "distance": 3,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 616,
+          "name": "Table",
+          "x": 3318,
+          "z": 3141,
+          "distance": 3,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 693,
+          "name": "Broom",
+          "x": 3322,
+          "z": 3137,
+          "distance": 3,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1534,
+          "name": "Door",
+          "x": 3321,
+          "z": 3142,
+          "distance": 4,
+          "optionsWithIndex": [
+            {
+              "text": "Close",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Close"
+          ]
+        },
+        {
+          "id": 1111,
+          "name": "Chair",
+          "x": 3323,
+          "z": 3139,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 616,
+          "name": "Table",
+          "x": 3323,
+          "z": 3140,
+          "distance": 4,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3314,
+          "z": 3136,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 388,
+          "name": "Wardrobe",
+          "x": 3324,
+          "z": 3137,
+          "distance": 5,
+          "optionsWithIndex": [
+            {
+              "text": "Open",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Open"
+          ]
+        },
+        {
+          "id": 1111,
+          "name": "Chair",
+          "x": 3324,
+          "z": 3139,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1111,
+          "name": "Chair",
+          "x": 3324,
+          "z": 3140,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1111,
+          "name": "Chair",
+          "x": 3324,
+          "z": 3141,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3324,
+          "z": 3143,
+          "distance": 5,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1403,
+          "name": "Cactus",
+          "x": 3313,
+          "z": 3142,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3325,
+          "z": 3137,
+          "distance": 6,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3314,
+          "z": 3145,
+          "distance": 7,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3316,
+          "z": 3145,
+          "distance": 7,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3325,
+          "z": 3145,
+          "distance": 7,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3326,
+          "z": 3143,
+          "distance": 7,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3311,
+          "z": 3142,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3327,
+          "z": 3137,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3327,
+          "z": 3145,
+          "distance": 8,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3310,
+          "z": 3136,
+          "distance": 9,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3316,
+          "z": 3147,
+          "distance": 9,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 473,
+          "name": "Rockslide",
+          "x": 3323,
+          "z": 3147,
+          "distance": 9,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3325,
+          "z": 3147,
+          "distance": 9,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3309,
+          "z": 3142,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1404,
+          "name": "Cactus",
+          "x": 3310,
+          "z": 3148,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3329,
+          "z": 3137,
+          "distance": 10,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3308,
+          "z": 3136,
+          "distance": 11,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3139,
+          "distance": 11,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3141,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3331,
+          "z": 3143,
+          "distance": 12,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3306,
+          "z": 3137,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1403,
+          "name": "Cactus",
+          "x": 3323,
+          "z": 3151,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3330,
+          "z": 3151,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3145,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 471,
+          "name": "Rockslide",
+          "x": 3332,
+          "z": 3151,
+          "distance": 13,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 1123,
+          "name": "Bush",
+          "x": 3319,
+          "z": 3152,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3147,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3149,
+          "distance": 14,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 357,
+          "name": "Crate",
+          "x": 3309,
+          "z": 3123,
+          "distance": 15,
+          "optionsWithIndex": [
+            {
+              "text": "Search",
+              "opIndex": 1
+            }
+          ],
+          "options": [
+            "Search"
+          ]
+        },
+        {
+          "id": 1403,
+          "name": "Cactus",
+          "x": 3324,
+          "z": 3153,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 474,
+          "name": "Rockslide",
+          "x": 3329,
+          "z": 3153,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        },
+        {
+          "id": 472,
+          "name": "Rockslide",
+          "x": 3333,
+          "z": 3153,
+          "distance": 15,
+          "optionsWithIndex": [],
+          "options": []
+        }
+      ],
+      "groundItems": [
+        {
+          "id": 1422,
+          "name": "Bronze mace",
+          "count": 1,
+          "x": 3320,
+          "z": 3137,
+          "distance": 1
+        }
+      ],
+      "gameMessages": [
+        {
+          "type": 0,
+          "text": "The shrimps are now nicely cooked.",
+          "sender": "",
+          "tick": 2958
+        },
+        {
+          "type": 0,
+          "text": "You put the shrimps on the stove.",
+          "sender": "",
+          "tick": 2870
+        },
+        {
+          "type": 0,
+          "text": "Welcome to RuneScape.",
+          "sender": "",
+          "tick": 47
+        }
+      ],
+      "recentDialogs": [],
+      "menuActions": [
+        {
+          "option": "Cancel",
+          "actionCode": 1252,
+          "paramA": 0,
+          "paramB": 0,
+          "paramC": 0
+        }
+      ],
+      "shop": {
+        "isOpen": false,
+        "title": "",
+        "shopItems": [],
+        "playerItems": []
+      },
+      "bank": {
+        "isOpen": false,
+        "items": []
+      },
+      "inGame": true,
+      "combatEvents": [],
+      "dialog": {
+        "isOpen": false,
+        "options": [],
+        "isWaiting": false,
+        "allComponents": []
+      },
+      "interface": {
+        "isOpen": false,
+        "interfaceId": -1,
+        "options": [],
+        "debugInfo": []
+      },
+      "modalOpen": false,
+      "modalInterface": -1,
+      "prayers": {
+        "activePrayers": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "prayerPoints": 1,
+        "prayerLevel": 1
+      }
+    },
+    "pddlArtifacts": {
+      "domainModelId": "short-model-id-cook_shrimp_alkharid",
+      "initialDomain": "(define (domain short_model_id_cook_shrimp_alkharid)\n  (:requirements :strips)\n  (:predicates\n    (has_item_bread)\n    (has_item_coins)\n    (has_item_raw_shrimps)\n    (has_item_shrimps)\n    (has_item_small_fishing_net)\n    (has_item_tinderbox)\n    (has_xp_attack)\n    (has_xp_fishing)\n    (has_xp_hitpoints)\n    (has_xp_thieving)\n    (item_gained_shrimps)\n    (message_observed_door_opened_or_reachability_changed)\n    (near_loc_barrel)\n    (near_loc_basket)\n    (near_loc_bench)\n    (near_loc_bush)\n    (near_loc_cactus)\n    (near_loc_chair)\n    (near_loc_crate)\n    (near_loc_curtain)\n    (near_loc_door)\n    (near_loc_fire)\n    (near_loc_gate)\n    (near_loc_glyphs)\n    (near_loc_large_door)\n    (near_loc_potted_plant)\n    (near_loc_range)\n    (near_loc_rockslide)\n    (near_loc_sacks)\n    (near_loc_statue)\n    (near_loc_table)\n    (near_loc_warehouse_shelves)\n    (reachable_blocked_destination_beyond_door_or_gate)\n    (reachable_fire)\n    (reachable_range)\n    (skill_at_least_agility_1)\n    (skill_at_least_attack_1)\n    (skill_at_least_cooking_1)\n    (skill_at_least_crafting_1)\n    (skill_at_least_defence_1)\n    (skill_at_least_firemaking_1)\n    (skill_at_least_fishing_2)\n    (skill_at_least_fletching_1)\n    (skill_at_least_herblore_1)\n    (skill_at_least_hitpoints_10)\n    (skill_at_least_magic_1)\n    (skill_at_least_mining_1)\n    (skill_at_least_prayer_1)\n    (skill_at_least_ranged_1)\n    (skill_at_least_runecraft_1)\n    (skill_at_least_smithing_1)\n    (skill_at_least_stat18_1)\n    (skill_at_least_stat19_1)\n    (skill_at_least_strength_1)\n    (skill_at_least_thieving_2)\n    (skill_at_least_woodcutting_1)\n    (xp_gained_cooking)\n  )\n  (:action use_item_on_cooking_source\n    :precondition (and (or (near_loc_range) (near_loc_fire)) (has_item_raw_shrimps))\n    :effect (and (has_item_shrimps) (item_gained_shrimps) (xp_gained_cooking))\n  )\n  (:action explore_for_cooking_source\n    :precondition (and (has_item_raw_shrimps))\n    :effect (and (reachable_range) (reachable_fire) (near_loc_range) (near_loc_fire))\n  )\n  (:action open_nearby_door\n    :precondition (and (or (near_loc_door) (near_loc_gate) (near_loc_large_door)))\n    :effect (and (reachable_blocked_destination_beyond_door_or_gate) (reachable_range) (reachable_fire) (message_observed_door_opened_or_reachability_changed))\n  )\n)",
+      "initialProblem": "(define (problem cook_shrimp_alkharid)\n  (:domain short_model_id_cook_shrimp_alkharid)\n  (:init (has_item_bread) (has_item_coins) (has_item_raw_shrimps) (has_item_small_fishing_net) (has_item_tinderbox) (has_xp_attack) (has_xp_fishing) (has_xp_hitpoints) (has_xp_thieving) (near_loc_barrel) (near_loc_basket) (near_loc_bench) (near_loc_bush) (near_loc_cactus) (near_loc_chair) (near_loc_crate) (near_loc_curtain) (near_loc_glyphs) (near_loc_potted_plant) (near_loc_rockslide) (near_loc_sacks) (near_loc_statue) (near_loc_table) (near_loc_warehouse_shelves) (skill_at_least_agility_1) (skill_at_least_attack_1) (skill_at_least_cooking_1) (skill_at_least_crafting_1) (skill_at_least_defence_1) (skill_at_least_firemaking_1) (skill_at_least_fishing_2) (skill_at_least_fletching_1) (skill_at_least_herblore_1) (skill_at_least_hitpoints_10) (skill_at_least_magic_1) (skill_at_least_mining_1) (skill_at_least_prayer_1) (skill_at_least_ranged_1) (skill_at_least_runecraft_1) (skill_at_least_smithing_1) (skill_at_least_stat18_1) (skill_at_least_stat19_1) (skill_at_least_strength_1) (skill_at_least_thieving_2) (skill_at_least_woodcutting_1))\n  (:goal (and (item_gained_shrimps) (xp_gained_cooking)))\n)",
+      "finalDomain": "(define (domain short_model_id_cook_shrimp_alkharid)\n  (:requirements :strips)\n  (:predicates\n    (has_item_bread)\n    (has_item_coins)\n    (has_item_raw_shrimps)\n    (has_item_shrimps)\n    (has_item_small_fishing_net)\n    (has_item_tinderbox)\n    (has_xp_attack)\n    (has_xp_cooking)\n    (has_xp_fishing)\n    (has_xp_hitpoints)\n    (has_xp_thieving)\n    (item_gained_shrimps)\n    (message_observed_door_opened_or_reachability_changed)\n    (near_loc_broom)\n    (near_loc_bush)\n    (near_loc_cactus)\n    (near_loc_chair)\n    (near_loc_crate)\n    (near_loc_door)\n    (near_loc_fire)\n    (near_loc_fireplace)\n    (near_loc_gate)\n    (near_loc_large_door)\n    (near_loc_range)\n    (near_loc_rockslide)\n    (near_loc_table)\n    (near_loc_wardrobe)\n    (reachable_blocked_destination_beyond_door_or_gate)\n    (reachable_fire)\n    (reachable_range)\n    (skill_at_least_agility_1)\n    (skill_at_least_attack_1)\n    (skill_at_least_cooking_1)\n    (skill_at_least_crafting_1)\n    (skill_at_least_defence_1)\n    (skill_at_least_firemaking_1)\n    (skill_at_least_fishing_2)\n    (skill_at_least_fletching_1)\n    (skill_at_least_herblore_1)\n    (skill_at_least_hitpoints_10)\n    (skill_at_least_magic_1)\n    (skill_at_least_mining_1)\n    (skill_at_least_prayer_1)\n    (skill_at_least_ranged_1)\n    (skill_at_least_runecraft_1)\n    (skill_at_least_smithing_1)\n    (skill_at_least_stat18_1)\n    (skill_at_least_stat19_1)\n    (skill_at_least_strength_1)\n    (skill_at_least_thieving_2)\n    (skill_at_least_woodcutting_1)\n    (xp_gained_cooking)\n  )\n  (:action use_item_on_cooking_source\n    :precondition (and (or (near_loc_range) (near_loc_fire)) (has_item_raw_shrimps))\n    :effect (and (has_item_shrimps) (item_gained_shrimps) (xp_gained_cooking))\n  )\n  (:action explore_for_cooking_source\n    :precondition (and (has_item_raw_shrimps))\n    :effect (and (reachable_range) (reachable_fire) (near_loc_range) (near_loc_fire))\n  )\n  (:action open_nearby_door\n    :precondition (and (or (near_loc_door) (near_loc_gate) (near_loc_large_door)))\n    :effect (and (reachable_blocked_destination_beyond_door_or_gate) (reachable_range) (reachable_fire) (message_observed_door_opened_or_reachability_changed))\n  )\n)",
+      "finalProblem": "(define (problem cook_shrimp_alkharid)\n  (:domain short_model_id_cook_shrimp_alkharid)\n  (:init (has_item_bread) (has_item_coins) (has_item_raw_shrimps) (has_item_shrimps) (has_item_small_fishing_net) (has_item_tinderbox) (has_xp_attack) (has_xp_cooking) (has_xp_fishing) (has_xp_hitpoints) (has_xp_thieving) (near_loc_broom) (near_loc_bush) (near_loc_cactus) (near_loc_chair) (near_loc_crate) (near_loc_door) (near_loc_fireplace) (near_loc_range) (near_loc_rockslide) (near_loc_table) (near_loc_wardrobe) (skill_at_least_agility_1) (skill_at_least_attack_1) (skill_at_least_cooking_1) (skill_at_least_crafting_1) (skill_at_least_defence_1) (skill_at_least_firemaking_1) (skill_at_least_fishing_2) (skill_at_least_fletching_1) (skill_at_least_herblore_1) (skill_at_least_hitpoints_10) (skill_at_least_magic_1) (skill_at_least_mining_1) (skill_at_least_prayer_1) (skill_at_least_ranged_1) (skill_at_least_runecraft_1) (skill_at_least_smithing_1) (skill_at_least_stat18_1) (skill_at_least_stat19_1) (skill_at_least_strength_1) (skill_at_least_thieving_2) (skill_at_least_woodcutting_1))\n  (:goal (and (item_gained_shrimps) (xp_gained_cooking)))\n)"
+    },
+    "domainArtifacts": {
+      "initialDomainModel": {
+        "id": "short-model-id-cook_shrimp_alkharid",
+        "taskId": "cook_shrimp_alkharid",
+        "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+        "provenance": [
+          {
+            "source": "llm",
+            "reference": "model",
+            "confidence": 0.9
+          }
+        ],
+        "notes": [
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared."
+        ],
+        "lessons": [],
+        "actions": [
+          {
+            "id": "use_item_on_cooking_source",
+            "name": "Use raw shrimps on cooking source",
+            "description": "Use a raw shrimp on a range or fire to cook it.",
+            "parameters": [
+              {
+                "name": "raw_item",
+                "type": "item"
+              },
+              {
+                "name": "source",
+                "type": "facility"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "xp_gained",
+                "args": {
+                  "skill": "Cooking",
+                  "minXp": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": [
+              "Cooking can produce Burnt fish instead of Shrimps."
+            ]
+          },
+          {
+            "id": "explore_for_cooking_source",
+            "name": "Explore for a cooking source",
+            "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+            "parameters": [
+              {
+                "name": "source",
+                "type": "facility",
+                "description": "Range or Fire"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "open_nearby_door",
+            "name": "Open nearby door or gate",
+            "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+            "parameters": [
+              {
+                "name": "door",
+                "type": "loc",
+                "description": "Visible door or gate with Open option"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Door|Gate|Large door"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "blocked destination beyond door or gate"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              },
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "message_observed",
+                "args": {
+                  "pattern": "door opened or reachability changed"
+                },
+                "confidence": 0.4,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          }
+        ]
+      },
+      "finalDomainModel": {
+        "id": "short-model-id-cook_shrimp_alkharid",
+        "taskId": "cook_shrimp_alkharid",
+        "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+        "provenance": [
+          {
+            "source": "llm",
+            "reference": "model",
+            "confidence": 0.9
+          }
+        ],
+        "notes": [
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+          "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+          "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+          "Observed lesson: Bounded exploration can establish a reachable nearby cooking source before retrying cooking."
+        ],
+        "lessons": [
+          {
+            "actionSchemaId": "explore_for_cooking_source",
+            "observation": "Exploration used KB target Range at (3318, 3138): Arrived",
+            "inference": "Bounded exploration can establish a reachable nearby cooking source before retrying cooking.",
+            "suggestedDomainChange": "Keep explore_for_cooking_source as an executable recovery action with effects near_loc(Range|Fire) and reachable(Range|Fire).",
+            "confidence": 0.75,
+            "provenance": [
+              {
+                "source": "environment",
+                "reference": "run-episode observed execution trace",
+                "confidence": 0.75,
+                "observedAt": "2026-05-07T04:49:41.004Z"
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "id": "use_item_on_cooking_source",
+            "name": "Use raw shrimps on cooking source",
+            "description": "Use a raw shrimp on a range or fire to cook it.",
+            "parameters": [
+              {
+                "name": "raw_item",
+                "type": "item"
+              },
+              {
+                "name": "source",
+                "type": "facility"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "item_removed",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "item_added",
+                "args": {
+                  "item": "Shrimps",
+                  "count": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "xp_gained",
+                "args": {
+                  "skill": "Cooking",
+                  "minXp": 1
+                },
+                "confidence": 1,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": [
+              "Cooking can produce Burnt fish instead of Shrimps."
+            ]
+          },
+          {
+            "id": "explore_for_cooking_source",
+            "name": "Explore for a cooking source",
+            "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+            "parameters": [
+              {
+                "name": "source",
+                "type": "facility",
+                "description": "Range or Fire"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "has_item",
+                "args": {
+                  "item": "Raw shrimps",
+                  "count": 1
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ]
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.5
+                  }
+                ],
+                "confidence": 0.5
+              },
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Range|Fire"
+                },
+                "confidence": 0.5,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          },
+          {
+            "id": "open_nearby_door",
+            "name": "Open nearby door or gate",
+            "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+            "parameters": [
+              {
+                "name": "door",
+                "type": "loc",
+                "description": "Visible door or gate with Open option"
+              }
+            ],
+            "preconditions": [
+              {
+                "kind": "near_loc",
+                "args": {
+                  "name": "Door|Gate|Large door"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              }
+            ],
+            "effects": [
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "blocked destination beyond door or gate"
+                },
+                "provenance": [
+                  {
+                    "source": "llm",
+                    "reference": "model",
+                    "confidence": 0.4
+                  }
+                ],
+                "confidence": 0.4
+              },
+              {
+                "kind": "reachable",
+                "args": {
+                  "target": "Range|Fire"
+                },
+                "confidence": 0.6,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              },
+              {
+                "kind": "message_observed",
+                "args": {
+                  "pattern": "door opened or reachability changed"
+                },
+                "confidence": 0.4,
+                "provenance": [
+                  {
+                    "source": "human",
+                    "reference": "experiments/domain-model.ts",
+                    "confidence": 1
+                  }
+                ]
+              }
+            ],
+            "negativeEvidence": []
+          }
+        ]
+      }
+    }
+  },
+  "verifier": {
+    "success": true,
+    "passed": [
+      {
+        "kind": "inventory_gained",
+        "item": "^Shrimps$",
+        "count": 1
+      },
+      {
+        "kind": "xp_gained",
+        "skill": "Cooking",
+        "minXp": 1
+      }
+    ],
+    "failed": [],
+    "evidence": [
+      "inventory gained ^Shrimps$: 1/1",
+      "Cooking xp gained: 30"
+    ]
+  }
+}

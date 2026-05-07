@@ -181,14 +181,26 @@ export const EXECUTABLE_ACTION_IDS = [
     'explore_for_cooking_source',
     // Task-agnostic alias. Executor treats this the same as explore_for_cooking_source.
     'explore_for_loc',
+    'walk_to',
+    'wait_ticks',
+    'interact_loc',
+    'interact_npc',
+    'use_item_on_loc',
+    'pickup_ground_item',
 ] as const;
 
 export const ACTION_DOCS = `
 Available executable SDK actions for this vertical slice:
 
 - bot.walkTo(x, z, tolerance?): pathfind to coordinates. Returns { success, message }.
+- walk_to: task-agnostic action id for bot.walkTo (use actionParams.x/z/tolerance).
 - bot.openDoor(target?): open a nearby door or gate, walking to it if needed.
 - bot.useItemOnLoc(item, loc): use an inventory item on a nearby location. Good examples: raw fish on range/fire.
+- use_item_on_loc: generic "use inventory item on location" (use actionParams.itemNamePattern + actionParams.locNamePattern [+ optional locId]).
+- interact_loc: interact with a location via an option (use actionParams.locNamePattern + actionParams.optionPattern).
+- interact_npc: interact with an NPC via an option (use actionParams.npcNamePattern + actionParams.optionPattern).
+- pickup_ground_item: pick up a ground item (use actionParams.itemNamePattern).
+- wait_ticks: wait for N ticks (use actionParams.ticks).
 - explore_for_cooking_source: bounded experiment executor that scans a wider radius, opens obvious doors/gates, and walks short probes to find a target location (default Range|Fire).
 - explore_for_loc: task-agnostic alias of explore_for_cooking_source (uses actionParams.targetLocNamePattern when provided).
 - sdk.findInventoryItem(pattern): find an item in inventory by name.
@@ -238,6 +250,69 @@ export function defaultCookShrimpDomain(taskId = 'cook_shrimp_alkharid'): Learne
     };
 }
 
+export function defaultGenericDomain(taskId: string): LearnedDomainModel {
+    return {
+        id: 'generic-v0',
+        taskId,
+        description: 'Minimal task-agnostic symbolic model over generic executable actions.',
+        provenance: human,
+        notes: [
+            'This is a fallback model used when no task-specific hand model exists.',
+            'Most actions require additional executor support to become fully general.',
+        ],
+        lessons: [],
+        actions: [
+            {
+                id: 'explore_for_loc',
+                name: 'Explore for a target location',
+                description: 'Scan and move around to find a target location (configured via action params in execution).',
+                parameters: [{ name: 'target', type: 'loc', description: 'Target location name pattern' }],
+                preconditions: [],
+                effects: [
+                    effect('near_loc', { name: 'target' }, 0.2),
+                    effect('reachable', { target: 'target' }, 0.2),
+                ],
+                negativeEvidence: [],
+            },
+            {
+                id: 'open_nearby_door',
+                name: 'Open nearby door or gate',
+                description: 'Open a visible door or gate when pathing is blocked.',
+                parameters: [{ name: 'door', type: 'loc' }],
+                preconditions: [predicate('near_loc', { name: 'Door|Gate|Large door' }, 0.4)],
+                effects: [effect('reachable', { target: 'unknown' }, 0.2)],
+                negativeEvidence: [],
+            },
+            {
+                id: 'interact_loc',
+                name: 'Interact with location',
+                description: 'Interact with a nearby location using a chosen option (e.g. Mine, Chop down, Fish, Smelt).',
+                parameters: [
+                    { name: 'loc', type: 'loc' },
+                    { name: 'option', type: 'quantity', description: 'Option text/pattern' },
+                ],
+                preconditions: [predicate('near_loc', { name: 'target' }, 0.2)],
+                effects: [],
+                negativeEvidence: [],
+            },
+            {
+                id: 'pickup_ground_item',
+                name: 'Pick up a ground item',
+                description: 'Pick up a nearby ground item by name pattern.',
+                parameters: [{ name: 'item', type: 'item' }],
+                preconditions: [],
+                effects: [],
+                negativeEvidence: [],
+            },
+        ],
+    };
+}
+
+export function defaultDomainForTask(task: TaskSpec): LearnedDomainModel {
+    if (task.id.includes('cook_shrimp')) return defaultCookShrimpDomain(task.id);
+    return defaultGenericDomain(task.id);
+}
+
 export function predicate(kind: DomainPredicate['kind'], args: Record<string, unknown>, confidence = 1): DomainPredicate {
     return { kind, args, confidence, provenance: human };
 }
@@ -270,7 +345,26 @@ export function stateFacts(summary: StateSummary): Set<string> {
 
     for (const group of Object.values(summary.nearbyLocs)) {
         facts.add(`near_loc:${normalizeFactName(group.name)}`);
+        for (const variant of Object.values(group.variants)) {
+            for (const opt of variant.options ?? []) {
+                facts.add(`near_loc_option:${normalizeFactName(group.name)}:${normalizeFactName(opt)}`);
+            }
+        }
     }
+
+    for (const group of Object.values(summary.nearbyNpcs)) {
+        facts.add(`near_npc:${normalizeFactName(group.name)}`);
+    }
+
+    for (const gi of summary.groundItems ?? []) {
+        if (gi.count > 0) facts.add(`ground_item:${normalizeFactName(gi.name)}`);
+    }
+
+    if (summary.ui.bankOpen) facts.add('ui:bank_open');
+    if (summary.ui.shopOpen) facts.add('ui:shop_open');
+    if (summary.ui.dialogOpen) facts.add('ui:dialog_open');
+    if (summary.ui.interfaceOpen) facts.add('ui:interface_open');
+    if (summary.ui.modalOpen) facts.add('ui:modal_open');
 
     for (const [skill, values] of Object.entries(summary.skills)) {
         facts.add(`skill_at_least:${normalizeFactName(skill)}:${values.baseLevel}`);
@@ -324,6 +418,21 @@ export function predicateToFacts(predicateValue: DomainPredicate): string[] {
         case 'near_loc': {
             const names = splitFactAlternatives(predicateValue.args.name ?? predicateValue.args.loc);
             return names.map(name => `near_loc:${name}`);
+        }
+        case 'near_loc_option': {
+            const locNames = splitFactAlternatives(predicateValue.args.loc ?? predicateValue.args.name);
+            const optNames = splitFactAlternatives(predicateValue.args.option ?? predicateValue.args.optionText);
+            const facts: string[] = [];
+            for (const loc of locNames) {
+                for (const opt of optNames) {
+                    facts.push(`near_loc_option:${loc}:${opt}`);
+                }
+            }
+            return facts;
+        }
+        case 'near_npc': {
+            const names = splitFactAlternatives(predicateValue.args.name ?? predicateValue.args.npc);
+            return names.map(name => `near_npc:${name}`);
         }
         case 'skill_at_least':
             return [`skill_at_least:${normalizeFactName(predicateValue.args.skill)}:${predicateValue.args.level ?? 1}`];

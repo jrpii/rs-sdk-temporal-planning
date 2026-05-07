@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { ACTION_DOCS, defaultCookShrimpDomain, safeModelName, sanitizeLearnedDomainModel } from './domain-model';
+import { ACTION_DOCS, defaultCookShrimpDomain, defaultDomainForTask, safeModelName, sanitizeLearnedDomainModel } from './domain-model';
 import { exportPddl } from './pddl';
 import { chatCompletion, extractJsonObject } from './llm';
 import type { LearnedDomainModel, StateSummary, TaskSpec } from './schemas';
@@ -97,27 +97,39 @@ function emptyState(): StateSummary {
 async function retrieveGraphRagContext(task: TaskSpec): Promise<string> {
     const question = `What wiki facts support a planning domain model for this RuneScape task: ${task.description}`;
     console.log(`[ExtractDomain] Querying Graph RAG with search: ${question}`);
-    const proc = Bun.spawn([
-        'python',
-        'osrs_agent.py',
-        '--question',
-        question,
-        '--no-llm',
-        '--show-context',
-    ], {
-        cwd: join(process.cwd(), 'agents', 'cse476-final-project'),
-        stdout: 'pipe',
-        stderr: 'pipe',
-    });
-    const [stdout, stderr, exitCode] = await Promise.all([
-        new Response(proc.stdout).text(),
-        new Response(proc.stderr).text(),
-        proc.exited,
-    ]);
-    if (exitCode !== 0) {
-        throw new Error(`Graph RAG retrieval failed: ${stderr || stdout}`);
+    const pythonExecutables = ['python', 'python3'];
+    let lastError: unknown = undefined;
+
+    for (const pythonExe of pythonExecutables) {
+        try {
+            const proc = Bun.spawn([
+                pythonExe,
+                'osrs_agent.py',
+                '--question',
+                question,
+                '--no-llm',
+                '--show-context',
+            ], {
+                cwd: join(process.cwd(), 'agents', 'cse476-final-project'),
+                stdout: 'pipe',
+                stderr: 'pipe',
+            });
+
+            const [stdout, stderr, exitCode] = await Promise.all([
+                new Response(proc.stdout).text(),
+                new Response(proc.stderr).text(),
+                proc.exited,
+            ]);
+            if (exitCode !== 0) {
+                throw new Error(`Graph RAG retrieval failed: ${stderr || stdout}`);
+            }
+            return stdout;
+        } catch (err) {
+            lastError = err;
+        }
     }
-    return stdout;
+
+    throw new Error(`Graph RAG retrieval failed (no python executable worked): ${String(lastError)}`);
 }
 
 function domainPrompt(task: TaskSpec, state?: StateSummary, retrievalContext = ''): string {
@@ -134,8 +146,9 @@ ${retrievalContext ? `Retrieved 2004 wiki / Graph RAG context:\n${retrievalConte
 Use only the provided executable actions, the task JSON, ${state ? 'the live initial state,' : ''} ${retrievalContext ? 'retrieved context,' : ''} and your internal knowledge of 2004 RuneScape.
 Draft a compact symbolic domain model that predicts action preconditions and effects.
 If the live state suggests a reachability issue, closed door, missing item, missing tool, or wrong location, represent that as preconditions/actions/uncertainty instead of assuming the direct action can always execute.
+Do NOT invent facility coordinates. If you do not have real coordinates from the provided live initial state (or from retrievalContext), set "knownFacilities" to [].
 
-Return ONLY JSON matching this TypeScript shape:
+Return ONLY JSON matching this TypeScript shape (task-agnostic; use actionParams at execution-time for targeting):
 {
   "id": "short-model-id",
   "taskId": "${task.id}",
@@ -143,56 +156,88 @@ Return ONLY JSON matching this TypeScript shape:
   "provenance": [{ "source": "llm", "reference": "model name", "confidence": 0.0 }],
   "notes": ["uncertainties or stochastic outcomes"],
   "lessons": [],
-  "knownFacilities": [
-    { "namePattern": "Range|Fire", "x": 0, "z": 0, "level": 0, "locId": 0, "confidence": 0.0, "provenance": [{ "source": "environment", "reference": "KB or trace", "confidence": 0.0 }], "observedAtTick": 0 }
-  ],
-  "actions": [{
-    "id": "use_item_on_cooking_source",
-    "name": "Use raw shrimps on cooking source",
-    "description": "string",
-    "parameters": [{ "name": "raw_item", "type": "item" }, { "name": "source", "type": "facility" }],
-    "preconditions": [
-      { "kind": "has_item", "args": { "item": "Raw shrimps", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.7 }], "confidence": 0.7 },
-      { "kind": "near_loc", "args": { "name": "Range|Fire" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.7 }], "confidence": 0.7 }
-    ],
-    "effects": [
-      { "kind": "item_removed", "args": { "item": "Raw shrimps", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.7 }], "confidence": 0.7 },
-      { "kind": "item_added", "args": { "item": "Shrimps", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.5 }], "confidence": 0.5 },
-      { "kind": "xp_gained", "args": { "skill": "Cooking", "minXp": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.5 }], "confidence": 0.5 }
-    ],
-    "negativeEvidence": []
-  }, {
-    "id": "explore_for_cooking_source",
-    "name": "Explore for a cooking source",
-    "description": "Bounded recovery action to scan and move around when no reachable Range or Fire is currently usable.",
-    "parameters": [{ "name": "source", "type": "facility" }],
-    "preconditions": [
-      { "kind": "has_item", "args": { "item": "Raw shrimps", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
-    ],
-    "effects": [
-      { "kind": "reachable", "args": { "target": "Range|Fire" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
-    ],
-    "negativeEvidence": []
-  }, {
-    "id": "open_nearby_door",
-    "name": "Open nearby door or gate",
-    "description": "Optional reachability recovery action when a door or gate blocks access.",
-    "parameters": [{ "name": "door", "type": "loc" }],
-    "preconditions": [
-      { "kind": "near_loc", "args": { "name": "Door|Gate|Large door" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
-    ],
-    "effects": [
-      { "kind": "reachable", "args": { "target": "blocked destination beyond door or gate" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }
-    ],
-    "negativeEvidence": []
-  }]
+  "knownFacilities": [],
+  "actions": [
+    {
+      "id": "explore_for_loc",
+      "name": "Explore for a target location",
+      "description": "Scan/move to find a useful target location (target chosen at execution via actionParams.targetLocNamePattern).",
+      "parameters": [{ "name": "target", "type": "loc" }],
+      "preconditions": [],
+      "effects": [{ "kind": "near_loc", "args": { "name": "target" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.3 }], "confidence": 0.3 }],
+      "negativeEvidence": []
+    },
+    {
+      "id": "walk_to",
+      "name": "Walk to coordinates",
+      "description": "Walk to (x,z) with tolerance (all provided at execution via actionParams).",
+      "parameters": [{ "name": "x", "type": "coordinate" }, { "name": "z", "type": "coordinate" }],
+      "preconditions": [],
+      "effects": [{ "kind": "position_changed", "args": { "target": "x,z" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.2 }], "confidence": 0.2 }],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_loc",
+      "name": "Interact with location",
+      "description": "Interact with a nearby location using an option (e.g. Mine, Chop down, Fish, Smelt).",
+      "parameters": [{ "name": "loc", "type": "loc" }, { "name": "option", "type": "quantity" }],
+      "preconditions": [{ "kind": "near_loc", "args": { "name": "target" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.3 }], "confidence": 0.3 }],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_npc",
+      "name": "Interact with NPC",
+      "description": "Interact with a nearby NPC using an option (e.g. Talk-to, Trade).",
+      "parameters": [{ "name": "npc", "type": "npc" }, { "name": "option", "type": "quantity" }],
+      "preconditions": [{ "kind": "near_npc", "args": { "name": "target" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.2 }], "confidence": 0.2 }],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "use_item_on_loc",
+      "name": "Use item on location",
+      "description": "Use an inventory item on a nearby location (chosen at execution via actionParams.itemNamePattern + locNamePattern).",
+      "parameters": [{ "name": "item", "type": "item" }, { "name": "loc", "type": "loc" }],
+      "preconditions": [{ "kind": "has_item", "args": { "item": "item", "count": 1 }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.2 }], "confidence": 0.2 }],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "pickup_ground_item",
+      "name": "Pick up ground item",
+      "description": "Pick up a ground item by name pattern (target chosen at execution via actionParams.itemNamePattern).",
+      "parameters": [{ "name": "item", "type": "item" }],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "wait_ticks",
+      "name": "Wait ticks",
+      "description": "Wait N server ticks (N chosen at execution via actionParams.ticks).",
+      "parameters": [{ "name": "ticks", "type": "quantity" }],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Optional reachability recovery action when a door or gate blocks access.",
+      "parameters": [{ "name": "door", "type": "loc" }],
+      "preconditions": [{ "kind": "near_loc", "args": { "name": "Door|Gate|Large door" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.4 }], "confidence": 0.4 }],
+      "effects": [{ "kind": "reachable", "args": { "target": "blocked destination beyond door or gate" }, "provenance": [{ "source": "llm", "reference": "model", "confidence": 0.3 }], "confidence": 0.3 }],
+      "negativeEvidence": []
+    }
+  ]
 }
 `.trim();
 }
 
 function normalizeDomain(raw: unknown, task: TaskSpec, model: string): LearnedDomainModel {
     const value = raw as Partial<LearnedDomainModel>;
-    const fallback = defaultCookShrimpDomain(task.id);
+    const fallback = defaultDomainForTask(task);
     return sanitizeLearnedDomainModel({
         ...fallback,
         ...value,

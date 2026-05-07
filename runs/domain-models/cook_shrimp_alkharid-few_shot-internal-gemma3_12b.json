@@ -1,0 +1,112 @@
+{
+  "id": "short-model-id-001",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Domain model for cooking shrimp near Al Kharid.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "gpt-4",
+      "confidence": 0.9
+    }
+  ],
+  "notes": [
+    "Cooking outcome is stochastic (Shrimps or Burnt Shrimp).",
+    "Success is defined by XP gain and inventory change, even with Burnt Shrimp."
+  ],
+  "actions": [
+    {
+      "id": "use_item_on_cooking_source",
+      "name": "Use raw shrimps on cooking source",
+      "description": "Uses a raw shrimp on a cooking facility (range or fire).",
+      "parameters": [
+        {
+          "name": "raw_item",
+          "type": "item"
+        },
+        {
+          "name": "source",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimp",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        },
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "effects": [
+        {
+          "kind": "item_removed",
+          "args": {
+            "item": "Raw shrimp",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.9
+            }
+          ],
+          "confidence": 0.9
+        },
+        {
+          "kind": "item_added",
+          "args": {
+            "item": "Shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        },
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Cooking",
+            "minXp": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ]
+}

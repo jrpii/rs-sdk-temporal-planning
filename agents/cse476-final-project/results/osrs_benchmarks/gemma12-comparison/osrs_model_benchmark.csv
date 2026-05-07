@@ -1,0 +1,13 @@
+model,task_id,task_kind,ok,retrieval_seconds,generation_seconds,total_seconds,response_chars,score,expected_hit_count,expected_total,avoid_hit_count,error
+gemma3:12b,domain_model_recipe,domain_model_generation,True,0.334,6.606,6.94,2070,7,7,8,0,
+gemma3:12b,planning_feedback_recipe,planning_feedback,True,0.467,4.236,4.702,1502,4,4,6,0,
+gemma3:12b,npc_variant_banking,domain_model_generation,True,0.383,4.668,5.05,1916,6,6,6,0,
+gemma3:4b,domain_model_recipe,domain_model_generation,True,0.33,6.578,6.908,2070,7,7,8,0,
+gemma3:4b,planning_feedback_recipe,planning_feedback,True,0.476,3.887,4.363,1301,5,5,6,0,
+gemma3:4b,npc_variant_banking,domain_model_generation,True,0.386,6.009,6.395,2460,6,6,6,0,
+deepseek-r1:7b,domain_model_recipe,domain_model_generation,True,0.362,6.205,6.567,1916,8,8,8,0,
+deepseek-r1:7b,planning_feedback_recipe,planning_feedback,True,0.491,4.532,5.023,1623,4,4,6,0,
+deepseek-r1:7b,npc_variant_banking,domain_model_generation,True,0.387,4.784,5.17,1887,6,6,6,0,
+deepseek-coder:6.7b,domain_model_recipe,domain_model_generation,True,0.342,6.646,6.988,2070,7,7,8,0,
+deepseek-coder:6.7b,planning_feedback_recipe,planning_feedback,True,0.477,3.303,3.78,1149,3,3,6,0,
+deepseek-coder:6.7b,npc_variant_banking,domain_model_generation,True,0.383,6.764,7.147,2570,6,6,6,0,

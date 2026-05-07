@@ -1,0 +1,9 @@
+{
+  "position": { "x": 3300, "z": 3310, "level": 0 },
+  "skills": { "Mining": 15, "Smithing": 1 },
+  "inventory": [
+    { "id": 1265, "count": 1 },
+    { "id": 2347, "count": 1 }
+  ]
+}
+
