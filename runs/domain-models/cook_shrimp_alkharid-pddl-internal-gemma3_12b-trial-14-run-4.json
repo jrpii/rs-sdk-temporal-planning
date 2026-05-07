@@ -1,0 +1,230 @@
+{
+  "id": "short-model-id-shrimp-cooking",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp on a range near Al Kharid.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "gpt-4",
+      "confidence": 0.8
+    }
+  ],
+  "notes": [
+    "Cooking success is stochastic; burnt shrimp is a possible outcome.",
+    "Pathfinding may be required to reach the range.",
+    "Exploration may be needed if a range is not immediately visible."
+  ],
+  "actions": [
+    {
+      "id": "use_item_on_cooking_source",
+      "name": "Use raw shrimp on range",
+      "description": "Use a raw shrimp on a nearby range to cook it.",
+      "parameters": [
+        {
+          "name": "raw_shrimp",
+          "type": "item"
+        },
+        {
+          "name": "range",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.9
+            }
+          ],
+          "confidence": 0.9
+        },
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.8
+            }
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "effects": [
+        {
+          "kind": "item_removed",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.9
+            }
+          ],
+          "confidence": 0.9
+        },
+        {
+          "kind": "item_added",
+          "args": {
+            "item": "Shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        },
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Cooking",
+            "minXp": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "explore_for_cooking_source",
+      "name": "Explore for a cooking source",
+      "description": "Explore the area to find a range if one is not immediately visible.",
+      "parameters": [
+        {
+          "name": "range",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        },
+        {
+          "kind": "not_near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door",
+      "description": "Open a nearby door to reach the range.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        },
+        {
+          "kind": "blocked_path",
+          "args": {
+            "target": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "gpt-4",
+              "confidence": 0.6
+            }
+          ],
+          "confidence": 0.6
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ]
+}

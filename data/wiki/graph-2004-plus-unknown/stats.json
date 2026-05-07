@@ -1,0 +1,949 @@
+{
+  "schemaVersion": "osrs-wiki-graph-v1",
+  "generatedAt": "2026-05-03T23:22:32.165Z",
+  "input": "F:\\RepoHome\\rs-sdk-temporal-planning\\data\\wiki\\osrs-wiki-structured-2004-plus-unknown.jsonl",
+  "outDir": "F:\\RepoHome\\rs-sdk-temporal-planning\\data\\wiki\\graph-2004-plus-unknown",
+  "options": {
+    "input": "data/wiki/osrs-wiki-structured-2004-plus-unknown.jsonl",
+    "outDir": "data/wiki/graph-2004-plus-unknown",
+    "maxPageLinks": 25,
+    "pageRankIterations": 25,
+    "damping": 0.85,
+    "includeMissingPages": false
+  },
+  "recordsRead": 11053,
+  "parseErrors": 0,
+  "structuredSchemaVersions": {
+    "osrs-wiki-structured-v4": 11053
+  },
+  "nodesByKind": {
+    "page": 11053,
+    "category": 1482,
+    "action": 251,
+    "slot": 17,
+    "combat_style": 15
+  },
+  "pagesByPrimaryType": {
+    "article": 4951,
+    "item": 2273,
+    "event": 43,
+    "skill": 29,
+    "guide": 787,
+    "quest": 299,
+    "scenery": 934,
+    "npc": 559,
+    "shop": 150,
+    "achievement_diary": 12,
+    "music": 273,
+    "location": 311,
+    "monster": 289,
+    "spell": 91,
+    "prayer": 32,
+    "minigame": 6,
+    "combat_achievement": 14
+  },
+  "edgesByRelation": {
+    "in_category": 45000,
+    "has_action": 5183,
+    "wiki_link": 81591,
+    "lead_link": 18817,
+    "equips_in_slot": 541,
+    "requires_material": 450,
+    "infobox_link": 12611,
+    "uses_combat_style": 171,
+    "variant_action": 799,
+    "variant_location": 76,
+    "requires_facility": 141,
+    "requires_skill": 241,
+    "requires_tool": 139,
+    "variant_quest": 20,
+    "produces_item": 13
+  },
+  "nodeCount": 12818,
+  "edgeCount": 165793,
+  "topByIndegree": [
+    {
+      "id": "page:2004",
+      "title": "2004",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1959
+    },
+    {
+      "id": "page:2002",
+      "title": "2002",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1644
+    },
+    {
+      "id": "page:2001",
+      "title": "2001",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1292
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1183
+    },
+    {
+      "id": "page:members",
+      "title": "Members",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1136
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1021
+    },
+    {
+      "id": "page:2003",
+      "title": "2003",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 977
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 945
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 941
+    },
+    {
+      "id": "page:demonic pacts league/areas/kandarin",
+      "title": "Demonic Pacts League/Areas/Kandarin",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 935
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 901
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 885
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 884
+    },
+    {
+      "id": "page:combat level",
+      "title": "combat level",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 835
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 744
+    },
+    {
+      "id": "page:free-to-play",
+      "title": "Free-to-play",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 709
+    },
+    {
+      "id": "page:choose option",
+      "title": "Choose Option",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 708
+    },
+    {
+      "id": "page:demonic pacts league/areas/asgarnia",
+      "title": "Demonic Pacts League/Areas/Asgarnia",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 655
+    },
+    {
+      "id": "page:29 march",
+      "title": "29 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 628
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 588
+    },
+    {
+      "id": "page:herblore",
+      "title": "Herblore",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 534
+    },
+    {
+      "id": "page:fishing",
+      "title": "Fishing",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 533
+    },
+    {
+      "id": "page:examine",
+      "title": "Examine",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 478
+    },
+    {
+      "id": "page:ranged",
+      "title": "Ranged",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 465
+    },
+    {
+      "id": "page:cooking pot (unobtainable item)",
+      "title": "Cooking pot (unobtainable item)",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 463
+    }
+  ],
+  "topByWeightedIndegree": [
+    {
+      "id": "page:2004",
+      "title": "2004",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 7241
+    },
+    {
+      "id": "page:2002",
+      "title": "2002",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 6109
+    },
+    {
+      "id": "page:2001",
+      "title": "2001",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 4896
+    },
+    {
+      "id": "page:2003",
+      "title": "2003",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 3471
+    },
+    {
+      "id": "page:29 march",
+      "title": "29 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 2534
+    },
+    {
+      "id": "page:4 january",
+      "title": "4 January",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1910
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1900
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1629
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1606
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 1580
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1569
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1557
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1529
+    },
+    {
+      "id": "page:27 february",
+      "title": "27 February",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1522
+    },
+    {
+      "id": "page:members",
+      "title": "Members",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1429
+    },
+    {
+      "id": "page:experience",
+      "title": "experience",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1337
+    },
+    {
+      "id": "page:human",
+      "title": "Human",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1323
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1219
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 1135
+    },
+    {
+      "id": "page:free-to-play",
+      "title": "Free-to-play",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1131
+    },
+    {
+      "id": "page:combat level",
+      "title": "combat level",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1082
+    },
+    {
+      "id": "page:12 december",
+      "title": "12 December",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1061
+    },
+    {
+      "id": "page:jagex",
+      "title": "Jagex",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 952
+    },
+    {
+      "id": "page:5 may",
+      "title": "5 May",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 949
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 945
+    }
+  ],
+  "topByPageLinkIndegree": [
+    {
+      "id": "page:2004",
+      "title": "2004",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1959
+    },
+    {
+      "id": "page:2002",
+      "title": "2002",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1644
+    },
+    {
+      "id": "page:2001",
+      "title": "2001",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1292
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1166
+    },
+    {
+      "id": "page:members",
+      "title": "Members",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 1136
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1021
+    },
+    {
+      "id": "page:2003",
+      "title": "2003",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 977
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 941
+    },
+    {
+      "id": "page:demonic pacts league/areas/kandarin",
+      "title": "Demonic Pacts League/Areas/Kandarin",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 935
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 894
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 885
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 882
+    },
+    {
+      "id": "page:combat level",
+      "title": "combat level",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 835
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 814
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 744
+    },
+    {
+      "id": "page:free-to-play",
+      "title": "Free-to-play",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 709
+    },
+    {
+      "id": "page:choose option",
+      "title": "Choose Option",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 708
+    },
+    {
+      "id": "page:demonic pacts league/areas/asgarnia",
+      "title": "Demonic Pacts League/Areas/Asgarnia",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 655
+    },
+    {
+      "id": "page:29 march",
+      "title": "29 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 628
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 554
+    },
+    {
+      "id": "page:fishing",
+      "title": "Fishing",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 533
+    },
+    {
+      "id": "page:herblore",
+      "title": "Herblore",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 501
+    },
+    {
+      "id": "page:examine",
+      "title": "Examine",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 478
+    },
+    {
+      "id": "page:ranged",
+      "title": "Ranged",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 465
+    },
+    {
+      "id": "page:cooking pot (unobtainable item)",
+      "title": "Cooking pot (unobtainable item)",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 463
+    }
+  ],
+  "topByPageRank": [
+    {
+      "id": "page:1998",
+      "title": "1998",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.025807041618989158
+    },
+    {
+      "id": "page:2001",
+      "title": "2001",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.02128496264543386
+    },
+    {
+      "id": "page:1999",
+      "title": "1999",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.016626516583661304
+    },
+    {
+      "id": "page:2002",
+      "title": "2002",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.014875356750197398
+    },
+    {
+      "id": "page:2000",
+      "title": "2000",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.012274990330837406
+    },
+    {
+      "id": "page:2004",
+      "title": "2004",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.011219832141209075
+    },
+    {
+      "id": "page:4 january",
+      "title": "4 January",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.008514883929962105
+    },
+    {
+      "id": "page:2003",
+      "title": "2003",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.007781873086580766
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.0043189205753476605
+    },
+    {
+      "id": "page:1 april",
+      "title": "1 April",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0037344632513170322
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.0034439093366209427
+    },
+    {
+      "id": "page:29 march",
+      "title": "29 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.003241874830295761
+    },
+    {
+      "id": "page:2005",
+      "title": "2005",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.002855129032611572
+    },
+    {
+      "id": "page:1 december",
+      "title": "1 December",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.00280848502591567
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.0027549071644707127
+    },
+    {
+      "id": "page:27 february",
+      "title": "27 February",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0026801185795364466
+    },
+    {
+      "id": "page:1 february",
+      "title": "1 February",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0025575364367632133
+    },
+    {
+      "id": "page:2006",
+      "title": "2006",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.002547458661942419
+    },
+    {
+      "id": "page:2007",
+      "title": "2007",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0024666318651057153
+    },
+    {
+      "id": "page:12 december",
+      "title": "12 December",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0024583788518974044
+    },
+    {
+      "id": "page:1 march",
+      "title": "1 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.002385811614942964
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.002381999126749412
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.002349607635951233
+    },
+    {
+      "id": "page:demonic pacts league/areas",
+      "title": "Demonic Pacts League/Areas",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.002349391697885214
+    },
+    {
+      "id": "page:1 august",
+      "title": "1 August",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0023025587417914556
+    }
+  ],
+  "topByPageLinkPageRank": [
+    {
+      "id": "page:1998",
+      "title": "1998",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.05965000330933098
+    },
+    {
+      "id": "page:2001",
+      "title": "2001",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.033452192827544254
+    },
+    {
+      "id": "page:1999",
+      "title": "1999",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.032402574495522196
+    },
+    {
+      "id": "page:2000",
+      "title": "2000",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.022542452952590983
+    },
+    {
+      "id": "page:2002",
+      "title": "2002",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.02233505345481884
+    },
+    {
+      "id": "page:2004",
+      "title": "2004",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.016170285042176945
+    },
+    {
+      "id": "page:4 january",
+      "title": "4 January",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.013207622519902817
+    },
+    {
+      "id": "page:2003",
+      "title": "2003",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.01169563327438995
+    },
+    {
+      "id": "page:1 april",
+      "title": "1 April",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.010164931957865175
+    },
+    {
+      "id": "page:1 august",
+      "title": "1 August",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.008455247583278574
+    },
+    {
+      "id": "page:1 december",
+      "title": "1 December",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.008129317098850597
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.0065119273974278925
+    },
+    {
+      "id": "page:1 july",
+      "title": "1 July",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0064300206813152384
+    },
+    {
+      "id": "page:1 february",
+      "title": "1 February",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0057390177349344405
+    },
+    {
+      "id": "page:cooking pot (unobtainable item)",
+      "title": "Cooking pot (unobtainable item)",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.005284202242481662
+    },
+    {
+      "id": "page:29 march",
+      "title": "29 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.005213436367039986
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.004966733442513203
+    },
+    {
+      "id": "page:1 march",
+      "title": "1 March",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.004685670109281291
+    },
+    {
+      "id": "page:2005",
+      "title": "2005",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.004252244565321745
+    },
+    {
+      "id": "page:1 june",
+      "title": "1 June",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0042242178046029664
+    },
+    {
+      "id": "page:1 january",
+      "title": "1 January",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.004008597116851336
+    },
+    {
+      "id": "page:27 february",
+      "title": "27 February",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.003986760463872075
+    },
+    {
+      "id": "page:demonic pacts league/areas",
+      "title": "Demonic Pacts League/Areas",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0037739572398680747
+    },
+    {
+      "id": "page:2007",
+      "title": "2007",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.003766967282249945
+    },
+    {
+      "id": "page:12 december",
+      "title": "12 December",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0037306867049989234
+    }
+  ]
+}

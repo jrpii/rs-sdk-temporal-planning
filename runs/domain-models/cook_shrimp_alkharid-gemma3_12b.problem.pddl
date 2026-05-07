@@ -1,0 +1,5 @@
+(define (problem cook_shrimp_alkharid)
+  (:domain short_model_id_001)
+  (:init (has_item_raw_shrimps) (near_loc_range) (skill_at_least_cooking_1))
+  (:goal (and (has_item_shrimps) (xp_gained_cooking)))
+)

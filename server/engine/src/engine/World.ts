@@ -153,6 +153,8 @@ class World {
     tickRate: number = World.TICKRATE; // speeds up when we're processing server shutdown
     currentTick: number = 0; // the current tick of the game world.
     nextTick: number = 0; // the next time the game world should tick.
+    paused: boolean = false;
+    private pendingManualTicks: number = 0;
     shutdownTick: number = -1;
     pmCount: number = 1; // can't be 0 as clients will ignore the pm, their array is filled with 0 as default
 
@@ -363,10 +365,81 @@ class World {
 
     // ----
 
+    getExperimentControlState() {
+        return {
+            paused: this.paused,
+            pendingManualTicks: this.pendingManualTicks,
+            tick: this.currentTick,
+            tickRate: this.tickRate,
+            players: this.getTotalPlayers(),
+            npcs: this.getTotalNpcs()
+        };
+    }
+
+    setPaused(paused: boolean) {
+        this.paused = paused;
+        if (!paused) {
+            this.pendingManualTicks = 0;
+            this.nextTick = Date.now() + this.tickRate;
+        }
+        return this.getExperimentControlState();
+    }
+
+    stepTicks(ticks: number = 1) {
+        const parsedTicks = Number.isFinite(ticks) ? ticks : 1;
+        const safeTicks = Math.max(1, Math.min(100, Math.floor(parsedTicks)));
+        this.paused = true;
+        this.pendingManualTicks += safeTicks;
+        return this.getExperimentControlState();
+    }
+
+    private processPausedClients(): void {
+        // Keep browser clients and SDK state flowing while the simulation clock is stopped.
+        this.processClientsIn();
+
+        for (const player of this.players) {
+            player.requestIdleLogout = false;
+        }
+
+        this.processInfo();
+        this.processClientsOut();
+        this.processPausedCleanup();
+    }
+
+    private processPausedCleanup(): void {
+        this.zonesTracking.forEach(zone => zone.reset());
+        this.zonesTracking.clear();
+
+        for (const player of this.players) {
+            player.resetEntity(false);
+
+            for (const inv of player.invs.values()) {
+                if (inv) {
+                    inv.update = false;
+                }
+            }
+        }
+
+        for (const npc of this.npcs) {
+            npc.resetEntity(false);
+        }
+    }
+
     cycle(): void {
         try {
             const start: number = Date.now();
             const drift: number = Math.max(0, start - this.nextTick);
+
+            if (this.paused && this.pendingManualTicks <= 0) {
+                this.processPausedClients();
+                this.nextTick = Date.now() + this.tickRate;
+                setTimeout(this.cycle.bind(this), this.tickRate);
+                return;
+            }
+
+            if (this.pendingManualTicks > 0) {
+                this.pendingManualTicks--;
+            }
 
             // world processing
             // - world queue
@@ -527,11 +600,16 @@ class World {
             }
 
             this.currentTick++;
-            this.nextTick += this.tickRate;
 
             // ----
 
-            setTimeout(this.cycle.bind(this), Math.max(0, this.tickRate - (Date.now() - start) - drift));
+            if (this.paused) {
+                this.nextTick = Date.now() + this.tickRate;
+                setTimeout(this.cycle.bind(this), this.pendingManualTicks > 0 ? 0 : 50);
+            } else {
+                this.nextTick += this.tickRate;
+                setTimeout(this.cycle.bind(this), Math.max(0, this.tickRate - (Date.now() - start) - drift));
+            }
         } catch (err) {
             if (err instanceof Error) {
                 printError('eep eep cabbage! An unhandled error occurred during the cycle: ' + err.message);

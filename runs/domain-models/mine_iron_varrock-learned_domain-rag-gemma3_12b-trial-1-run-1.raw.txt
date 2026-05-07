@@ -1,0 +1,219 @@
+```json
+{
+  "id": "short-model-id",
+  "taskId": "mine_iron_varrock",
+  "description": "Mine one iron ore from the Varrock mine checkpoint.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "model name",
+      "confidence": 0.0
+    }
+  ],
+  "notes": [
+    "Mining requires a pickaxe.  Ensure a pickaxe is equipped.",
+    "Mining iron ore requires level 21 Mining."
+  ],
+  "lessons": [],
+  "knownFacilities": [],
+  "actions": [
+    {
+      "id": "explore_for_loc",
+      "name": "Explore for a target location",
+      "description": "Scan/move to find a useful target location (target chosen at execution via actionParams.targetLocNamePattern).",
+      "parameters": [
+        {
+          "name": "target",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "walk_to",
+      "name": "Walk to coordinates",
+      "description": "Walk to (x,z) with tolerance (all provided at execution via actionParams).",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "coordinate"
+        },
+        {
+          "name": "z",
+          "type": "coordinate"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "position_changed",
+          "args": {
+            "target": "x,z"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.2
+            }
+          ],
+          "confidence": 0.2
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_loc",
+      "name": "Interact with location",
+      "description": "Interact with a nearby location using an option (e.g. Mine, Chop down, Fish, Smelt).",
+      "parameters": [
+        {
+          "name": "loc",
+          "type": "loc"
+        },
+        {
+          "name": "option",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        },
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Bronze pickaxe",
+            "count": 1
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5
+        },
+        {
+          "kind": "skill_level",
+          "args": {
+            "skill": "Mining",
+            "level": 21
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.7
+            }
+          ],
+          "confidence": 0.7
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "pickup_ground_item",
+      "name": "Pick up ground item",
+      "description": "Pick up a ground item by name pattern (target chosen at execution via actionParams.itemNamePattern).",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "wait_ticks",
+      "name": "Wait ticks",
+      "description": "Wait N server ticks (N chosen at execution via actionParams.ticks).",
+      "parameters": [
+        {
+          "name": "ticks",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Optional reachability recovery action when a door or gate blocks access.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door|Gate|Large door"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "blocked destination beyond door or gate"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ]
+}
+```

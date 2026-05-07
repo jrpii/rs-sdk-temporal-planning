@@ -1,0 +1,393 @@
+{
+  "capturedAt": "2026-05-04T15:01:55.976Z",
+  "botName": "McPlan",
+  "summary": {
+    "tick": 12,
+    "inGame": true,
+    "position": {
+      "x": 3288,
+      "z": 3209,
+      "level": 0
+    },
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "run": {
+      "energy": 100,
+      "weight": 9
+    },
+    "combat": {
+      "inCombat": false,
+      "targetIndex": -1,
+      "lastDamageTick": 0
+    },
+    "skills": {
+      "Attack": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 16
+      },
+      "Defence": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Strength": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Hitpoints": {
+        "level": 10,
+        "baseLevel": 10,
+        "xp": 985
+      },
+      "Ranged": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Prayer": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Magic": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Cooking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Woodcutting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fletching": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fishing": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 80
+      },
+      "Firemaking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Crafting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Smithing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Mining": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Herblore": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Agility": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Thieving": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 136
+      },
+      "Stat18": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Stat19": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Runecraft": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      }
+    },
+    "inventory": {
+      "Coins": 41,
+      "Tinderbox": 1,
+      "Small fishing net": 1,
+      "Bread": 1,
+      "Raw shrimps": 8
+    },
+    "equipment": [
+      "Bronze axe",
+      "Wooden shield",
+      "Bronze arrow"
+    ],
+    "nearbyNpcs": [
+      {
+        "name": "Camel",
+        "distance": 1,
+        "options": []
+      },
+      {
+        "name": "Gnome pilot",
+        "distance": 3,
+        "options": [
+          "Talk-to"
+        ]
+      },
+      {
+        "name": "Gem trader",
+        "distance": 3,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Camel",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Man",
+        "distance": 7,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Man",
+        "distance": 9,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Man",
+        "distance": 11,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Silk trader",
+        "distance": 12,
+        "options": [
+          "Talk-to"
+        ]
+      },
+      {
+        "name": "Man",
+        "distance": 13,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Man",
+        "distance": 14,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      }
+    ],
+    "nearbyLocs": [
+      {
+        "name": "Market stall",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Vase",
+        "distance": 3,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Curtain",
+        "distance": 4,
+        "options": [
+          "Close"
+        ]
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Table",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Crate",
+        "distance": 7,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Range",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Bed",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Gnome glider",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "gnomeglider_icon1",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Crate",
+        "distance": 8,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Bush",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 9,
+        "options": []
+      },
+      {
+        "name": "Market stall",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 11,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 11,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 12,
+        "options": []
+      },
+      {
+        "name": "Bush",
+        "distance": 12,
+        "options": []
+      },
+      {
+        "name": "Bush",
+        "distance": 12,
+        "options": []
+      }
+    ],
+    "groundItems": [],
+    "ui": {
+      "dialogOpen": false,
+      "interfaceOpen": false,
+      "shopOpen": false,
+      "bankOpen": false,
+      "modalOpen": false
+    },
+    "recentMessages": [
+      "Welcome to RuneScape."
+    ]
+  }
+}

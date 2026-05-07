@@ -1,0 +1,3 @@
+taskId,method,model,run,ok,tracePath,domainPath,domainUse,domainGeneratedThisTrial,initialStateSnapshotPath,ragContextEnabled,completedAt
+cook_shrimp_alkharid,rag,none,1,false,,,using scripted cook-shrimp control,false,,false,2026-05-07T05:10:11.050Z
+cook_shrimp_alkharid,rag,none,2,false,,,using scripted cook-shrimp control,false,,false,2026-05-07T05:10:19.974Z

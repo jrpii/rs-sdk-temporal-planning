@@ -1,0 +1,742 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-05-07T06:42:46.738Z",
+  "locsByName": {
+    "Rocks": {
+      "name": "Rocks",
+      "byId": {
+        "450": {
+          "id": 450,
+          "lastSeenTick": 98,
+          "seenCount": 6,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3286,
+              "z": 3364,
+              "level": 0
+            }
+          ]
+        },
+        "2090": {
+          "id": 2090,
+          "lastSeenTick": 106,
+          "seenCount": 27090,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3286,
+              "z": 3364,
+              "level": 0
+            },
+            {
+              "x": 3286,
+              "z": 3361,
+              "level": 0
+            },
+            {
+              "x": 3287,
+              "z": 3365,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3361,
+              "level": 0
+            },
+            {
+              "x": 3289,
+              "z": 3361,
+              "level": 0
+            },
+            {
+              "x": 3289,
+              "z": 3363,
+              "level": 0
+            },
+            {
+              "x": 3282,
+              "z": 3367,
+              "level": 0
+            },
+            {
+              "x": 3282,
+              "z": 3368,
+              "level": 0
+            }
+          ]
+        },
+        "2091": {
+          "id": 2091,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3290,
+              "z": 3362,
+              "level": 0
+            }
+          ]
+        },
+        "2092": {
+          "id": 2092,
+          "lastSeenTick": 106,
+          "seenCount": 10161,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3285,
+              "z": 3368,
+              "level": 0
+            },
+            {
+              "x": 3285,
+              "z": 3369,
+              "level": 0
+            },
+            {
+              "x": 3286,
+              "z": 3369,
+              "level": 0
+            }
+          ]
+        },
+        "2093": {
+          "id": 2093,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3288,
+              "z": 3370,
+              "level": 0
+            }
+          ]
+        },
+        "2094": {
+          "id": 2094,
+          "lastSeenTick": 106,
+          "seenCount": 16935,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3284,
+              "z": 3363,
+              "level": 0
+            },
+            {
+              "x": 3284,
+              "z": 3364,
+              "level": 0
+            },
+            {
+              "x": 3283,
+              "z": 3365,
+              "level": 0
+            },
+            {
+              "x": 3283,
+              "z": 3366,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3366,
+              "level": 0
+            }
+          ]
+        },
+        "2095": {
+          "id": 2095,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [
+            "Mine",
+            "Prospect"
+          ],
+          "positions": [
+            {
+              "x": 3289,
+              "z": 3368,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Boulder": {
+      "name": "Boulder",
+      "byId": {
+        "444": {
+          "id": 444,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [],
+          "positions": [
+            {
+              "x": 3274,
+              "z": 3365,
+              "level": 0
+            }
+          ]
+        },
+        "445": {
+          "id": 445,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [],
+          "positions": [
+            {
+              "x": 3277,
+              "z": 3366,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Tree": {
+      "name": "Tree",
+      "byId": {
+        "1276": {
+          "id": 1276,
+          "lastSeenTick": 106,
+          "seenCount": 13548,
+          "options": [
+            "Chop down"
+          ],
+          "positions": [
+            {
+              "x": 3273,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3295,
+              "z": 3376,
+              "level": 0
+            },
+            {
+              "x": 3300,
+              "z": 3365,
+              "level": 0
+            },
+            {
+              "x": 3271,
+              "z": 3371,
+              "level": 0
+            }
+          ]
+        },
+        "1278": {
+          "id": 1278,
+          "lastSeenTick": 106,
+          "seenCount": 37257,
+          "options": [
+            "Chop down"
+          ],
+          "positions": [
+            {
+              "x": 3279,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3295,
+              "z": 3366,
+              "level": 0
+            },
+            {
+              "x": 3276,
+              "z": 3353,
+              "level": 0
+            },
+            {
+              "x": 3283,
+              "z": 3353,
+              "level": 0
+            },
+            {
+              "x": 3296,
+              "z": 3368,
+              "level": 0
+            },
+            {
+              "x": 3297,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3279,
+              "z": 3351,
+              "level": 0
+            },
+            {
+              "x": 3295,
+              "z": 3351,
+              "level": 0
+            },
+            {
+              "x": 3278,
+              "z": 3348,
+              "level": 0
+            },
+            {
+              "x": 3283,
+              "z": 3348,
+              "level": 0
+            },
+            {
+              "x": 3301,
+              "z": 3368,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Bush": {
+      "name": "Bush",
+      "byId": {
+        "1122": {
+          "id": 1122,
+          "lastSeenTick": 106,
+          "seenCount": 6774,
+          "options": [],
+          "positions": [
+            {
+              "x": 3293,
+              "z": 3372,
+              "level": 0
+            },
+            {
+              "x": 3300,
+              "z": 3377,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Tree stump": {
+      "name": "Tree stump",
+      "byId": {
+        "1341": {
+          "id": 1341,
+          "lastSeenTick": 106,
+          "seenCount": 10161,
+          "options": [],
+          "positions": [
+            {
+              "x": 3276,
+              "z": 3368,
+              "level": 0
+            },
+            {
+              "x": 3273,
+              "z": 3373,
+              "level": 0
+            },
+            {
+              "x": 3271,
+              "z": 3363,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Small fern": {
+      "name": "Small fern",
+      "byId": {
+        "1173": {
+          "id": 1173,
+          "lastSeenTick": 106,
+          "seenCount": 6774,
+          "options": [],
+          "positions": [
+            {
+              "x": 3297,
+              "z": 3367,
+              "level": 0
+            },
+            {
+              "x": 3292,
+              "z": 3376,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Stones": {
+      "name": "Stones",
+      "byId": {
+        "447": {
+          "id": 447,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [],
+          "positions": [
+            {
+              "x": 3274,
+              "z": 3367,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Thistle": {
+      "name": "Thistle",
+      "byId": {
+        "1174": {
+          "id": 1174,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [],
+          "positions": [
+            {
+              "x": 3298,
+              "z": 3364,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Plant": {
+      "name": "Plant",
+      "byId": {
+        "1392": {
+          "id": 1392,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [],
+          "positions": [
+            {
+              "x": 3301,
+              "z": 3372,
+              "level": 0
+            }
+          ]
+        },
+        "1393": {
+          "id": 1393,
+          "lastSeenTick": 106,
+          "seenCount": 6774,
+          "options": [],
+          "positions": [
+            {
+              "x": 3299,
+              "z": 3351,
+              "level": 0
+            },
+            {
+              "x": 3301,
+              "z": 3360,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Oak": {
+      "name": "Oak",
+      "byId": {
+        "1281": {
+          "id": 1281,
+          "lastSeenTick": 106,
+          "seenCount": 3387,
+          "options": [
+            "Chop down"
+          ],
+          "positions": [
+            {
+              "x": 3300,
+              "z": 3353,
+              "level": 0
+            }
+          ]
+        }
+      }
+    }
+  },
+  "npcsByName": {
+    "Unicorn": {
+      "name": "Unicorn",
+      "variants": {
+        "15|0|Attack": {
+          "combatLevel": 15,
+          "lastSeenTick": 106,
+          "seenCount": 4688,
+          "options": [
+            "Attack"
+          ],
+          "positions": [
+            {
+              "x": 3278,
+              "z": 3352,
+              "level": 0
+            },
+            {
+              "x": 3287,
+              "z": 3351,
+              "level": 0
+            },
+            {
+              "x": 3298,
+              "z": 3350,
+              "level": 0
+            },
+            {
+              "x": 3277,
+              "z": 3349,
+              "level": 0
+            },
+            {
+              "x": 3278,
+              "z": 3357,
+              "level": 0
+            },
+            {
+              "x": 3280,
+              "z": 3357,
+              "level": 0
+            },
+            {
+              "x": 3293,
+              "z": 3364,
+              "level": 0
+            },
+            {
+              "x": 3296,
+              "z": 3360,
+              "level": 0
+            },
+            {
+              "x": 3296,
+              "z": 3356,
+              "level": 0
+            },
+            {
+              "x": 3294,
+              "z": 3355,
+              "level": 0
+            },
+            {
+              "x": 3276,
+              "z": 3364,
+              "level": 0
+            },
+            {
+              "x": 3277,
+              "z": 3364,
+              "level": 0
+            },
+            {
+              "x": 3277,
+              "z": 3357,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3353,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3355,
+              "level": 0
+            },
+            {
+              "x": 3276,
+              "z": 3357,
+              "level": 0
+            },
+            {
+              "x": 3286,
+              "z": 3350,
+              "level": 0
+            },
+            {
+              "x": 3292,
+              "z": 3367,
+              "level": 0
+            },
+            {
+              "x": 3294,
+              "z": 3367,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3352,
+              "level": 0
+            },
+            {
+              "x": 3288,
+              "z": 3351,
+              "level": 0
+            },
+            {
+              "x": 3289,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3276,
+              "z": 3350,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Giant rat": {
+      "name": "Giant rat",
+      "variants": {
+        "6|0|Attack": {
+          "combatLevel": 6,
+          "lastSeenTick": 106,
+          "seenCount": 2809,
+          "options": [
+            "Attack"
+          ],
+          "positions": [
+            {
+              "x": 3294,
+              "z": 3377,
+              "level": 0
+            },
+            {
+              "x": 3293,
+              "z": 3379,
+              "level": 0
+            },
+            {
+              "x": 3292,
+              "z": 3378,
+              "level": 0
+            },
+            {
+              "x": 3290,
+              "z": 3377,
+              "level": 0
+            },
+            {
+              "x": 3296,
+              "z": 3379,
+              "level": 0
+            },
+            {
+              "x": 3292,
+              "z": 3379,
+              "level": 0
+            },
+            {
+              "x": 3292,
+              "z": 3376,
+              "level": 0
+            },
+            {
+              "x": 3291,
+              "z": 3377,
+              "level": 0
+            }
+          ]
+        }
+      }
+    },
+    "Bear": {
+      "name": "Bear",
+      "variants": {
+        "19|0|Attack": {
+          "combatLevel": 19,
+          "lastSeenTick": 106,
+          "seenCount": 2523,
+          "options": [
+            "Attack"
+          ],
+          "positions": [
+            {
+              "x": 3302,
+              "z": 3350,
+              "level": 0
+            },
+            {
+              "x": 3295,
+              "z": 3354,
+              "level": 0
+            },
+            {
+              "x": 3300,
+              "z": 3349,
+              "level": 0
+            },
+            {
+              "x": 3301,
+              "z": 3349,
+              "level": 0
+            },
+            {
+              "x": 3295,
+              "z": 3350,
+              "level": 0
+            },
+            {
+              "x": 3294,
+              "z": 3350,
+              "level": 0
+            },
+            {
+              "x": 3293,
+              "z": 3353,
+              "level": 0
+            },
+            {
+              "x": 3294,
+              "z": 3352,
+              "level": 0
+            },
+            {
+              "x": 3298,
+              "z": 3353,
+              "level": 0
+            },
+            {
+              "x": 3299,
+              "z": 3353,
+              "level": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

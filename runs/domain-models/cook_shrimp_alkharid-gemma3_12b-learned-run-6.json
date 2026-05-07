@@ -1,0 +1,345 @@
+{
+  "id": "short-model-id-1",
+  "taskId": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "model",
+      "confidence": 0.9
+    }
+  ],
+  "notes": [
+    "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Classical effect is the successful cooking branch; execution must tolerate stochastic burned output and retry.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared.",
+    "Cooking is stochastic at low level. Using Raw shrimps on a Range can produce Shrimps or Burnt fish.",
+    "A failed stochastic outcome is not an invalid action if Raw shrimps were consumed and Burnt fish appeared."
+  ],
+  "lessons": [
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "observation": "Initial exploration failed to find a cooking source.",
+      "inference": "The initial plan did not account for the possibility of a cooking source not being immediately visible.",
+      "actionSchemaId": "explore_for_cooking_source",
+      "suggestedDomainChange": "Add a precondition to explore_for_cooking_source that it should be attempted if the initial cooking attempt fails.",
+      "confidence": 0.9,
+      "provenance": [
+        {
+          "source": "environment",
+          "reference": "episode trace",
+          "confidence": 0.9
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "use_item_on_cooking_source",
+      "name": "Use raw shrimps on cooking source",
+      "description": "Use a raw shrimp on a range or fire to cook it.",
+      "parameters": [
+        {
+          "name": "raw_item",
+          "type": "item"
+        },
+        {
+          "name": "source",
+          "type": "facility"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "item_removed",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "item_added",
+          "args": {
+            "item": "Shrimps",
+            "count": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Cooking",
+            "minXp": 1
+          },
+          "confidence": 1,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "explore_for_cooking_source",
+      "name": "Explore for a cooking source",
+      "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "facility",
+          "description": "Range or Fire"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.5
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc",
+          "description": "Visible door or gate with Open option"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door|Gate|Large door"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "cooking source"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.4
+            }
+          ],
+          "confidence": 0.4
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.6,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "message_observed",
+          "args": {
+            "pattern": "door opened or reachability changed"
+          },
+          "confidence": 0.4,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ]
+}

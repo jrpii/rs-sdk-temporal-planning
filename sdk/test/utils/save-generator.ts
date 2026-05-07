@@ -171,9 +171,11 @@ export const Skills = {
 // Known locations
 export const Locations = {
     LUMBRIDGE_CASTLE: { x: 3222, z: 3218 },
+    LUMBRIDGE_RANGE: { x: 3211, z: 3215 },  // Near Bob's Axes, usable without Cook's Assistant
     LUMBRIDGE_SPINNING_WHEEL: { x: 3209, z: 3213, level: 2 },  // 2nd floor of castle
     LUMBRIDGE_SHOP: { x: 3212, z: 3246 },
     ALKHARID_FISHING: { x: 3267, z: 3148 },  // Safe shrimp spot near Al Kharid palace
+    ALKHARID_RANGE: { x: 3271, z: 3180 },
     DRAYNOR_FISHING: { x: 3086, z: 3230 },  // WARNING: Near dark wizards!
     VARROCK_SE_MINE: { x: 3285, z: 3365 },
     VARROCK_TEA_STALL: { x: 3269, z: 3410 },  // SE Varrock, near tea stall
@@ -559,6 +561,24 @@ export const TestPresets = {
             { id: Items.WATER_RUNE, count: 6 },
             { id: Items.EARTH_RUNE, count: 4 },
             { id: Items.BODY_RUNE, count: 2 },
+        ],
+    } as SaveConfig,
+
+    // Cook one raw shrimp at the accessible Lumbridge range near Bob's Axes
+    COOK_SHRIMP_LUMBRIDGE: {
+        position: Locations.LUMBRIDGE_RANGE,
+        skills: { Cooking: 1 },
+        inventory: [
+            { id: Items.RAW_SHRIMPS, count: 1 },
+        ],
+    } as SaveConfig,
+
+    // Cook one raw shrimp at an Al Kharid range near the fishing spot
+    COOK_SHRIMP_ALKHARID: {
+        position: Locations.ALKHARID_RANGE,
+        skills: { Cooking: 1 },
+        inventory: [
+            { id: Items.RAW_SHRIMPS, count: 1 },
         ],
     } as SaveConfig,
 

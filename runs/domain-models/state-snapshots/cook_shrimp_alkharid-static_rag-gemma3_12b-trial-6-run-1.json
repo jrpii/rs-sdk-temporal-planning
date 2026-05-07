@@ -1,0 +1,420 @@
+{
+  "capturedAt": "2026-05-04T19:22:50.855Z",
+  "botName": "McPlan",
+  "summary": {
+    "tick": 11,
+    "inGame": true,
+    "position": {
+      "x": 3289,
+      "z": 3198,
+      "level": 0
+    },
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "run": {
+      "energy": 100,
+      "weight": 9
+    },
+    "combat": {
+      "inCombat": false,
+      "targetIndex": -1,
+      "lastDamageTick": 0
+    },
+    "skills": {
+      "Attack": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 16
+      },
+      "Defence": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Strength": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Hitpoints": {
+        "level": 10,
+        "baseLevel": 10,
+        "xp": 985
+      },
+      "Ranged": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Prayer": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Magic": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Cooking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Woodcutting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fletching": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fishing": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 80
+      },
+      "Firemaking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Crafting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Smithing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Mining": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Herblore": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Agility": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Thieving": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 136
+      },
+      "Stat18": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Stat19": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Runecraft": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      }
+    },
+    "inventory": {
+      "Coins": 41,
+      "Tinderbox": 1,
+      "Small fishing net": 1,
+      "Bread": 1,
+      "Raw shrimps": 8
+    },
+    "equipment": [
+      "Bronze axe",
+      "Wooden shield",
+      "Bronze arrow"
+    ],
+    "nearbyNpcs": [
+      {
+        "name": "Man",
+        "distance": 4,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Camel",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Man",
+        "distance": 8,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Zeke",
+        "distance": 8,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Silk trader",
+        "distance": 8,
+        "options": [
+          "Talk-to"
+        ]
+      },
+      {
+        "name": "Man",
+        "distance": 8,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Man",
+        "distance": 9,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Camel",
+        "distance": 11,
+        "options": []
+      },
+      {
+        "name": "Man",
+        "distance": 12,
+        "options": [
+          "Attack",
+          "Pickpocket"
+        ],
+        "combatLevel": 2
+      },
+      {
+        "name": "Gem trader",
+        "distance": 14,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Tanner",
+        "distance": 15,
+        "options": [
+          "Talk-to"
+        ]
+      },
+      {
+        "name": "Gnome pilot",
+        "distance": 15,
+        "options": [
+          "Talk-to"
+        ]
+      }
+    ],
+    "nearbyLocs": [
+      {
+        "name": "Cactus",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 3,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 3,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 3,
+        "options": []
+      },
+      {
+        "name": "Crate",
+        "distance": 4,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Range",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Bamboo tree",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Tree",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Ladder",
+        "distance": 6,
+        "options": [
+          "Climb-up"
+        ]
+      },
+      {
+        "name": "Crate",
+        "distance": 6,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Glyphs",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Potted plant",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Table",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Bed",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Chair",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Crate",
+        "distance": 7,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Stool",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Potted plant",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Stool",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Basket",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Basket",
+        "distance": 7,
+        "options": []
+      },
+      {
+        "name": "Vase",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Curtain",
+        "distance": 8,
+        "options": [
+          "Close"
+        ]
+      },
+      {
+        "name": "Crate",
+        "distance": 8,
+        "options": [
+          "Search"
+        ]
+      },
+      {
+        "name": "Basket",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 9,
+        "options": []
+      },
+      {
+        "name": "Warehouse shelves",
+        "distance": 9,
+        "options": []
+      }
+    ],
+    "groundItems": [
+      {
+        "name": "Leather boots",
+        "count": 1,
+        "distance": 13
+      }
+    ],
+    "ui": {
+      "dialogOpen": false,
+      "interfaceOpen": false,
+      "shopOpen": false,
+      "bankOpen": false,
+      "modalOpen": false
+    },
+    "recentMessages": [
+      "Welcome to RuneScape."
+    ]
+  }
+}

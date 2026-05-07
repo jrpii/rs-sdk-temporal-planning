@@ -5,7 +5,7 @@ import { handleClientPage, handleCacheEndpoints } from './pages/client.js';
 import { handleHiscoresPage, handleHiscoresPlayerPage, handleHiscoresOutfitPage, handleHiscoresBankPage } from './pages/hiscores.js';
 import { handleViewerAssets } from './hiscoresServer.js';
 import { handleScreenshotsListPage, handleScreenshotFilePage } from './pages/screenshots.js';
-import { handleScreenshotUpload, handleExportCollisionApi } from './pages/api.js';
+import { handleScreenshotUpload, handleExperimentControlApi, handleExportCollisionApi } from './pages/api.js';
 import { handleDisclaimerPage, handleMapviewPage, handlePublicFiles } from './pages/static.js';
 import { WebSocketData, handleWebSocketUpgrade, handleGatewayEndpointGet, websocketHandlers } from './websocket.js';
 
@@ -147,6 +147,9 @@ export async function startWeb() {
             // API endpoints
             const screenshotUploadResponse = await handleScreenshotUpload(req, url);
             if (screenshotUploadResponse) return screenshotUploadResponse;
+
+            const experimentControlResponse = await handleExperimentControlApi(req, url);
+            if (experimentControlResponse) return experimentControlResponse;
 
             const exportCollisionResponse = handleExportCollisionApi(url);
             if (exportCollisionResponse) return exportCollisionResponse;

@@ -1,0 +1,24 @@
+{
+  "id": "mine_iron_varrock",
+  "description": "Mine one iron ore from the Varrock mine checkpoint.",
+  "maxSteps": 10,
+  "startState": {
+    "checkpointPath": "runs/checkpoints/McPlan-mine-iron-1.sav",
+    "notes": "Checkpointed miner at Varrock mine."
+  },
+  "taskHints": {
+    "explorationTargets": ["Rock"],
+    "preferredActions": ["explore_for_loc", "interact_loc", "wait_ticks", "pickup_ground_item", "open_nearby_door"],
+    "goalItems": ["Iron ore"]
+  },
+  "goalState": {
+    "description": "Inventory gains Iron ore and Mining XP increases.",
+    "inventoryGained": { "Iron ore": 1 },
+    "xpGained": { "Mining": 1 }
+  },
+  "success": [
+    { "kind": "inventory_gained", "item": "Iron ore", "count": 1 },
+    { "kind": "xp_gained", "skill": "Mining", "minXp": 1 }
+  ]
+}
+

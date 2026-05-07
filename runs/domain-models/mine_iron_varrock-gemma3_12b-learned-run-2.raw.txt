@@ -1,0 +1,428 @@
+```json
+{
+  "id": "short-model-id",
+  "taskId": "mine_iron_varrock",
+  "description": "Mine one iron ore from the Varrock mine checkpoint.",
+  "provenance": [
+    {
+      "source": "llm",
+      "reference": "model name",
+      "confidence": 0
+    }
+  ],
+  "notes": [
+    "This is a fallback model used when no task-specific hand model exists.",
+    "Most actions require additional executor support to become fully general.",
+    "Mining iron ore requires a pickaxe.  The player has a Bronze pickaxe.",
+    "Mining iron ore requires level 21. The player has level 21 mining."
+  ],
+  "lessons": [
+    {
+      "description": "After failing to pickup ground item, wait a tick to allow the item to be added to inventory.",
+      "actions": [
+        {
+          "id": "wait_ticks",
+          "name": "Wait ticks",
+          "description": "Wait N server ticks (N chosen at execution via actionParams.ticks).",
+          "parameters": [
+            {
+              "name": "ticks",
+              "type": "quantity"
+            }
+          ],
+          "preconditions": [],
+          "effects": [],
+          "negativeEvidence": []
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "explore_for_loc",
+      "name": "Explore for a target location",
+      "description": "Scan/move to find a useful target location (target chosen at execution via actionParams.targetLocNamePattern).",
+      "parameters": [
+        {
+          "name": "target",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "confidence": 0.2,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "target"
+          },
+          "confidence": 0.2,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "open_nearby_door",
+      "name": "Open nearby door or gate",
+      "description": "Open a visible door or gate when pathing reports a reachable-looking target cannot actually be reached.",
+      "parameters": [
+        {
+          "name": "door",
+          "type": "loc",
+          "description": "Visible door or gate with Open option"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Door|Gate|Large door"
+          },
+          "confidence": 0.4,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "unknown"
+          },
+          "confidence": 0.2,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "blocked destination beyond door or gate"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.3
+            }
+          ],
+          "confidence": 0.3
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.6,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "message_observed",
+          "args": {
+            "pattern": "door opened or reachability changed"
+          },
+          "confidence": 0.4,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_loc",
+      "name": "Interact with location",
+      "description": "Interact with a nearby location using an option (e.g. Mine, Chop down, Fish, Smelt).",
+      "parameters": [
+        {
+          "name": "loc",
+          "type": "loc"
+        },
+        {
+          "name": "option",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "target"
+          },
+          "confidence": 0.2,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "xp_gained",
+          "args": {
+            "skill": "Mining"
+          },
+          "confidence": 0.8,
+          "provenance": [
+            {
+              "source": "observation",
+              "reference": "episode trace",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "pickup_ground_item",
+      "name": "Pick up ground item",
+      "description": "Pick up a ground item by name pattern (target chosen at execution via actionParams.itemNamePattern).",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": [
+        {
+          "kind": "item_not_found",
+          "args": {
+            "item": "Iron ore"
+          },
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "id": "walk_to",
+      "name": "Walk to coordinates",
+      "description": "Walk to (x,z) with tolerance (all provided at execution via actionParams).",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "coordinate"
+        },
+        {
+          "name": "z",
+          "type": "coordinate"
+        }
+      ],
+      "preconditions": [],
+      "effects": [
+        {
+          "kind": "position_changed",
+          "args": {
+            "target": "x,z"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.2
+            }
+          ],
+          "confidence": 0.2
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "id": "interact_npc",
+      "name": "Interact with NPC",
+      "description": "Interact with a nearby NPC using an option (e.g. Talk-to, Trade).",
+      "parameters": [
+        {
+          "name": "npc",
+          "type": "npc"
+        },
+        {
+          "name": "option",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "near_npc",
+          "args": {
+            "name": "target"
+          },
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.2
+            }
+          ],
+          "confidence": 0.2
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "use_item_on_loc",
+      "name": "Use item on location",
+      "description": "Use an inventory item on a nearby location (chosen at execution via actionParams.itemNamePattern + locNamePattern).",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "item"
+        },
+        {
+          "name": "loc",
+          "type": "loc"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "item",
+            "count": 1
+          },
+          "confidence": 0.2,
+          "provenance": [
+            {
+              "source": "llm",
+              "reference": "model",
+              "confidence": 0.2
+            }
+          ]
+        }
+      ],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "wait_ticks",
+      "name": "Wait ticks",
+      "description": "Wait N server ticks (N chosen at execution via actionParams.ticks).",
+      "parameters": [
+        {
+          "name": "ticks",
+          "type": "quantity"
+        }
+      ],
+      "preconditions": [],
+      "effects": [],
+      "negativeEvidence": []
+    },
+    {
+      "id": "explore_for_cooking_source",
+      "name": "Explore for a cooking source",
+      "description": "Bounded recovery action that scans, opens obvious doors/gates, and walks short probes to find a reachable Range or Fire.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "facility",
+          "description": "Range or Fire"
+        }
+      ],
+      "preconditions": [
+        {
+          "kind": "has_item",
+          "args": {
+            "item": "Raw shrimps",
+            "count": 1
+          },
+          "confidence": 0.6,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "effects": [
+        {
+          "kind": "near_loc",
+          "args": {
+            "name": "Range|Fire"
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "kind": "reachable",
+          "args": {
+            "target": "Range|Fire"
+          },
+          "confidence": 0.5,
+          "provenance": [
+            {
+              "source": "human",
+              "reference": "experiments/domain-model.ts",
+              "confidence": 1
+            }
+          ]
+        }
+      ],
+      "negativeEvidence": []
+    }
+  ],
+  "knownFacilities": [
+    {
+      "name": "Rocks",
+      "locations": [
+        {
+          "x": 3286,
+          "z": 3364
+        }
+      ]
+    }
+  ]
+}
+```

@@ -285,8 +285,8 @@ export class BotOverlay implements GatewayMessageHandler {
         this.ui.updateContent(formatBotState(state));
     }
 
-    getState(): BotState {
-        return this.collector.collectState();
+    getState(): BotState | BotWorldState {
+        return this.collectWorldState() ?? this.collector.collectState();
     }
 
     toggle(): void {

@@ -1,0 +1,13 @@
+model,task_id,task_kind,ok,retrieval_seconds,generation_seconds,total_seconds,response_chars,score,expected_hit_count,expected_total,avoid_hit_count,error
+gpt-oss:20b,domain_model_recipe,domain_model_generation,True,0.467,6.489,6.957,2038,7,7,8,0,
+gpt-oss:20b,planning_feedback_recipe,planning_feedback,True,0.603,5.216,5.819,1727,6,6,6,0,
+gpt-oss:20b,npc_variant_banking,domain_model_generation,True,0.529,5.685,6.214,2030,5,5,6,0,
+gemma3:12b,domain_model_recipe,domain_model_generation,True,0.453,6.688,7.141,2087,7,7,8,0,
+gemma3:12b,planning_feedback_recipe,planning_feedback,True,0.616,3.779,4.394,1240,5,5,6,0,
+gemma3:12b,npc_variant_banking,domain_model_generation,True,0.507,4.424,4.932,1704,6,6,6,0,
+deepseek-r1:7b,domain_model_recipe,domain_model_generation,True,0.466,6.605,7.071,2116,5,5,8,0,
+deepseek-r1:7b,planning_feedback_recipe,planning_feedback,True,0.618,4.532,5.15,1525,6,6,6,0,
+deepseek-r1:7b,npc_variant_banking,domain_model_generation,True,0.518,6.801,7.319,2484,6,6,6,0,
+gemma3:4b,domain_model_recipe,domain_model_generation,True,0.467,6.733,7.2,2087,7,7,8,0,
+gemma3:4b,planning_feedback_recipe,planning_feedback,True,0.599,4.667,5.266,1507,6,6,6,0,
+gemma3:4b,npc_variant_banking,domain_model_generation,True,0.513,5.174,5.687,2203,6,6,6,0,

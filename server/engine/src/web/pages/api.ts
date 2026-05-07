@@ -2,7 +2,22 @@ import fs from 'fs';
 import * as rsmod from '@2004scape/rsmod-pathfinder';
 import { CollisionFlag, LocLayer } from '@2004scape/rsmod-pathfinder';
 import LocType from '#/cache/config/LocType.js';
+import VarPlayerType from '#/cache/config/VarPlayerType.js';
+import { PlayerLoading } from '#/engine/entity/PlayerLoading.js';
+import World from '#/engine/World.js';
 import Packet from '#/io/Packet.js';
+import Environment from '#/util/Environment.js';
+import { toSafeName } from '#/util/JString.js';
+
+function jsonResponse(data: unknown, status = 200): Response {
+    return new Response(JSON.stringify(data, null, 2), {
+        status,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        }
+    });
+}
 
 export async function handleScreenshotUpload(req: Request, url: URL): Promise<Response | null> {
     if (url.pathname !== '/api/screenshot' || req.method !== 'POST') {
@@ -24,6 +39,152 @@ export async function handleScreenshotUpload(req: Request, url: URL): Promise<Re
             headers: { 'Content-Type': 'application/json' }
         });
     }
+}
+
+export async function handleExperimentControlApi(req: Request, url: URL): Promise<Response | null> {
+    if (!url.pathname.startsWith('/api/experiment/')) {
+        return null;
+    }
+
+    if (!Environment.NODE_DEBUG) {
+        return jsonResponse({ success: false, error: 'Experiment controls require NODE_DEBUG=true' }, 403);
+    }
+
+    if (url.pathname === '/api/experiment/status') {
+        return jsonResponse({ success: true, ...World.getExperimentControlState() });
+    }
+
+    if (url.pathname === '/api/experiment/save') {
+        const username = toSafeName(url.searchParams.get('username') || '');
+        if (!username || username === 'invalid_name') {
+            return jsonResponse({ success: false, error: 'Valid username is required' }, 400);
+        }
+
+        const onlinePlayer = World.getPlayerByUsername(username);
+        const savePath = `data/players/${Environment.NODE_PROFILE}/${username}.sav`;
+        const save = onlinePlayer
+            ? onlinePlayer.save()
+            : fs.existsSync(savePath)
+                ? fs.readFileSync(savePath)
+                : null;
+
+        if (!save) {
+            return jsonResponse({ success: false, error: `No online player or saved checkpoint found for ${username}` }, 404);
+        }
+
+        return new Response(save, {
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': `attachment; filename="${username}.sav"`,
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
+    }
+
+    if (req.method !== 'POST') {
+        return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+    }
+
+    if (url.pathname === '/api/experiment/pause') {
+        return jsonResponse({ success: true, ...World.setPaused(true) });
+    }
+
+    if (url.pathname === '/api/experiment/resume') {
+        return jsonResponse({ success: true, ...World.setPaused(false) });
+    }
+
+    if (url.pathname === '/api/experiment/step') {
+        let ticks = 1;
+        try {
+            const body = await req.json();
+            ticks = Number(body?.ticks ?? 1);
+        } catch {
+            ticks = 1;
+        }
+        return jsonResponse({ success: true, ...World.stepTicks(ticks) });
+    }
+
+    if (url.pathname === '/api/experiment/run') {
+        try {
+            const body = await req.json();
+            const username = toSafeName(String(body?.username || ''));
+            const enabled = body?.enabled !== false;
+
+            if (!username || username === 'invalid_name') {
+                return jsonResponse({ success: false, error: 'Valid username is required' }, 400);
+            }
+
+            const onlinePlayer = World.getPlayerByUsername(username);
+            if (!onlinePlayer) {
+                return jsonResponse({ success: false, error: `No online player found for ${username}` }, 404);
+            }
+
+            onlinePlayer.run = enabled ? 1 : 0;
+            onlinePlayer.tempRun = enabled ? 1 : 0;
+            onlinePlayer.setVar(VarPlayerType.RUN, onlinePlayer.run);
+
+            return jsonResponse({
+                success: true,
+                username,
+                run: onlinePlayer.run,
+                runEnergy: onlinePlayer.runenergy,
+                message: enabled ? 'Run mode enabled.' : 'Run mode disabled.'
+            });
+        } catch (error) {
+            return jsonResponse({
+                success: false,
+                error: error instanceof Error ? error.message : String(error)
+            }, 500);
+        }
+    }
+
+    if (url.pathname === '/api/experiment/load-save') {
+        try {
+            const body = await req.json();
+            const username = toSafeName(String(body?.username || ''));
+            const saveBase64 = String(body?.saveBase64 || '');
+
+            if (!username || username === 'invalid_name') {
+                return jsonResponse({ success: false, error: 'Valid username is required' }, 400);
+            }
+
+            if (!saveBase64) {
+                return jsonResponse({ success: false, error: 'saveBase64 is required' }, 400);
+            }
+
+            const save = Buffer.from(saveBase64, 'base64');
+            if (!PlayerLoading.verify(new Packet(new Uint8Array(save)))) {
+                return jsonResponse({ success: false, error: 'Invalid or unsupported save file' }, 400);
+            }
+
+            const saveDir = `data/players/${Environment.NODE_PROFILE}`;
+            fs.mkdirSync(saveDir, { recursive: true });
+            fs.writeFileSync(`${saveDir}/${username}.sav`, save);
+
+            const onlinePlayer = World.getPlayerByUsername(username);
+            const relogRequired = Boolean(onlinePlayer);
+            if (onlinePlayer) {
+                World.removePlayerWithoutSave(onlinePlayer);
+            }
+
+            return jsonResponse({
+                success: true,
+                username,
+                profile: Environment.NODE_PROFILE,
+                relogRequired,
+                message: relogRequired
+                    ? 'Save installed. Online player was disconnected without saving current state; log in again to load it.'
+                    : 'Save installed. Next login will load it.'
+            });
+        } catch (error) {
+            return jsonResponse({
+                success: false,
+                error: error instanceof Error ? error.message : String(error)
+            }, 500);
+        }
+    }
+
+    return jsonResponse({ success: false, error: 'Unknown experiment control endpoint' }, 404);
 }
 
 // Export collision data for SDK bundling

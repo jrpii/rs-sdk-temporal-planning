@@ -12,6 +12,8 @@ export class OverlayUI {
     private container: HTMLDivElement;
     private content: HTMLPreElement;
     private actionLog: HTMLPreElement;
+    private terminalOutput: HTMLPreElement;
+    private terminalInput: HTMLInputElement;
     private packetLogContainer: HTMLDivElement;
     private packetLogContent!: HTMLPreElement;
 
@@ -55,15 +57,18 @@ export class OverlayUI {
         this.container = document.createElement('div');
         this.container.id = 'bot-sdk-overlay';
         this.container.style.cssText = `
-            width: 100%;
-            max-width: 700px;
+            width: min(96vw, 1400px);
+            max-width: 1400px;
+            min-width: 700px;
+            min-height: 520px;
             display: flex;
             flex-direction: column;
             background: rgba(0, 0, 0, 0.85);
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 11px;
             color: #04A800;
-            overflow: hidden;
+            resize: both;
+            overflow: auto;
             margin-top: 10px;
         `;
 
@@ -73,6 +78,8 @@ export class OverlayUI {
             display: flex;
             flex-direction: row;
             flex: 1;
+            height: 700px;
+            max-height: 75vh;
             min-height: 0;
         `;
 
@@ -88,12 +95,22 @@ export class OverlayUI {
 
         const sdkHeader = document.createElement('div');
         sdkHeader.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 4px 10px;
             background: rgba(4, 168, 0, 0.15);
             font-weight: bold;
             font-size: 10px;
         `;
-        sdkHeader.textContent = 'WORLD STATE';
+        sdkHeader.innerHTML = `
+            <span>WORLD STATE</span>
+            <span>
+                <button id="world-copy" style="background: none; border: 1px solid #04A800; color: #04A800; cursor: pointer; padding: 2px 8px; margin-left: 4px; font-size: 10px;">Copy</button>
+                <button id="world-save-text" style="background: none; border: 1px solid #04A800; color: #04A800; cursor: pointer; padding: 2px 8px; margin-left: 4px; font-size: 10px;">Save Text</button>
+                <button id="world-save-json" style="background: none; border: 1px solid #04A800; color: #04A800; cursor: pointer; padding: 2px 8px; margin-left: 4px; font-size: 10px;">Save JSON</button>
+            </span>
+        `;
 
         // Create content area (world state)
         this.content = document.createElement('pre');
@@ -104,7 +121,7 @@ export class OverlayUI {
             padding: 10px;
             overflow-y: auto;
             overflow-x: hidden;
-            max-height: 350px;
+            max-height: none;
             white-space: pre-wrap;
             word-break: break-word;
             tab-size: 4;
@@ -145,7 +162,7 @@ export class OverlayUI {
             padding: 10px;
             overflow-y: auto;
             overflow-x: hidden;
-            max-height: 350px;
+            max-height: none;
             white-space: pre-wrap;
             word-break: break-word;
             color: #FFD700;
@@ -155,8 +172,69 @@ export class OverlayUI {
         `;
         this.actionLog.textContent = 'Download the SDK to get started:\ngithub.com/MaxBittker/rs-sdk\n\n(waiting for SDK actions...)';
 
+        const terminalPanel = document.createElement('div');
+        terminalPanel.style.cssText = `
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border-top: 1px solid rgba(4, 168, 0, 0.3);
+        `;
+
+        const terminalHeader = document.createElement('div');
+        terminalHeader.style.cssText = `
+            padding: 4px 10px;
+            background: rgba(4, 168, 0, 0.12);
+            font-weight: bold;
+            font-size: 10px;
+            color: #04A800;
+        `;
+        terminalHeader.textContent = 'BROWSER TERMINAL';
+
+        this.terminalOutput = document.createElement('pre');
+        this.terminalOutput.id = 'bot-terminal-output';
+        this.terminalOutput.className = 'dark-scrollbar';
+        this.terminalOutput.style.cssText = `
+            margin: 0;
+            padding: 10px;
+            overflow-y: auto;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #04A800;
+            font-size: 10px;
+            flex: 1;
+            text-align: left;
+        `;
+        this.terminalOutput.textContent = [
+            'Browser terminal ready. Type "help".',
+            'Examples: state | npcs | walk 3221 3222 | rel 1 0 | dialog 1',
+            'JS: client.getBotState() | await helpers.pause()'
+        ].join('\n');
+
+        this.terminalInput = document.createElement('input');
+        this.terminalInput.id = 'bot-terminal-input';
+        this.terminalInput.placeholder = 'enter command...';
+        this.terminalInput.style.cssText = `
+            box-sizing: border-box;
+            width: 100%;
+            padding: 7px 10px;
+            background: #050505;
+            color: #04A800;
+            border: 0;
+            border-top: 1px solid rgba(4, 168, 0, 0.35);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 11px;
+            outline: none;
+        `;
+
+        terminalPanel.appendChild(terminalHeader);
+        terminalPanel.appendChild(this.terminalOutput);
+        terminalPanel.appendChild(this.terminalInput);
+
         actionsPanel.appendChild(actionHeader);
         actionsPanel.appendChild(this.actionLog);
+        actionsPanel.appendChild(terminalPanel);
 
         // Assemble panels
         panelsContainer.appendChild(sdkPanel);
@@ -247,17 +325,31 @@ export class OverlayUI {
     }
 
     private setupEventHandlers(): void {
+        const worldCopy = document.getElementById('world-copy');
+        const worldSaveText = document.getElementById('world-save-text');
+        const worldSaveJson = document.getElementById('world-save-json');
         const packetsBtn = document.getElementById('bot-packets');
         const pktToggle = document.getElementById('pkt-toggle');
         const pktClear = document.getElementById('pkt-clear');
         const pktCopy = document.getElementById('pkt-copy');
         const pktClose = document.getElementById('pkt-close');
 
+        worldCopy?.addEventListener('click', () => this.copyWorldState());
+        worldSaveText?.addEventListener('click', () => this.saveWorldStateText());
+        worldSaveJson?.addEventListener('click', () => this.saveWorldStateJson());
         packetsBtn?.addEventListener('click', () => this.togglePacketLog());
         pktToggle?.addEventListener('click', () => this.togglePacketLogging());
         pktClear?.addEventListener('click', () => this.clearPacketLog());
         pktCopy?.addEventListener('click', () => this.copyPacketLog());
         pktClose?.addEventListener('click', () => this.togglePacketLog());
+
+        this.terminalInput.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+            const command = this.terminalInput.value.trim();
+            if (!command) return;
+            this.terminalInput.value = '';
+            void this.runTerminalCommand(command);
+        });
     }
 
     private makeDraggable(handle: HTMLElement, container: HTMLElement): void {
@@ -369,6 +461,200 @@ export class OverlayUI {
 
     isPacketLoggingEnabled(): boolean {
         return this.packetLogEnabled;
+    }
+
+    private flashButton(id: string, text: string, color: string = '#04A800'): void {
+        const button = document.getElementById(id);
+        if (!button) return;
+
+        const originalText = button.textContent;
+        const originalBackground = button.style.background;
+        const originalColor = button.style.color;
+        button.textContent = text;
+        button.style.background = color;
+        button.style.color = '#000';
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = originalBackground;
+            button.style.color = originalColor;
+        }, 1000);
+    }
+
+    private downloadText(filename: string, text: string, type: string): void {
+        const blob = new Blob([text], { type });
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(href);
+    }
+
+    private getBotUsername(): string {
+        const credentials = typeof (this.client as any).getCredentials === 'function'
+            ? (this.client as any).getCredentials()
+            : null;
+        const username = credentials?.username || 'bot';
+        return String(username).replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
+    private copyWorldState(): void {
+        navigator.clipboard.writeText(this.content.textContent || '').then(() => {
+            this.flashButton('world-copy', 'Copied!');
+        }).catch(err => {
+            console.error('Failed to copy world state:', err);
+        });
+    }
+
+    private saveWorldStateText(): void {
+        this.downloadText(`${this.getBotUsername()}-world-state-${Date.now()}.txt`, this.content.textContent || '', 'text/plain');
+        this.flashButton('world-save-text', 'Saved!');
+    }
+
+    private saveWorldStateJson(): void {
+        const state = typeof (this.client as any).getBotState === 'function'
+            ? (this.client as any).getBotState()
+            : null;
+        const payload = {
+            capturedAt: new Date().toISOString(),
+            url: window.location.href,
+            state
+        };
+        this.downloadText(`${this.getBotUsername()}-world-state-${Date.now()}.json`, JSON.stringify(payload, null, 2), 'application/json');
+        this.flashButton('world-save-json', 'Saved!');
+    }
+
+    private appendTerminal(text: string): void {
+        this.terminalOutput.textContent += `\n${text}`;
+        this.terminalOutput.scrollTop = this.terminalOutput.scrollHeight;
+    }
+
+    private async runTerminalCommand(command: string): Promise<void> {
+        this.appendTerminal(`> ${command}`);
+
+        try {
+            const result = await this.executeTerminalCommand(command);
+            if (result !== undefined) {
+                this.appendTerminal(typeof result === 'string' ? result : JSON.stringify(result, null, 2));
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.appendTerminal(`ERROR: ${message}`);
+        }
+    }
+
+    private async executeTerminalCommand(command: string): Promise<unknown> {
+        const parts = command.split(/\s+/);
+        const op = parts[0]?.toLowerCase();
+        const c = this.client as any;
+
+        if (op === 'help') {
+            return [
+                'Commands:',
+                '  help',
+                '  clear',
+                '  state',
+                '  npcs',
+                '  walk <x> <z>',
+                '  rel <dx> <dz>',
+                '  talk <npc name>',
+                '  dialog <optionIndex>',
+                '  pause | resume | step',
+                '  save',
+                '  load',
+                '  js <expression or statements>',
+                '',
+                'JS context: client, helpers. Examples:',
+                '  js client.getBotState()',
+                '  js await helpers.step()',
+                '  js client.walkTo(3221, 3222)'
+            ].join('\n');
+        }
+
+        if (op === 'clear') {
+            this.terminalOutput.textContent = 'Browser terminal ready.';
+            return undefined;
+        }
+
+        if (op === 'state') {
+            return typeof c.getBotState === 'function' ? c.getBotState() : null;
+        }
+
+        if (op === 'npcs') {
+            return typeof c.getNearbyNpcs === 'function' ? c.getNearbyNpcs() : [];
+        }
+
+        if (op === 'walk') {
+            const x = Number(parts[1]);
+            const z = Number(parts[2]);
+            if (!Number.isFinite(x) || !Number.isFinite(z)) throw new Error('Usage: walk <x> <z>');
+            return c.walkTo(x, z);
+        }
+
+        if (op === 'rel') {
+            const dx = Number(parts[1]);
+            const dz = Number(parts[2]);
+            if (!Number.isFinite(dx) || !Number.isFinite(dz)) throw new Error('Usage: rel <dx> <dz>');
+            return c.walkRelative(dx, dz);
+        }
+
+        if (op === 'talk') {
+            const name = command.slice('talk'.length).trim();
+            if (!name) throw new Error('Usage: talk <npc name>');
+            const npcIndex = c.findNpcByName(name);
+            if (npcIndex < 0) throw new Error(`NPC not found: ${name}`);
+            return c.talkToNpc(npcIndex);
+        }
+
+        if (op === 'dialog') {
+            const option = Number(parts[1] ?? 0);
+            if (!Number.isFinite(option)) throw new Error('Usage: dialog <optionIndex>');
+            return c.clickDialogOption(option);
+        }
+
+        const helpers = {
+            state: () => typeof c.getBotState === 'function' ? c.getBotState() : null,
+            npcs: () => typeof c.getNearbyNpcs === 'function' ? c.getNearbyNpcs() : [],
+            pause: async () => (await fetch('/api/experiment/pause', { method: 'POST' })).json(),
+            resume: async () => (await fetch('/api/experiment/resume', { method: 'POST' })).json(),
+            step: async (ticks = 1) => (await fetch('/api/experiment/step', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticks })
+            })).json(),
+            save: () => {
+                const download = (window as any).downloadSaveCheckpoint;
+                if (typeof download !== 'function') throw new Error('Save checkpoint control is unavailable');
+                download();
+                return 'Save checkpoint download started.';
+            },
+            load: () => {
+                const select = (window as any).selectSaveCheckpoint;
+                if (typeof select !== 'function') throw new Error('Load checkpoint control is unavailable');
+                select();
+                return 'Choose a .sav checkpoint file to load.';
+            }
+        };
+
+        if (op === 'pause') return helpers.pause();
+        if (op === 'resume') return helpers.resume();
+        if (op === 'step') return helpers.step(Number(parts[1] ?? 1));
+        if (op === 'save') return helpers.save();
+        if (op === 'load') return helpers.load();
+
+        const js = op === 'js' ? command.slice(2).trim() : command;
+        const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+        try {
+            return await new AsyncFunction('client', 'helpers', `"use strict"; return (${js});`)(c, helpers);
+        } catch (expressionError) {
+            try {
+                return await new AsyncFunction('client', 'helpers', `"use strict"; ${js}`)(c, helpers);
+            } catch {
+                throw expressionError;
+            }
+        }
     }
 
     // Main overlay methods

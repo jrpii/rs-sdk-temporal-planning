@@ -1,0 +1,17 @@
+[
+  {
+    "output": "497"
+  },
+  {
+    "output": "520"
+  },
+  {
+    "output": "240"
+  },
+  {
+    "output": "10"
+  },
+  {
+    "output": "5040 and 148995 have a GCD of 105. So, the simplified fraction is: $$ \\frac{5040 \\div 105}{148995 \\div 105} = \\frac{48}{1419} $$ Now, check if 48 and 1419 are relatively prime. The GCD of 48 and 1419 is 3. So, divide both by 3: $$ \\frac{48 \\div 3}{14"
+  }
+]

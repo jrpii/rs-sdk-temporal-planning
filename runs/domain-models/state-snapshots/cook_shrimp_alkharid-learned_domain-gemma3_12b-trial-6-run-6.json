@@ -1,0 +1,342 @@
+{
+  "capturedAt": "2026-05-05T02:31:29.001Z",
+  "botName": "McPlan",
+  "summary": {
+    "tick": 11,
+    "inGame": true,
+    "position": {
+      "x": 3330,
+      "z": 3176,
+      "level": 0
+    },
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "run": {
+      "energy": 100,
+      "weight": 9
+    },
+    "combat": {
+      "inCombat": false,
+      "targetIndex": -1,
+      "lastDamageTick": 0
+    },
+    "skills": {
+      "Attack": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 16
+      },
+      "Defence": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Strength": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Hitpoints": {
+        "level": 10,
+        "baseLevel": 10,
+        "xp": 985
+      },
+      "Ranged": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Prayer": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Magic": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Cooking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Woodcutting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fletching": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fishing": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 80
+      },
+      "Firemaking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Crafting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Smithing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Mining": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Herblore": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Agility": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Thieving": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 136
+      },
+      "Stat18": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Stat19": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Runecraft": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      }
+    },
+    "inventory": {
+      "Coins": 41,
+      "Tinderbox": 1,
+      "Small fishing net": 1,
+      "Bread": 1,
+      "Raw shrimps": 8
+    },
+    "equipment": [
+      "Bronze axe",
+      "Wooden shield",
+      "Bronze arrow"
+    ],
+    "nearbyNpcs": [
+      {
+        "name": "Louie legs",
+        "distance": 13,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Shop keeper",
+        "distance": 14,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Ranael",
+        "distance": 15,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      },
+      {
+        "name": "Shop assistant",
+        "distance": 15,
+        "options": [
+          "Talk-to",
+          "Trade"
+        ]
+      }
+    ],
+    "nearbyLocs": [
+      {
+        "name": "Rockslide",
+        "distance": 1,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 2,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 3,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 4,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 5,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 6,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 8,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 9,
+        "options": []
+      },
+      {
+        "name": "Cactus",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Rockslide",
+        "distance": 10,
+        "options": []
+      },
+      {
+        "name": "Bush",
+        "distance": 11,
+        "options": []
+      }
+    ],
+    "groundItems": [],
+    "ui": {
+      "dialogOpen": false,
+      "interfaceOpen": false,
+      "shopOpen": false,
+      "bankOpen": false,
+      "modalOpen": false
+    },
+    "recentMessages": [
+      "Welcome to RuneScape."
+    ]
+  }
+}

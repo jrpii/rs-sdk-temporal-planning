@@ -1,0 +1,353 @@
+{
+  "input": "data/wiki/osrs-wiki-structured.jsonl",
+  "output": "data/wiki/osrs-wiki-structured-2004-plus-unknown.jsonl",
+  "cutoff": "2004-09-07",
+  "includeUnknownAdded": true,
+  "read": 35003,
+  "written": 11053,
+  "parseErrors": 0,
+  "excluded": {
+    "added_after_cutoff": 23900,
+    "removed_on_or_before_cutoff": 50
+  },
+  "includedByPrimaryType": {
+    "article": 4951,
+    "item": 2273,
+    "event": 43,
+    "skill": 29,
+    "guide": 787,
+    "quest": 299,
+    "scenery": 934,
+    "npc": 559,
+    "shop": 150,
+    "achievement_diary": 12,
+    "music": 273,
+    "location": 311,
+    "monster": 289,
+    "spell": 91,
+    "prayer": 32,
+    "minigame": 6,
+    "combat_achievement": 14
+  },
+  "excludedByPrimaryType": {
+    "combat_achievement": 637,
+    "item": 10116,
+    "npc": 3616,
+    "event": 79,
+    "article": 947,
+    "music": 955,
+    "scenery": 4627,
+    "monster": 1363,
+    "quest": 159,
+    "location": 797,
+    "spell": 171,
+    "shop": 334,
+    "prayer": 76,
+    "achievement_diary": 13,
+    "minigame": 48,
+    "skill": 6,
+    "guide": 6
+  },
+  "sampleExcluded": [
+    {
+      "title": "... 'til Dawn",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2021-07-21",
+      "dateRemoved": null
+    },
+    {
+      "title": "'24-carat' sword",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2020-04-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Beedy-eye' Jones",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Beefy' Burns",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Betty' B.Boppin",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Birds-Eye' Jack",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Black-eye'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Currency' The Alchemist",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Eagle-eye' Shultz",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Gummy'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Lecherous' Lee",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'No fingers'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Picarron' Pete",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Squawking' Steve Beanie",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2025-11-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Sticky' Sanders",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "'The Guns'",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "'Transmute' The Alchemist",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2007-02-19",
+      "dateRemoved": null
+    },
+    {
+      "title": "1/3rds full jug",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2004-11-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "1/5ths full bucket",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2004-11-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "10th birthday balloons",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2023-02-22",
+      "dateRemoved": null
+    },
+    {
+      "title": "10th birthday cape",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2023-02-22",
+      "dateRemoved": null
+    },
+    {
+      "title": "10th squad sigil",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2004-12-06",
+      "dateRemoved": null
+    },
+    {
+      "title": "1337mage43",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-07-24",
+      "dateRemoved": null
+    },
+    {
+      "title": "1337sp34kr",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2005-08-23",
+      "dateRemoved": null
+    },
+    {
+      "title": "18lb shot",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2006-06-13",
+      "dateRemoved": null
+    },
+    {
+      "title": "1v1 Tournament Guide",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2022-07-06",
+      "dateRemoved": null
+    },
+    {
+      "title": "2/3rds full jug",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2004-11-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "2/5ths full bucket",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2004-11-02",
+      "dateRemoved": null
+    },
+    {
+      "title": "2013 April Fools",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-04-01",
+      "dateRemoved": "2013-04-04"
+    },
+    {
+      "title": "2013 Christmas event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-12-17",
+      "dateRemoved": "2014-01-09"
+    },
+    {
+      "title": "2013 Easter event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-03-26",
+      "dateRemoved": "2013-04-08"
+    },
+    {
+      "title": "2013 Goblin Invasion",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-05-10",
+      "dateRemoved": "2013-09-05"
+    },
+    {
+      "title": "2013 Halloween event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-10-24",
+      "dateRemoved": "2013-11-07"
+    },
+    {
+      "title": "2013 Midsummer event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-07-02",
+      "dateRemoved": "2013-08-15"
+    },
+    {
+      "title": "2013 Rare Drops",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-06-03",
+      "dateRemoved": "2013-09-09"
+    },
+    {
+      "title": "2013 Thanksgiving event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2013-11-28",
+      "dateRemoved": "2013-12-05"
+    },
+    {
+      "title": "2014 April Fools",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-04-01",
+      "dateRemoved": "2014-04-03"
+    },
+    {
+      "title": "2014 Birthday event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-02-20",
+      "dateRemoved": "2014-03-06"
+    },
+    {
+      "title": "2014 Christmas event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-12-18",
+      "dateRemoved": "2015-01-08"
+    },
+    {
+      "title": "2014 Easter event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-04-10",
+      "dateRemoved": "2014-05-01"
+    },
+    {
+      "title": "2014 Goblin Invasion",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-09-08",
+      "dateRemoved": "2014-10-02"
+    },
+    {
+      "title": "2014 Halloween event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-10-23",
+      "dateRemoved": "2014-11-06"
+    },
+    {
+      "title": "2014 Midsummer event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-06-26",
+      "dateRemoved": "2014-07-10"
+    },
+    {
+      "title": "2014 Thanksgiving event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-11-27",
+      "dateRemoved": "2014-12-10"
+    },
+    {
+      "title": "2014 Valentine's Day event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2014-02-13",
+      "dateRemoved": "2014-02-20"
+    },
+    {
+      "title": "2015 April Fools",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2015-04-01",
+      "dateRemoved": "2015-04-09"
+    },
+    {
+      "title": "2015 Birthday event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2015-02-19",
+      "dateRemoved": "2015-02-26"
+    },
+    {
+      "title": "2015 Christmas event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2015-12-15",
+      "dateRemoved": "2016-01-07"
+    },
+    {
+      "title": "2015 Easter event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2015-03-30",
+      "dateRemoved": "2015-04-09"
+    },
+    {
+      "title": "2015 Halloween event",
+      "reason": "added_after_cutoff",
+      "dateAdded": "2015-10-29",
+      "dateRemoved": "2015-11-12"
+    }
+  ]
+}

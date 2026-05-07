@@ -1,0 +1,946 @@
+{
+  "schemaVersion": "osrs-wiki-graph-v1",
+  "generatedAt": "2026-05-03T23:22:24.974Z",
+  "input": "F:\\RepoHome\\rs-sdk-temporal-planning\\data\\wiki\\osrs-wiki-structured-2004.jsonl",
+  "outDir": "F:\\RepoHome\\rs-sdk-temporal-planning\\data\\wiki\\graph-2004",
+  "options": {
+    "input": "data/wiki/osrs-wiki-structured-2004.jsonl",
+    "outDir": "data/wiki/graph-2004",
+    "maxPageLinks": 25,
+    "pageRankIterations": 25,
+    "damping": 0.85,
+    "includeMissingPages": false
+  },
+  "recordsRead": 3915,
+  "parseErrors": 0,
+  "structuredSchemaVersions": {
+    "osrs-wiki-structured-v4": 3915
+  },
+  "nodesByKind": {
+    "page": 3915,
+    "category": 709,
+    "action": 225,
+    "slot": 12,
+    "combat_style": 15
+  },
+  "pagesByPrimaryType": {
+    "item": 1615,
+    "scenery": 657,
+    "npc": 547,
+    "shop": 112,
+    "music": 243,
+    "location": 292,
+    "skill": 19,
+    "monster": 263,
+    "quest": 59,
+    "prayer": 20,
+    "article": 32,
+    "spell": 51,
+    "minigame": 4,
+    "guide": 1
+  },
+  "edgesByRelation": {
+    "in_category": 30705,
+    "has_action": 4316,
+    "wiki_link": 24399,
+    "lead_link": 8665,
+    "equips_in_slot": 524,
+    "requires_material": 449,
+    "uses_combat_style": 169,
+    "infobox_link": 2313,
+    "variant_action": 742,
+    "variant_location": 63,
+    "requires_facility": 141,
+    "requires_skill": 241,
+    "requires_tool": 138,
+    "variant_quest": 20,
+    "produces_item": 13
+  },
+  "nodeCount": 4876,
+  "edgeCount": 72898,
+  "topByIndegree": [
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 640
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 548
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 546
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 441
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 386
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 355
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 343
+    },
+    {
+      "id": "page:ranged",
+      "title": "Ranged",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 301
+    },
+    {
+      "id": "page:anvil",
+      "title": "anvil",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 295
+    },
+    {
+      "id": "page:bullroarer",
+      "title": "Bullroarer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 282
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 265
+    },
+    {
+      "id": "page:hammer",
+      "title": "Hammer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 264
+    },
+    {
+      "id": "page:beckon",
+      "title": "Beckon",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 233
+    },
+    {
+      "id": "page:prayer",
+      "title": "Prayer",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 225
+    },
+    {
+      "id": "page:church organ",
+      "title": "Church organ",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 211
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 181
+    },
+    {
+      "id": "page:ardougne",
+      "title": "Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 168
+    },
+    {
+      "id": "page:herblore",
+      "title": "Herblore",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 159
+    },
+    {
+      "id": "page:bones",
+      "title": "Bones",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 151
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 145
+    },
+    {
+      "id": "page:al kharid",
+      "title": "Al Kharid",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 139
+    },
+    {
+      "id": "page:east ardougne",
+      "title": "East Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 122
+    },
+    {
+      "id": "page:knife",
+      "title": "Knife",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 118
+    },
+    {
+      "id": "page:earth rune",
+      "title": "Earth rune",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 112
+    },
+    {
+      "id": "page:falador",
+      "title": "Falador",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 112
+    }
+  ],
+  "topByWeightedIndegree": [
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 1125
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 1014
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 924
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 920
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 865
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 725
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 724
+    },
+    {
+      "id": "page:anvil",
+      "title": "anvil",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 650
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 641
+    },
+    {
+      "id": "page:ardougne",
+      "title": "Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 574
+    },
+    {
+      "id": "page:al kharid",
+      "title": "Al Kharid",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 539
+    },
+    {
+      "id": "page:hammer",
+      "title": "Hammer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 536.5
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 504
+    },
+    {
+      "id": "page:herblore",
+      "title": "Herblore",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 494
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 480
+    },
+    {
+      "id": "page:east ardougne",
+      "title": "East Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 473
+    },
+    {
+      "id": "page:falador",
+      "title": "Falador",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 469
+    },
+    {
+      "id": "page:ranged",
+      "title": "Ranged",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 469
+    },
+    {
+      "id": "page:brimhaven",
+      "title": "Brimhaven",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 384
+    },
+    {
+      "id": "page:dragon slayer i",
+      "title": "Dragon Slayer I",
+      "kind": "page",
+      "primaryType": "quest",
+      "value": 367
+    },
+    {
+      "id": "page:biohazard",
+      "title": "Biohazard",
+      "kind": "page",
+      "primaryType": "quest",
+      "value": 343
+    },
+    {
+      "id": "page:grand tree",
+      "title": "Grand Tree",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 339
+    },
+    {
+      "id": "page:prayer",
+      "title": "Prayer",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 338
+    },
+    {
+      "id": "page:burthorpe",
+      "title": "Burthorpe",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 335
+    },
+    {
+      "id": "page:knife",
+      "title": "Knife",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 329.5
+    }
+  ],
+  "topByPageLinkIndegree": [
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 633
+    },
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 548
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 529
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 441
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 386
+    },
+    {
+      "id": "page:ranged",
+      "title": "Ranged",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 301
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 285
+    },
+    {
+      "id": "page:bullroarer",
+      "title": "Bullroarer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 282
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 280
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 265
+    },
+    {
+      "id": "page:beckon",
+      "title": "Beckon",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 233
+    },
+    {
+      "id": "page:prayer",
+      "title": "Prayer",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 224
+    },
+    {
+      "id": "page:church organ",
+      "title": "Church organ",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 211
+    },
+    {
+      "id": "page:anvil",
+      "title": "anvil",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 195
+    },
+    {
+      "id": "page:hammer",
+      "title": "Hammer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 185
+    },
+    {
+      "id": "page:ardougne",
+      "title": "Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 167
+    },
+    {
+      "id": "page:bones",
+      "title": "Bones",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 151
+    },
+    {
+      "id": "page:fletching",
+      "title": "Fletching",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 147
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 145
+    },
+    {
+      "id": "page:al kharid",
+      "title": "Al Kharid",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 139
+    },
+    {
+      "id": "page:herblore",
+      "title": "Herblore",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 126
+    },
+    {
+      "id": "page:east ardougne",
+      "title": "East Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 117
+    },
+    {
+      "id": "page:falador",
+      "title": "Falador",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 110
+    },
+    {
+      "id": "page:asgarnia",
+      "title": "Asgarnia",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 108
+    },
+    {
+      "id": "page:brimhaven",
+      "title": "Brimhaven",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 106
+    }
+  ],
+  "topByPageRank": [
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.006928377558312612
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.005244033312368322
+    },
+    {
+      "id": "page:ardougne",
+      "title": "Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.0048888337197369736
+    },
+    {
+      "id": "page:asgarnia",
+      "title": "Asgarnia",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.004828833765455191
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.004671776863331676
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.004124715608229679
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.003363201027372017
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.003257736419923053
+    },
+    {
+      "id": "page:al kharid",
+      "title": "Al Kharid",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.0031863890757927705
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.003018498131600803
+    },
+    {
+      "id": "page:magic",
+      "title": "Magic",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.002804411304168587
+    },
+    {
+      "id": "page:beckon",
+      "title": "Beckon",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0026466393159269865
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.002624071137934566
+    },
+    {
+      "id": "page:amulet of glory",
+      "title": "Amulet of glory",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.002501168950910286
+    },
+    {
+      "id": "page:bullroarer",
+      "title": "Bullroarer",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.002496304009765439
+    },
+    {
+      "id": "page:anvil",
+      "title": "anvil",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.0024230123514686923
+    },
+    {
+      "id": "page:alrena",
+      "title": "Alrena",
+      "kind": "page",
+      "primaryType": "npc",
+      "value": 0.002130157412260077
+    },
+    {
+      "id": "page:angry",
+      "title": "Angry",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.0019992417959325682
+    },
+    {
+      "id": "page:burthorpe",
+      "title": "Burthorpe",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.0019891748251235153
+    },
+    {
+      "id": "page:brimhaven",
+      "title": "Brimhaven",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.0019243617467012127
+    },
+    {
+      "id": "page:church organ",
+      "title": "Church organ",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.0018567619740482786
+    },
+    {
+      "id": "page:adamantite rocks",
+      "title": "adamantite rocks",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.0018368126483889247
+    },
+    {
+      "id": "page:biohazard",
+      "title": "Biohazard",
+      "kind": "page",
+      "primaryType": "quest",
+      "value": 0.0017737590145351714
+    },
+    {
+      "id": "page:east ardougne",
+      "title": "East Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.0017517342816491556
+    },
+    {
+      "id": "page:falador",
+      "title": "Falador",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.001673301345554285
+    }
+  ],
+  "topByPageLinkPageRank": [
+    {
+      "id": "page:attack",
+      "title": "Attack",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.022416586060956173
+    },
+    {
+      "id": "page:agility",
+      "title": "Agility",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.01270675440005769
+    },
+    {
+      "id": "page:air altar",
+      "title": "Air Altar",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.009681774276157056
+    },
+    {
+      "id": "page:asgarnia",
+      "title": "Asgarnia",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.009636355317597996
+    },
+    {
+      "id": "page:coins",
+      "title": "Coins",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.008326112279408923
+    },
+    {
+      "id": "page:ardougne",
+      "title": "Ardougne",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.008277852752022788
+    },
+    {
+      "id": "page:alrena",
+      "title": "Alrena",
+      "kind": "page",
+      "primaryType": "npc",
+      "value": 0.006808151445729068
+    },
+    {
+      "id": "page:amulet of glory",
+      "title": "Amulet of glory",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.006647406929734779
+    },
+    {
+      "id": "page:adamantite bar",
+      "title": "Adamantite bar",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.00588242616875678
+    },
+    {
+      "id": "page:defence",
+      "title": "Defence",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.005873240258976258
+    },
+    {
+      "id": "page:gielinor",
+      "title": "Gielinor",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.005804431102373649
+    },
+    {
+      "id": "page:aemad",
+      "title": "Aemad",
+      "kind": "page",
+      "primaryType": "npc",
+      "value": 0.005652700498178532
+    },
+    {
+      "id": "page:'perfect' gold bar",
+      "title": "'perfect' gold bar",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.0054767151565631705
+    },
+    {
+      "id": "page:air rune",
+      "title": "Air rune",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.005457055080336002
+    },
+    {
+      "id": "page:al kharid",
+      "title": "Al Kharid",
+      "kind": "page",
+      "primaryType": "location",
+      "value": 0.005397882346815492
+    },
+    {
+      "id": "page:adamantite ore",
+      "title": "adamantite ore",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.004969101894279722
+    },
+    {
+      "id": "page:adamantite rocks",
+      "title": "adamantite rocks",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.004802565141876226
+    },
+    {
+      "id": "page:anvil",
+      "title": "anvil",
+      "kind": "page",
+      "primaryType": "scenery",
+      "value": 0.0047188271402507495
+    },
+    {
+      "id": "page:crafting",
+      "title": "Crafting",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.004362944220773903
+    },
+    {
+      "id": "page:cooking",
+      "title": "Cooking",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.00430063235973843
+    },
+    {
+      "id": "page:asgarnian ale",
+      "title": "Asgarnian ale",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.00424788614295668
+    },
+    {
+      "id": "page:beckon",
+      "title": "Beckon",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.004097387737393753
+    },
+    {
+      "id": "page:angry",
+      "title": "Angry",
+      "kind": "page",
+      "primaryType": "article",
+      "value": 0.00404654126248395
+    },
+    {
+      "id": "page:adamant full helm",
+      "title": "Adamant full helm",
+      "kind": "page",
+      "primaryType": "item",
+      "value": 0.0038089236633347917
+    },
+    {
+      "id": "page:hitpoints",
+      "title": "Hitpoints",
+      "kind": "page",
+      "primaryType": "skill",
+      "value": 0.003785613181938871
+    }
+  ]
+}

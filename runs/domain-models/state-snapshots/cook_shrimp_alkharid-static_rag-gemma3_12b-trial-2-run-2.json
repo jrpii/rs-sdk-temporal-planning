@@ -1,0 +1,861 @@
+{
+  "capturedAt": "2026-05-07T05:15:09.766Z",
+  "botName": "McPlan",
+  "summary": {
+    "tick": 10,
+    "inGame": true,
+    "position": {
+      "x": 3330,
+      "z": 3176,
+      "level": 0
+    },
+    "hp": {
+      "current": 10,
+      "max": 10
+    },
+    "run": {
+      "energy": 100,
+      "weight": 9
+    },
+    "combat": {
+      "inCombat": false,
+      "targetIndex": -1,
+      "lastDamageTick": 0
+    },
+    "skills": {
+      "Attack": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 16
+      },
+      "Defence": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Strength": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Hitpoints": {
+        "level": 10,
+        "baseLevel": 10,
+        "xp": 985
+      },
+      "Ranged": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Prayer": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Magic": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Cooking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Woodcutting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fletching": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Fishing": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 80
+      },
+      "Firemaking": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Crafting": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Smithing": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Mining": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Herblore": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Agility": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Thieving": {
+        "level": 2,
+        "baseLevel": 2,
+        "xp": 136
+      },
+      "Stat18": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Stat19": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      },
+      "Runecraft": {
+        "level": 1,
+        "baseLevel": 1,
+        "xp": 0
+      }
+    },
+    "inventory": {
+      "Coins": 41,
+      "Tinderbox": 1,
+      "Small fishing net": 1,
+      "Bread": 1,
+      "Raw shrimps": 8
+    },
+    "equipment": [
+      "Bronze axe",
+      "Wooden shield",
+      "Bronze arrow"
+    ],
+    "nearbyNpcs": {
+      "Shop keeper": {
+        "name": "Shop keeper",
+        "variants": {
+          "0|Talk-to|Trade": {
+            "options": [
+              "Talk-to",
+              "Trade"
+            ],
+            "instances": [
+              {
+                "index": 5578,
+                "x": 3317,
+                "z": 3185,
+                "distance": 13,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      },
+      "Dommik": {
+        "name": "Dommik",
+        "variants": {
+          "0|Talk-to|Trade": {
+            "options": [
+              "Talk-to",
+              "Trade"
+            ],
+            "instances": [
+              {
+                "index": 5582,
+                "x": 3323,
+                "z": 3191,
+                "distance": 15,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      },
+      "Ranael": {
+        "name": "Ranael",
+        "variants": {
+          "0|Talk-to|Trade": {
+            "options": [
+              "Talk-to",
+              "Trade"
+            ],
+            "instances": [
+              {
+                "index": 5575,
+                "x": 3315,
+                "z": 3161,
+                "distance": 15,
+                "inCombat": false,
+                "hp": 0,
+                "maxHp": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "nearbyLocs": {
+      "Rockslide": {
+        "name": "Rockslide",
+        "variants": {
+          "474|": {
+            "id": 474,
+            "options": [],
+            "instances": [
+              {
+                "x": 3331,
+                "z": 3176,
+                "distance": 1
+              },
+              {
+                "x": 3330,
+                "z": 3174,
+                "distance": 2
+              },
+              {
+                "x": 3330,
+                "z": 3172,
+                "distance": 4
+              },
+              {
+                "x": 3331,
+                "z": 3180,
+                "distance": 4
+              },
+              {
+                "x": 3330,
+                "z": 3168,
+                "distance": 8
+              },
+              {
+                "x": 3331,
+                "z": 3184,
+                "distance": 8
+              },
+              {
+                "x": 3330,
+                "z": 3166,
+                "distance": 10
+              },
+              {
+                "x": 3331,
+                "z": 3186,
+                "distance": 10
+              },
+              {
+                "x": 3333,
+                "z": 3190,
+                "distance": 14
+              }
+            ]
+          },
+          "472|": {
+            "id": 472,
+            "options": [],
+            "instances": [
+              {
+                "x": 3329,
+                "z": 3178,
+                "distance": 2
+              },
+              {
+                "x": 3334,
+                "z": 3172,
+                "distance": 4
+              },
+              {
+                "x": 3334,
+                "z": 3174,
+                "distance": 4
+              },
+              {
+                "x": 3333,
+                "z": 3170,
+                "distance": 6
+              },
+              {
+                "x": 3333,
+                "z": 3184,
+                "distance": 8
+              },
+              {
+                "x": 3335,
+                "z": 3185,
+                "distance": 9
+              },
+              {
+                "x": 3332,
+                "z": 3166,
+                "distance": 10
+              },
+              {
+                "x": 3333,
+                "z": 3186,
+                "distance": 10
+              },
+              {
+                "x": 3333,
+                "z": 3162,
+                "distance": 14
+              }
+            ]
+          },
+          "473|": {
+            "id": 473,
+            "options": [],
+            "instances": [
+              {
+                "x": 3332,
+                "z": 3174,
+                "distance": 2
+              },
+              {
+                "x": 3332,
+                "z": 3178,
+                "distance": 2
+              },
+              {
+                "x": 3333,
+                "z": 3176,
+                "distance": 3
+              },
+              {
+                "x": 3332,
+                "z": 3182,
+                "distance": 6
+              },
+              {
+                "x": 3329,
+                "z": 3164,
+                "distance": 12
+              },
+              {
+                "x": 3332,
+                "z": 3188,
+                "distance": 12
+              },
+              {
+                "x": 3331,
+                "z": 3162,
+                "distance": 14
+              }
+            ]
+          },
+          "471|": {
+            "id": 471,
+            "options": [],
+            "instances": [
+              {
+                "x": 3332,
+                "z": 3172,
+                "distance": 4
+              },
+              {
+                "x": 3333,
+                "z": 3180,
+                "distance": 4
+              },
+              {
+                "x": 3334,
+                "z": 3178,
+                "distance": 4
+              },
+              {
+                "x": 3335,
+                "z": 3176,
+                "distance": 5
+              },
+              {
+                "x": 3331,
+                "z": 3170,
+                "distance": 6
+              },
+              {
+                "x": 3334,
+                "z": 3182,
+                "distance": 6
+              },
+              {
+                "x": 3332,
+                "z": 3168,
+                "distance": 8
+              },
+              {
+                "x": 3331,
+                "z": 3164,
+                "distance": 12
+              },
+              {
+                "x": 3334,
+                "z": 3188,
+                "distance": 12
+              },
+              {
+                "x": 3342,
+                "z": 3189,
+                "distance": 13
+              },
+              {
+                "x": 3335,
+                "z": 3190,
+                "distance": 14
+              },
+              {
+                "x": 3340,
+                "z": 3190,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Cactus": {
+        "name": "Cactus",
+        "variants": {
+          "1404|": {
+            "id": 1404,
+            "options": [],
+            "instances": [
+              {
+                "x": 3325,
+                "z": 3178,
+                "distance": 5
+              }
+            ]
+          },
+          "1396|": {
+            "id": 1396,
+            "options": [],
+            "instances": [
+              {
+                "x": 3325,
+                "z": 3166,
+                "distance": 10
+              }
+            ]
+          }
+        }
+      },
+      "Bush": {
+        "name": "Bush",
+        "variants": {
+          "1123|": {
+            "id": 1123,
+            "options": [],
+            "instances": [
+              {
+                "x": 3341,
+                "z": 3165,
+                "distance": 11
+              },
+              {
+                "x": 3336,
+                "z": 3164,
+                "distance": 12
+              },
+              {
+                "x": 3338,
+                "z": 3164,
+                "distance": 12
+              },
+              {
+                "x": 3342,
+                "z": 3165,
+                "distance": 12
+              },
+              {
+                "x": 3337,
+                "z": 3163,
+                "distance": 13
+              },
+              {
+                "x": 3339,
+                "z": 3163,
+                "distance": 13
+              },
+              {
+                "x": 3340,
+                "z": 3163,
+                "distance": 13
+              },
+              {
+                "x": 3336,
+                "z": 3162,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Potted plant": {
+        "name": "Potted plant",
+        "variants": {
+          "1158|": {
+            "id": 1158,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3165,
+                "distance": 12
+              }
+            ]
+          }
+        }
+      },
+      "Glyphs": {
+        "name": "Glyphs",
+        "variants": {
+          "911|": {
+            "id": 911,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3175,
+                "distance": 12
+              },
+              {
+                "x": 3318,
+                "z": 3163,
+                "distance": 13
+              },
+              {
+                "x": 3316,
+                "z": 3173,
+                "distance": 14
+              },
+              {
+                "x": 3316,
+                "z": 3178,
+                "distance": 14
+              },
+              {
+                "x": 3316,
+                "z": 3186,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Crate": {
+        "name": "Crate",
+        "variants": {
+          "356|Search": {
+            "id": 356,
+            "options": [
+              "Search"
+            ],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3176,
+                "distance": 12
+              },
+              {
+                "x": 3316,
+                "z": 3177,
+                "distance": 14
+              }
+            ]
+          },
+          "357|Search": {
+            "id": 357,
+            "options": [
+              "Search"
+            ],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3177,
+                "distance": 12
+              },
+              {
+                "x": 3318,
+                "z": 3179,
+                "distance": 12
+              },
+              {
+                "x": 3317,
+                "z": 3177,
+                "distance": 13
+              },
+              {
+                "x": 3317,
+                "z": 3186,
+                "distance": 13
+              },
+              {
+                "x": 3316,
+                "z": 3186,
+                "distance": 14
+              }
+            ]
+          },
+          "358|Search": {
+            "id": 358,
+            "options": [
+              "Search"
+            ],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3180,
+                "distance": 12
+              },
+              {
+                "x": 3317,
+                "z": 3176,
+                "distance": 13
+              },
+              {
+                "x": 3317,
+                "z": 3179,
+                "distance": 13
+              }
+            ]
+          }
+        }
+      },
+      "Warehouse shelves": {
+        "name": "Warehouse shelves",
+        "variants": {
+          "1016|": {
+            "id": 1016,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3178,
+                "distance": 12
+              },
+              {
+                "x": 3318,
+                "z": 3185,
+                "distance": 12
+              }
+            ]
+          },
+          "1018|": {
+            "id": 1018,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3182,
+                "distance": 12
+              },
+              {
+                "x": 3318,
+                "z": 3186,
+                "distance": 12
+              }
+            ]
+          },
+          "1015|": {
+            "id": 1015,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3183,
+                "distance": 12
+              }
+            ]
+          },
+          "1017|": {
+            "id": 1017,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3184,
+                "distance": 12
+              }
+            ]
+          }
+        }
+      },
+      "Sacks": {
+        "name": "Sacks",
+        "variants": {
+          "365|Search": {
+            "id": 365,
+            "options": [
+              "Search"
+            ],
+            "instances": [
+              {
+                "x": 3317,
+                "z": 3173,
+                "distance": 13
+              }
+            ]
+          }
+        }
+      },
+      "Basket": {
+        "name": "Basket",
+        "variants": {
+          "382|": {
+            "id": 382,
+            "options": [],
+            "instances": [
+              {
+                "x": 3317,
+                "z": 3178,
+                "distance": 13
+              }
+            ]
+          }
+        }
+      },
+      "Statue": {
+        "name": "Statue",
+        "variants": {
+          "580|": {
+            "id": 580,
+            "options": [],
+            "instances": [
+              {
+                "x": 3316,
+                "z": 3166,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Chair": {
+        "name": "Chair",
+        "variants": {
+          "1088|": {
+            "id": 1088,
+            "options": [],
+            "instances": [
+              {
+                "x": 3316,
+                "z": 3185,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Bench": {
+        "name": "Bench",
+        "variants": {
+          "1106|": {
+            "id": 1106,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3162,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Barrel": {
+        "name": "Barrel",
+        "variants": {
+          "362|": {
+            "id": 362,
+            "options": [],
+            "instances": [
+              {
+                "x": 3318,
+                "z": 3190,
+                "distance": 14
+              },
+              {
+                "x": 3319,
+                "z": 3190,
+                "distance": 14
+              }
+            ]
+          }
+        }
+      },
+      "Table": {
+        "name": "Table",
+        "variants": {
+          "614|": {
+            "id": 614,
+            "options": [],
+            "instances": [
+              {
+                "x": 3315,
+                "z": 3162,
+                "distance": 15
+              }
+            ]
+          },
+          "595|": {
+            "id": 595,
+            "options": [],
+            "instances": [
+              {
+                "x": 3315,
+                "z": 3182,
+                "distance": 15
+              },
+              {
+                "x": 3315,
+                "z": 3184,
+                "distance": 15
+              }
+            ]
+          }
+        }
+      },
+      "Curtain": {
+        "name": "Curtain",
+        "variants": {
+          "1529|Close": {
+            "id": 1529,
+            "options": [
+              "Close"
+            ],
+            "instances": [
+              {
+                "x": 3315,
+                "z": 3166,
+                "distance": 15
+              }
+            ]
+          }
+        }
+      }
+    },
+    "groundItems": [],
+    "ui": {
+      "dialogOpen": false,
+      "interfaceOpen": false,
+      "shopOpen": false,
+      "bankOpen": false,
+      "modalOpen": false
+    },
+    "recentMessages": [
+      "Welcome to RuneScape."
+    ]
+  }
+}

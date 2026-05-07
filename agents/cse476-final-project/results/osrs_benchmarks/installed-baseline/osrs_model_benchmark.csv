@@ -1,0 +1,13 @@
+model,task_id,task_kind,ok,retrieval_seconds,generation_seconds,total_seconds,response_chars,score,expected_hit_count,expected_total,avoid_hit_count,error
+gemma3:4b,domain_model_recipe,domain_model_generation,True,0.339,6.454,6.793,2070,7,7,8,0,
+gemma3:4b,planning_feedback_recipe,planning_feedback,True,0.493,3.504,3.997,1201,3,3,6,0,
+gemma3:4b,npc_variant_banking,domain_model_generation,True,0.396,8.918,9.315,2143,5,5,6,0,
+llama3.2:3b-instruct-q8_0,domain_model_recipe,domain_model_generation,True,0.339,7.04,7.379,2070,7,7,8,0,
+llama3.2:3b-instruct-q8_0,planning_feedback_recipe,planning_feedback,True,0.488,4.528,5.016,1572,4,4,6,0,
+llama3.2:3b-instruct-q8_0,npc_variant_banking,domain_model_generation,True,0.395,6.553,6.948,2276,6,6,6,0,
+deepseek-r1:7b,domain_model_recipe,domain_model_generation,True,0.341,6.505,6.846,2021,7,7,8,0,
+deepseek-r1:7b,planning_feedback_recipe,planning_feedback,True,0.47,5.397,5.867,1872,5,5,6,0,
+deepseek-r1:7b,npc_variant_banking,domain_model_generation,True,0.386,4.654,5.04,1958,6,6,6,0,
+deepseek-coder:6.7b,domain_model_recipe,domain_model_generation,True,0.334,7.214,7.548,2336,8,8,8,0,
+deepseek-coder:6.7b,planning_feedback_recipe,planning_feedback,True,0.462,4.295,4.757,1519,4,4,6,0,
+deepseek-coder:6.7b,npc_variant_banking,domain_model_generation,True,0.396,6.026,6.423,2296,6,6,6,0,

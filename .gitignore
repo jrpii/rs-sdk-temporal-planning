@@ -1,7 +1,6 @@
 node_modules/
 __pycache__/
 .DS_Store
-runs/
 gateway/agent-state/
 screenshots/
 public-bot/
@@ -21,3 +20,28 @@ bots/*/
 # SDK is copied into Docker via Dockerfile; don't duplicate it under server/
 server/sdk/
 jobs/
+
+# --- Course submission / experiment artifacts ---
+# These were previously ignored to keep the repo light, but for the final
+# project submission we want to version experiment outputs (traces, checkpoints,
+# learned domains, KB/transition logs, and the temporally filtered wiki graph).
+#
+# If this repo is later used as a lightweight dev repo again, consider reverting
+# this section or moving large artifacts to a release/archive.
+
+# Track experiment outputs
+# (runs/* is now tracked; no ignore rule needed.)
+
+# Track KG inputs/outputs needed for reproduction, but avoid multi-GB raw dumps.
+# Keep: 2004 structured slices + 2004 graphs (+ optional plus-unknown).
+# Ignore: full crawl pages and non-2004 slices unless you explicitly need them.
+data/wiki/osrs-wiki-pages.jsonl
+data/wiki/osrs-wiki-structured.jsonl
+data/wiki/osrs-wiki-structured.jsonl.stats.json
+data/wiki/osrs-wiki-structured-2007*.jsonl
+data/wiki/osrs-wiki-structured-2007*.json
+data/wiki/graph/
+data/wiki/graph-gephi-small/
+data/wiki/graph-2007/
+data/wiki/graph-2007-plus-unknown/
+data/wiki/gephi-workspace/

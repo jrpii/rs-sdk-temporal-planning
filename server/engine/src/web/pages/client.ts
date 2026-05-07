@@ -1,4 +1,5 @@
 import ejs from 'ejs';
+import fs from 'fs';
 
 import { CrcBuffer } from '#/cache/CrcTable.js';
 import OnDemand from '#/engine/OnDemand.js';
@@ -65,33 +66,51 @@ export async function handleClientPage(url: URL): Promise<Response | null> {
     return null;
 }
 
+function clientArchiveResponse(fileId: number, archiveName: string): Response {
+    const packed = OnDemand.cache.read(0, fileId);
+    if (packed) {
+        return new Response(Buffer.from(packed));
+    }
+
+    const loosePath = `data/pack/client/${archiveName}`;
+    if (fs.existsSync(loosePath)) {
+        console.warn(`[Cache] Packed client archive ${archiveName} (${fileId}) missing; serving loose ${loosePath}. Rebuild data/pack to repair cache indexes.`);
+        return new Response(Bun.file(loosePath));
+    }
+
+    return new Response(`Missing client archive ${archiveName} (${fileId}). Run "bun run build" in server/engine to rebuild data/pack.`, {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' }
+    });
+}
+
 export function handleCacheEndpoints(url: URL): Response | null {
     if (url.pathname.startsWith('/crc')) {
         return new Response(Buffer.from(CrcBuffer.data));
     }
     if (url.pathname.startsWith('/title')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 1)!));
+        return clientArchiveResponse(1, 'title');
     }
     if (url.pathname.startsWith('/config')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 2)!));
+        return clientArchiveResponse(2, 'config');
     }
     if (url.pathname.startsWith('/interface')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 3)!));
+        return clientArchiveResponse(3, 'interface');
     }
     if (url.pathname.startsWith('/media')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 4)!));
+        return clientArchiveResponse(4, 'media');
     }
     if (url.pathname.startsWith('/versionlist')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 5)!));
+        return clientArchiveResponse(5, 'versionlist');
     }
     if (url.pathname.startsWith('/textures')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 6)!));
+        return clientArchiveResponse(6, 'textures');
     }
     if (url.pathname.startsWith('/wordenc')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 7)!));
+        return clientArchiveResponse(7, 'wordenc');
     }
     if (url.pathname.startsWith('/sounds')) {
-        return new Response(Buffer.from(OnDemand.cache.read(0, 8)!));
+        return clientArchiveResponse(8, 'sounds');
     }
     if (url.pathname.startsWith('/ondemand.zip')) {
         return new Response(Bun.file('data/pack/ondemand.zip'));

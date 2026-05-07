@@ -1,0 +1,72 @@
+[
+  {
+    "model": "gemma3:12b",
+    "task_id": "domain_model_recipe",
+    "task_kind": "domain_model_generation",
+    "ok": true,
+    "error": null,
+    "retrieval_seconds": 0.482,
+    "generation_seconds": 11.667,
+    "total_seconds": 12.15,
+    "response_chars": 810,
+    "response_preview": "## Domain Model: Crafting a Perfect Ring\n\nHere's a domain model for crafting a perfect ring, based on the provided OSRS Wiki context.\n\n**Entities:**\n\n*   **Perfect Ring:** An untradeable, members-only item, a quest item for the Family Crest quest. It can be worn or dropped. It has no combat bonuses.\n*   **Perfect Gold Bar:** A material required for crafting the perfect ring.\n*   **Ruby:** A material required for crafting the perfect ring.\n*   **Ring Mould:** A tool required for crafting the perfect ring.\n*   **Anvil:** A facility required for crafting the perfect ring.\n\n**Actions:**\n\n*   **Craft:** The primary action to create a perfect ring.\n*   **Wear:**  The player can equip the perfect ring.\n*   **Drop:** The player can discard the perfect ring.\n\n**Preconditions:**\n\n*   **Crafting Level:** Craft",
+    "expected_hits": [
+      "Crafting",
+      "Ring mould",
+      "Anvil",
+      "Ruby"
+    ],
+    "expected_hit_count": 4,
+    "expected_total": 8,
+    "avoid_hits": [],
+    "avoid_hit_count": 0,
+    "score": 4
+  },
+  {
+    "model": "gemma3:12b",
+    "task_id": "planning_feedback_recipe",
+    "task_kind": "planning_feedback",
+    "ok": true,
+    "error": null,
+    "retrieval_seconds": 0.645,
+    "generation_seconds": 5.324,
+    "total_seconds": 5.969,
+    "response_chars": 661,
+    "response_preview": "Okay, here's an analysis of the situation and the recommended action, based on the provided context.\n\n**Entities:**\n\n*   Ruby\n*   'perfect' gold bar\n*   Ring mould\n*   Anvil\n*   'perfect' ring (desired output)\n*   Crafting level 40\n\n**Actions:**\n\n*   Crafting ('perfect' ring)\n\n**Preconditions:**\n\n*   **Crafting Level:** The bot must have a Crafting level of 40. (Direct Match 1, Traversed Edge from 'perfect' ring)\n*   **Tools:** A Ring mould is required. (Direct Match 1, Recipe 1)\n*   **Facilities:** An Anvil is required. (Direct Match 1, Recipe 1)\n*   **Materials:** The bot needs a 'perfect' gold bar and a Ruby. (Direct Match 1, Recipe 1)\n*   **Location",
+    "expected_hits": [
+      "Anvil",
+      "Ring mould",
+      "'perfect' gold bar",
+      "Ruby",
+      "Crafting"
+    ],
+    "expected_hit_count": 5,
+    "expected_total": 6,
+    "avoid_hits": [],
+    "avoid_hit_count": 0,
+    "score": 5
+  },
+  {
+    "model": "gemma3:12b",
+    "task_id": "npc_variant_banking",
+    "task_kind": "domain_model_generation",
+    "ok": true,
+    "error": null,
+    "retrieval_seconds": 0.516,
+    "generation_seconds": 4.591,
+    "total_seconds": 5.107,
+    "response_chars": 654,
+    "response_preview": "## Domain Model: 'Birds-Eye' Jack\n\nHere's a domain model for 'Birds-Eye' Jack, based on the provided context.\n\n**Entities:**\n\n*   **'Birds-Eye' Jack (NPC):** A character who exists in two versions: a Pirate (during Lunar Diplomacy) and a Banker (during Dream Mentor).\n    *   **Pirate Version:** Located at Pirates' Cove (2224, 3796).\n    *   **Banker Version:** Located at the Lunar Isle bank (2100, 3921).  Can be interacted with from further away than most NPCs.\n    *   *Wiki Page:* [https://oldschool.runescape.wiki/w/'Birds-Eye'_Jack](https://oldschool.runescape.wiki/w/'Birds-Eye'_Jack)\n\n**Actions:**\n\n*   **Talk-to:** Available for both versions.",
+    "expected_hits": [
+      "Banker",
+      "Bank",
+      "Lunar Isle",
+      "Dream Mentor"
+    ],
+    "expected_hit_count": 4,
+    "expected_total": 6,
+    "avoid_hits": [],
+    "avoid_hit_count": 0,
+    "score": 4
+  }
+]

@@ -567,6 +567,39 @@ const server = Bun.serve({
             return new Response(null, { headers: corsHeaders });
         }
 
+        // Ask an existing browser bot tab to reload after checkpoint installation.
+        // This does not request a save; it is meant for local experiment resets where
+        // the engine already installed the desired .sav checkpoint.
+        const reloadMatch = url.pathname.match(/^\/reload\/(.+)$/);
+        if (reloadMatch && reloadMatch[1]) {
+            const username = decodeURIComponent(reloadMatch[1]);
+            const botSession = botSessions.get(username);
+
+            if (!botSession?.ws) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: `No live browser bot session for ${username}`,
+                }, null, 2), {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json', ...corsHeaders }
+                });
+            }
+
+            botSession.lastState = null;
+            botSession.lastStateReceivedAt = 0;
+            SyncModule.sendToBot(botSession, {
+                type: 'reload',
+                reason: 'Experiment checkpoint installed; reload browser bot to relog from checkpoint.'
+            });
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: `Reload requested for ${username}`,
+            }, null, 2), {
+                headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+        }
+
         // Per-bot status endpoint: /status/:username
         const botStatusMatch = url.pathname.match(/^\/status\/(.+)$/);
         if (botStatusMatch && botStatusMatch[1]) {

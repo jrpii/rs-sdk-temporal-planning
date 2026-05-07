@@ -28,11 +28,13 @@ Usage:
 Options:
   --server <host>   Server hostname (default: from bot.env or rs-sdk-demo.fly.dev)
   --timeout <ms>    Connection timeout in ms (default: 5000)
+  --launch          Open the browser bot client if no live session is connected
   --help            Show this help
 
 Examples:
   bun sdk/cli.ts mybot
   bun sdk/cli.ts mybot secret --server localhost
+  bun sdk/cli.ts mybot --server localhost --launch --timeout 30000
 `.trim());
 }
 
@@ -72,6 +74,7 @@ async function main() {
     let password = process.env.PASSWORD || '';
     let server = process.env.SERVER || '';
     let timeout = 5000;
+    let launch = false;
 
     const positional: string[] = [];
     for (let i = 0; i < args.length; i++) {
@@ -83,6 +86,8 @@ async function main() {
             server = args[++i] ?? server;
         } else if (arg === '--timeout' || arg === '-t') {
             timeout = parseInt(args[++i] ?? '5000', 10);
+        } else if (arg === '--launch') {
+            launch = true;
         } else if (!arg.startsWith('-')) {
             positional.push(arg);
         }
@@ -124,14 +129,31 @@ async function main() {
 
     const gatewayUrl = deriveGatewayUrl(server);
 
-    // Create SDK - never auto-launch browser in CLI mode
+    // Create SDK. By default CLI only inspects an existing browser session;
+    // --launch turns it into a convenience login/check command.
     const sdk = new BotSDK({
         botUsername: username,
         password,
         gatewayUrl,
         autoReconnect: false,
-        autoLaunchBrowser: false
+        autoLaunchBrowser: launch,
+        browserLaunchTimeout: timeout
     });
+
+    if (isLocal) {
+        const status = await sdk.checkBotStatus();
+        if (status.status === 'dead' && !launch) {
+            console.error(`Error: No browser bot session connected for '${username}'.`);
+            console.error(`  The gateway is reachable at ${gatewayUrl}, but it has no live bot state for this username.`);
+            console.error(`  Open the bot client first, then re-run this command:`);
+            if (password) {
+                console.error(`  http://localhost:8888/bot?bot=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+            } else {
+                console.error(`  http://localhost:8888/bot?bot=${encodeURIComponent(username)}`);
+            }
+            process.exit(1);
+        }
+    }
 
     // Connect with timeout
     try {

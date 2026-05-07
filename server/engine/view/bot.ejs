@@ -370,10 +370,17 @@
             </select> |
             <a class="green" href="#" id="fullscreen" onclick="toggleFullscreen();">Go Fullscreen</a> |
             <a class="green" href="#" id="screenshot" onclick="saveScreenshot();">Take screenshot</a> |
+            <a class="green" href="#" id="experiment-pause" onclick="toggleExperimentPause(); return false;">Pause game</a> |
+            <a class="green" href="#" onclick="stepExperimentTick(); return false;">Step tick</a> |
+            <a class="green" href="#" onclick="downloadStateSnapshot(); return false;">State snapshot</a> |
+            <a class="green" href="#" onclick="downloadSaveCheckpoint(); return false;">Save checkpoint</a> |
+            <a class="green" href="#" onclick="selectSaveCheckpoint(); return false;">Load checkpoint</a> |
             <a class="green" href="/mapview/" target="_blank">Map</a> |
             <a class="green" href="/hiscores">Hiscores</a> |
             <a class="green" href="https://discord.gg/3DcuU5cMJN" target="_blank">Discord</a> |
             <a class="green" href="https://github.com/MaxBittker/rs-sdk" target="_blank">GitHub</a> |
+            <span class="green" id="experiment-status"></span>
+            <span id="experiment-status-separator" style="display:none;"> | </span>
             <span class="green" id="player-count">0 online</span>
         </div>
 
@@ -395,6 +402,7 @@
 
         <!-- SDK Panel container -->
         <div id="sdk-panel-container"></div>
+        <input type="file" id="save-checkpoint-input" accept=".sav,application/octet-stream" style="display:none;">
     </center>
 
     <script>
@@ -427,6 +435,216 @@
             // Auto-initialize from URL params (login, fps)
             autoInitFromUrlParams();
         })();
+
+        function setBotStatus(message) {
+            const status = document.getElementById('bot-status');
+            if (status) {
+                status.textContent = message;
+            }
+        }
+
+        function updateExperimentStatusDisplay(data) {
+            const pauseLink = document.getElementById('experiment-pause');
+            if (pauseLink) {
+                pauseLink.textContent = data.paused ? 'Resume game' : 'Pause game';
+            }
+
+            const status = document.getElementById('experiment-status');
+            const separator = document.getElementById('experiment-status-separator');
+            if (status && typeof data.tick === 'number') {
+                const pending = data.pendingManualTicks ? ` +${data.pendingManualTicks}` : '';
+                status.textContent = `tick ${data.tick}${data.paused ? ' paused' : ''}${pending}`;
+                if (separator) {
+                    separator.style.display = 'inline';
+                }
+            }
+        }
+
+        async function experimentControl(path, options = {}) {
+            const response = await fetch(path, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            const data = await response.json();
+            if (!response.ok || data.success === false) {
+                throw new Error(data.error || `Request failed: ${response.status}`);
+            }
+            updateExperimentStatusDisplay(data);
+            return data;
+        }
+
+        let experimentStatusInFlight = false;
+
+        window.refreshExperimentStatus = async function({ silent = false } = {}) {
+            if (experimentStatusInFlight) {
+                return;
+            }
+
+            experimentStatusInFlight = true;
+            try {
+                await experimentControl('/api/experiment/status');
+            } catch (e) {
+                if (!silent) {
+                    console.warn('Experiment status unavailable:', e);
+                }
+            } finally {
+                experimentStatusInFlight = false;
+            }
+        };
+
+        window.toggleExperimentPause = async function() {
+            try {
+                const status = await experimentControl('/api/experiment/status');
+                const path = status.paused ? '/api/experiment/resume' : '/api/experiment/pause';
+                const next = await experimentControl(path, { method: 'POST' });
+                setBotStatus(next.paused ? 'Game paused' : 'Game resumed');
+            } catch (e) {
+                setBotStatus('Experiment control error: ' + e.message);
+            }
+        };
+
+        window.stepExperimentTick = async function() {
+            try {
+                const data = await experimentControl('/api/experiment/step', {
+                    method: 'POST',
+                    body: JSON.stringify({ ticks: 1 })
+                });
+                setBotStatus(`Queued one tick from ${data.tick}; game remains paused`);
+                setTimeout(() => window.refreshExperimentStatus({ silent: true }), 100);
+            } catch (e) {
+                setBotStatus('Step tick error: ' + e.message);
+            }
+        };
+
+        window.downloadStateSnapshot = async function() {
+            try {
+                const state = clientInstance?.getBotState ? clientInstance.getBotState() : null;
+                if (!state) {
+                    setBotStatus('No bot state available yet');
+                    return;
+                }
+
+                let experiment = null;
+                try {
+                    experiment = await experimentControl('/api/experiment/status');
+                } catch {
+                    // Snapshot still works when the experiment control API is unavailable.
+                }
+
+                const username = document.getElementById('bot-username')?.value || 'bot';
+                const safeUsername = username.replace(/[^a-zA-Z0-9_-]/g, '_');
+                const payload = {
+                    capturedAt: new Date().toISOString(),
+                    url: window.location.href,
+                    bot: username,
+                    experiment,
+                    state
+                };
+
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `${safeUsername}-state-${Date.now()}.json`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(href);
+                setBotStatus('State snapshot downloaded');
+            } catch (e) {
+                setBotStatus('Snapshot error: ' + e.message);
+            }
+        };
+
+        window.downloadSaveCheckpoint = async function() {
+            try {
+                const username = document.getElementById('bot-username')?.value?.trim();
+                if (!username) {
+                    setBotStatus('Save checkpoint error: username is required');
+                    return;
+                }
+
+                const response = await fetch(`/api/experiment/save?username=${encodeURIComponent(username)}`);
+                if (!response.ok) {
+                    let message = `Request failed: ${response.status}`;
+                    try {
+                        const data = await response.json();
+                        message = data.error || message;
+                    } catch {
+                        // Keep generic message if server did not return JSON.
+                    }
+                    throw new Error(message);
+                }
+
+                const blob = await response.blob();
+                const safeUsername = username.replace(/[^a-zA-Z0-9_-]/g, '_');
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `${safeUsername}-${Date.now()}.sav`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(href);
+                setBotStatus('Save checkpoint downloaded');
+            } catch (e) {
+                setBotStatus('Save checkpoint error: ' + e.message);
+            }
+        };
+
+        window.selectSaveCheckpoint = function() {
+            const input = document.getElementById('save-checkpoint-input');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        };
+
+        async function uploadSaveCheckpoint(file) {
+            const username = document.getElementById('bot-username')?.value?.trim();
+            if (!username) {
+                setBotStatus('Load checkpoint error: username is required');
+                return;
+            }
+
+            const bytes = new Uint8Array(await file.arrayBuffer());
+            let binary = '';
+            for (const byte of bytes) {
+                binary += String.fromCharCode(byte);
+            }
+
+            const result = await experimentControl('/api/experiment/load-save', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username,
+                    filename: file.name,
+                    saveBase64: btoa(binary)
+                })
+            });
+
+            setBotStatus(result.message || `Loaded checkpoint for ${result.username}`);
+
+            if (result.relogRequired) {
+                setTimeout(() => {
+                    setBotStatus('Refreshing to load checkpoint...');
+                    window.location.reload();
+                }, 1500);
+            }
+        }
+
+        document.getElementById('save-checkpoint-input')?.addEventListener('change', async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            try {
+                await uploadSaveCheckpoint(file);
+            } catch (e) {
+                setBotStatus('Load checkpoint error: ' + e.message);
+            }
+        });
+
+        window.refreshExperimentStatus();
+        setInterval(() => window.refreshExperimentStatus({ silent: true }), 1000);
 
         // Generate a short random username (keep it very short)
         function generateUsername() {

@@ -1,0 +1,4 @@
+model,task_id,task_kind,ok,retrieval_seconds,generation_seconds,total_seconds,response_chars,score,expected_hit_count,expected_total,avoid_hit_count,error
+gemma3:12b,domain_model_recipe,domain_model_generation,True,0.482,11.667,12.15,810,4,4,8,0,
+gemma3:12b,planning_feedback_recipe,planning_feedback,True,0.645,5.324,5.969,661,5,5,6,0,
+gemma3:12b,npc_variant_banking,domain_model_generation,True,0.516,4.591,5.107,654,4,4,6,0,

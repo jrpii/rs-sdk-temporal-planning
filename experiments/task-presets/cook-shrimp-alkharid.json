@@ -1,0 +1,23 @@
+{
+  "id": "cook_shrimp_alkharid",
+  "description": "Cook one raw shrimp from a checkpoint near an Al Kharid range.",
+  "maxSteps": 6,
+  "startState": {
+    "checkpointPath": "runs/checkpoints/McPlan-cook-shrimp-alkharid.sav",
+    "checkpointProfile": "experiments",
+    "notes": "Install before each episode with: bun experiments/load-save.ts McPlan runs/checkpoints/McPlan-cook-shrimp-alkharid.sav --api http://localhost:8888. Then relog with: bun sdk/cli.ts McPlan --server localhost --timeout 15000 --launch."
+  },
+  "goalState": {
+    "description": "Inventory gains cooked Shrimps and Cooking XP increases.",
+    "inventoryGained": {
+      "Shrimps": 1
+    },
+    "xpGained": {
+      "Cooking": 1
+    }
+  },
+  "success": [
+    { "kind": "inventory_gained", "item": "^Shrimps$", "count": 1 },
+    { "kind": "xp_gained", "skill": "Cooking", "minXp": 1 }
+  ]
+}
