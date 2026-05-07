@@ -1,13 +1,36 @@
 #!/usr/bin/env bun
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { basename, join } from 'path';
 import type { ActionResult, BotWorldState, NearbyLoc } from '../sdk/types';
 import { connectExperimentBot } from './connect';
+import { buildDiscoveryPlanSteps } from './discovery-plan';
+import { KnowledgeBase } from './knowledge-base';
 import { ACTION_DOCS, appendDomainLessons, defaultCookShrimpDomain, effect, predicate, sanitizeLearnedDomainModel } from './domain-model';
 import { chatCompletion, extractJsonObject } from './llm';
 import { exportPddl } from './pddl';
 import { createPlanner } from './planner';
-import type { AgenticReplanEvent, DomainEffect, DomainPredicate, EpisodeTrace, ExecutionStep, LearnedActionSchema, LearnedDomainLesson, LearnedDomainModel, PlannerMethod, PlanStep, StateSummary, TaskSpec } from './schemas';
+import {
+    appendTransitionRecord,
+    buildTransitionRecord,
+    observedWorldObjectsFromState,
+    resolveTransitionLogPaths,
+} from './transition-log';
+import type {
+    AgenticReplanEvent,
+    DiscoveryPhaseMeta,
+    DomainEffect,
+    DomainPredicate,
+    EpisodeTrace,
+    ExecutionPhase,
+    ExecutionStep,
+    LearnedActionSchema,
+    LearnedDomainLesson,
+    LearnedDomainModel,
+    PlannerMethod,
+    PlanStep,
+    StateSummary,
+    TaskSpec,
+} from './schemas';
 import { diffStateSummaries, summarizeState } from './state-summary';
 import { evaluateVerifiers } from './verifier';
 
@@ -17,6 +40,8 @@ Run one experiment episode from a TaskSpec JSON file.
 
 Usage:
   bun experiments/run-episode.ts <task.json> --bot McPlan [--method few_shot] [--model none] [--domain model.json] [--server localhost] [--api http://localhost:8888] [--api-base http://127.0.0.1:11434/v1] [--force-run] [--agentic-replan] [--agentic-explore] [--replan-rag] [--max-replans 2] [--max-steps 10] [--ready-timeout 30000] [--out runs/traces]
+         [--scripted-planner] [--no-discovery-on-empty-plan] [--discovery-max-steps N]
+         [--no-transition-log-global] [--transition-log-global PATH] [--transition-log-task] [--transition-log-task-dir DIR] [--transition-log-trial PATH]
 
 Example:
   bun experiments/run-episode.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --method few_shot --server localhost
@@ -48,6 +73,19 @@ function parseArgs() {
     let outDir = join('runs', 'traces');
     let maxStepsOverride: number | undefined;
     let readyTimeout = 15_000;
+    let discoveryOnEmptyPlan = true;
+    let discoveryMaxSteps = 0;
+    let scriptedPlanner = false;
+    let transitionLogGlobalDisabled = false;
+    let transitionLogGlobalPath = join('runs', 'transitions', 'global.jsonl');
+    let transitionLogTaskIsolated = false;
+    let transitionLogTaskDir = join('runs', 'transitions');
+    let transitionLogTrialPath = '';
+    let kbGlobalDisabled = false;
+    let kbGlobalPath = join('runs', 'kb', 'global.json');
+    let kbTaskIsolated = false;
+    let kbTaskDir = join('runs', 'kb');
+    let kbTrialPath = '';
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -81,6 +119,32 @@ function parseArgs() {
             readyTimeout = Number(args[++i] ?? readyTimeout);
         } else if (arg === '--out') {
             outDir = args[++i] ?? outDir;
+        } else if (arg === '--no-discovery-on-empty-plan') {
+            discoveryOnEmptyPlan = false;
+        } else if (arg === '--discovery-max-steps') {
+            discoveryMaxSteps = Number(args[++i] ?? '0');
+        } else if (arg === '--scripted-planner') {
+            scriptedPlanner = true;
+        } else if (arg === '--no-transition-log-global') {
+            transitionLogGlobalDisabled = true;
+        } else if (arg === '--transition-log-global') {
+            transitionLogGlobalPath = args[++i] ?? transitionLogGlobalPath;
+        } else if (arg === '--transition-log-task') {
+            transitionLogTaskIsolated = true;
+        } else if (arg === '--transition-log-task-dir') {
+            transitionLogTaskDir = args[++i] ?? transitionLogTaskDir;
+        } else if (arg === '--transition-log-trial') {
+            transitionLogTrialPath = args[++i] ?? '';
+        } else if (arg === '--no-kb-global') {
+            kbGlobalDisabled = true;
+        } else if (arg === '--kb-global') {
+            kbGlobalPath = args[++i] ?? kbGlobalPath;
+        } else if (arg === '--kb-task') {
+            kbTaskIsolated = true;
+        } else if (arg === '--kb-task-dir') {
+            kbTaskDir = args[++i] ?? kbTaskDir;
+        } else if (arg === '--kb-trial') {
+            kbTrialPath = args[++i] ?? '';
         }
     }
 
@@ -89,7 +153,37 @@ function parseArgs() {
         throw new Error(`Unknown method: ${method}`);
     }
 
-    return { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, agenticExplore, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout };
+    return {
+        taskPath,
+        botName,
+        method,
+        modelName,
+        domainPath,
+        server,
+        api,
+        apiBase,
+        forceRun,
+        agenticReplan,
+        agenticExplore,
+        replanRag,
+        maxReplans,
+        outDir,
+        maxStepsOverride,
+        readyTimeout,
+        discoveryOnEmptyPlan,
+        discoveryMaxSteps,
+        scriptedPlanner,
+        transitionLogGlobalDisabled,
+        transitionLogGlobalPath,
+        transitionLogTaskIsolated,
+        transitionLogTaskDir,
+        transitionLogTrialPath,
+        kbGlobalDisabled,
+        kbGlobalPath,
+        kbTaskIsolated,
+        kbTaskDir,
+        kbTrialPath,
+    };
 }
 
 function readTask(path: string): TaskSpec {
@@ -137,8 +231,14 @@ function shouldAttemptReachabilityRecovery(result: ActionResult): boolean {
 
 function shouldAttemptAgenticReplan(result: ActionResult, verifierSuccess: boolean): boolean {
     if (verifierSuccess) return false;
-    if (!result.success) return true;
-    return /no detected product|burned|no progress|timed out/i.test(result.message);
+    if (result.success) {
+        // Stochastic burn still consumes a shrimp and is not a "stuck" state for LLM replan; retry next cook step.
+        if (/burn|burnt|burned/i.test(result.message)) {
+            return false;
+        }
+        return /no detected product|no progress|timed out/i.test(result.message);
+    }
+    return true;
 }
 
 async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentBot>>, timeout = 15_000): Promise<StateSummary> {
@@ -149,10 +249,48 @@ async function currentSummary(conn: Awaited<ReturnType<typeof connectExperimentB
     return summarizeState(state);
 }
 
-async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>>, step: PlanStep): Promise<ActionResult> {
+// This is VERY hard coded for the shrimp task. Bounded probe is deterministic. Would need to be more generic for other tasks...
+function extractTargetLocPattern(step: PlanStep): RegExp | null {
+    const raw = step.actionParams?.targetLocNamePattern;
+    if (typeof raw === 'string' && raw.trim()) {
+        try {
+            return new RegExp(raw, 'i');
+        } catch {
+            return null;
+        }
+    }
+    return null;
+}
+
+async function executeStep(
+    conn: Awaited<ReturnType<typeof connectExperimentBot>>,
+    step: PlanStep,
+    kb?: KnowledgeBase,
+): Promise<ActionResult> {
     if (step.actionSchemaId === 'explore_for_cooking_source') {
         const state = conn.sdk.getState();
         if (!state?.player) return { success: false, message: 'No game state available' };
+
+        const targetPattern = extractTargetLocPattern(step) ?? /^(Range|Fire)$/i;
+
+        // 1) If KB has a known target location, bias movement to the nearest known coordinate first.
+        if (kb) {
+            const candidates = kb.findLocPositionsByNamePattern(targetPattern)
+                .filter(p => p.level === state.player!.level);
+            if (candidates.length > 0) {
+                candidates.sort((a, b) => {
+                    const da = Math.max(Math.abs(a.x - state.player!.worldX), Math.abs(a.z - state.player!.worldZ));
+                    const db = Math.max(Math.abs(b.x - state.player!.worldX), Math.abs(b.z - state.player!.worldZ));
+                    return da - db;
+                });
+                const best = candidates[0]!;
+                const walkResult = await conn.bot.walkTo(best.x, best.z, 3);
+                return {
+                    ...walkResult,
+                    message: `Exploration used KB target ${best.name} at (${best.x}, ${best.z}): ${walkResult.message}`,
+                };
+            }
+        }
 
         const existingSource = findCookingSource(state);
         if (existingSource) {
@@ -164,7 +302,9 @@ async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>
         }
 
         const scannedLocs = await conn.sdk.scanNearbyLocs(30);
-        const scannedSource = findCookingSourceInLocs(scannedLocs);
+        const scannedSource = scannedLocs
+            .filter(loc => targetPattern.test(loc.name))
+            .sort((a, b) => a.distance - b.distance)[0] ?? null;
         if (scannedSource) {
             const walkResult = await conn.bot.walkTo(scannedSource.x, scannedSource.z, 3);
             return {
@@ -183,8 +323,13 @@ async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>
                 return { ...doorResult, message: `Exploration tried ${openDoor.name}: ${doorResult.message}` };
             }
             await conn.sdk.waitForTicks(1);
-            const afterDoorSource = findCookingSource(conn.sdk.getState() ?? state)
-                ?? findCookingSourceInLocs(await conn.sdk.scanNearbyLocs(30));
+            const afterDoorState = conn.sdk.getState() ?? state;
+            const afterDoorSource = afterDoorState.nearbyLocs
+                .filter(loc => targetPattern.test(loc.name))
+                .sort((a, b) => a.distance - b.distance)[0]
+                ?? (await conn.sdk.scanNearbyLocs(30))
+                    .filter(loc => targetPattern.test(loc.name))
+                    .sort((a, b) => a.distance - b.distance)[0];
             if (afterDoorSource) {
                 const walkResult = await conn.bot.walkTo(afterDoorSource.x, afterDoorSource.z, 3);
                 return {
@@ -204,14 +349,18 @@ async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>
         for (const probe of probes) {
             const walkResult = await conn.bot.walkTo(probe.x, probe.z, 3);
             if (!walkResult.success) continue;
-            const source = findCookingSource(conn.sdk.getState() ?? state)
-                ?? findCookingSourceInLocs(await conn.sdk.scanNearbyLocs(30));
+            const source = (conn.sdk.getState() ?? state).nearbyLocs
+                .filter(loc => targetPattern.test(loc.name))
+                .sort((a, b) => a.distance - b.distance)[0]
+                ?? (await conn.sdk.scanNearbyLocs(30))
+                    .filter(loc => targetPattern.test(loc.name))
+                    .sort((a, b) => a.distance - b.distance)[0];
             if (source) {
                 return { success: true, message: `Exploration probe found ${source.name} at (${source.x}, ${source.z})` };
             }
         }
 
-        return { success: false, message: 'Exploration did not find a Range or Fire within bounded probes' };
+        return { success: false, message: `Exploration did not find target locs matching ${targetPattern} within bounded probes` };
     }
 
     if (step.actionSchemaId === 'open_nearby_door') {
@@ -243,7 +392,11 @@ async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>
     const raw = conn.sdk.findInventoryItem(/^Raw shrimps$/i);
     if (!raw) return { success: false, message: 'Missing Raw shrimps in inventory' };
 
-    const range = findCookingSource(beforeState);
+    let range = findCookingSource(beforeState);
+    if (!range) {
+        const scanned = await conn.sdk.scanNearbyLocs(30);
+        range = findCookingSourceInLocs(scanned);
+    }
     if (!range) return { success: false, message: 'No nearby range or fire found' };
 
     if (range.distance > 3) {
@@ -253,7 +406,8 @@ async function executeStep(conn: Awaited<ReturnType<typeof connectExperimentBot>
         }
     }
 
-    const sourceNow = findCookingSource(conn.sdk.getState() ?? beforeState);
+    const live = conn.sdk.getState() ?? beforeState;
+    let sourceNow = findCookingSource(live) ?? findCookingSourceInLocs(await conn.sdk.scanNearbyLocs(30));
     if (!sourceNow) return { success: false, message: `${range.name} no longer visible` };
 
     const sendResult = await conn.sdk.sendUseItemOnLoc(raw.slot, sourceNow.x, sourceNow.z, sourceNow.id);
@@ -457,12 +611,14 @@ async function symbolicPlanFromDomain(args: {
         task: replanningTask,
         state: args.state,
         learnedActions: args.domainModel.actions,
+        planExpand: { cookRepeatCap: 1 },
     });
     console.log(`[Episode] Symbolic replanner after domain update: ${output.notes ?? 'none'}`);
     return output.plan.slice(0, args.remainingSteps).map((step, index) => ({
         ...step,
         stepIndex: index,
         naturalLanguage: `Symbolic recovery ${index + 1}: ${step.naturalLanguage}`,
+        executionPhase: 'replanned_symbolic' as const,
     }));
 }
 
@@ -653,14 +809,52 @@ async function requestAgenticReplan(args: {
 }
 
 async function main() {
-    const { taskPath, botName, method, modelName, domainPath, server, api, apiBase, forceRun, agenticReplan, agenticExplore, replanRag, maxReplans, outDir, maxStepsOverride, readyTimeout } = parseArgs();
+    const {
+        taskPath,
+        botName,
+        method,
+        modelName,
+        domainPath,
+        server,
+        api,
+        apiBase,
+        forceRun,
+        agenticReplan,
+        agenticExplore,
+        replanRag,
+        maxReplans,
+        outDir,
+        maxStepsOverride,
+        readyTimeout,
+        discoveryOnEmptyPlan,
+        discoveryMaxSteps,
+        scriptedPlanner,
+        transitionLogGlobalDisabled,
+        transitionLogGlobalPath,
+        transitionLogTaskIsolated,
+        transitionLogTaskDir,
+        transitionLogTrialPath,
+        kbGlobalDisabled,
+        kbGlobalPath,
+        kbTaskIsolated,
+        kbTaskDir,
+        kbTrialPath,
+    } = parseArgs();
     const task = readTask(taskPath);
     if (maxStepsOverride !== undefined && Number.isFinite(maxStepsOverride) && maxStepsOverride > 0) {
         task.maxSteps = maxStepsOverride;
     }
     const domainModel = readDomain(domainPath);
-    let effectiveDomainModel = sanitizeLearnedDomainModel(domainModel ?? defaultCookShrimpDomain(task.id), task);
-    const planner = createPlanner(method, effectiveDomainModel);
+    let effectiveDomainModel = sanitizeLearnedDomainModel(
+        domainModel ?? defaultCookShrimpDomain(task.id),
+        task,
+        defaultCookShrimpDomain(task.id),
+        { includeRecoveryActions: true },
+    );
+    const planner =
+        scriptedPlanner && (method === 'few_shot' || method === 'static_rag')
+            ? createPlanner(method, undefined)
+            : createPlanner(method, effectiveDomainModel);
     const conn = await connectExperimentBot(botName, server);
     const startedAt = Date.now();
     const execution: ExecutionStep[] = [];
@@ -672,7 +866,58 @@ async function main() {
         }
         mkdirSync(outDir, { recursive: true });
         const outPath = tracePath(outDir, task, method);
+        const episodeId = basename(outPath, '.json');
+        const transitionPaths = resolveTransitionLogPaths({
+            taskId: task.id,
+            globalEnabled: !transitionLogGlobalDisabled && Boolean(transitionLogGlobalPath),
+            globalPath: transitionLogGlobalPath,
+            taskIsolated: transitionLogTaskIsolated,
+            taskIsolatedDir: transitionLogTaskDir,
+            trialPath: transitionLogTrialPath || undefined,
+        });
+
         const before = await currentSummary(conn, readyTimeout);
+        const kbPaths = [
+            ...(kbGlobalDisabled ? [] : [kbGlobalPath]),
+            ...(kbTaskIsolated ? [join(kbTaskDir, 'by-task', `${task.id}.json`)] : []),
+            ...(kbTrialPath ? [kbTrialPath] : []),
+        ].filter(Boolean);
+        // Load persisted KB (global/task/trial) so exploration can use learned locations immediately.
+        const kb = (() => {
+            const existingPath = kbPaths.find(p => existsSync(p));
+            return existingPath ? KnowledgeBase.load(existingPath) : new KnowledgeBase();
+        })();
+        kb.observe(conn.sdk.getState());
+
+        const flushTransitionRecord = (executed: ExecutionStep): void => {
+            if (transitionPaths.length === 0) return;
+            const baseline = execution[0]!.before;
+            const cumulativeDelta = diffStateSummaries(baseline, executed.after);
+            const verifierAfter = evaluateVerifiers(executed.after, task.success, cumulativeDelta);
+            appendTransitionRecord(
+                transitionPaths,
+                buildTransitionRecord({
+                    episodeId,
+                    tracePath: outPath,
+                    taskId: task.id,
+                    taskSpec: task,
+                    method,
+                    modelName,
+                    stepOrdinal: execution.length - 1,
+                    phase: executed.phase ?? 'planned',
+                    actionSchemaId: executed.actionSchemaId,
+                    actionParams: executed.actionParams,
+                    summaryBefore: executed.before,
+                    summaryAfter: executed.after,
+                    delta: executed.delta,
+                    result: executed.result,
+                    verifierAfter,
+                    cumulativeDeltaFromEpisodeStart: cumulativeDelta,
+                    verifierProgressSuccess: verifierAfter.success,
+                    observedWorldObjects: observedWorldObjectsFromState(conn.sdk.getState()),
+                }),
+            );
+        };
         const initialPddl = buildPddlArtifact({
             task,
             state: before,
@@ -687,8 +932,22 @@ async function main() {
 
         console.log(`[Episode] Planner notes: ${plannerOutput.notes ?? 'none'}`);
         console.log('[Episode] Plan to execute:');
-        const plan = [...plannerOutput.plan.slice(0, task.maxSteps)];
-        if (plan.length === 0) {
+        let plan = [...plannerOutput.plan.slice(0, task.maxSteps)];
+        let discoveryPhase: DiscoveryPhaseMeta | undefined;
+        const symbolicPlanEmpty = plan.length === 0;
+        if (symbolicPlanEmpty && discoveryOnEmptyPlan) {
+            const budget =
+                discoveryMaxSteps > 0 ? Math.min(task.maxSteps, discoveryMaxSteps) : task.maxSteps;
+            discoveryPhase = {
+                reason: 'empty_initial_plan',
+                plannerNotes: plannerOutput.notes,
+                budgetSteps: Math.max(0, Math.min(budget, task.maxSteps)),
+            };
+            plan = buildDiscoveryPlanSteps(task.id, task.maxSteps, discoveryPhase.budgetSteps);
+            console.warn(
+                `[Episode] Symbolic planner returned no plan; discovery bootstrap will run ${plan.length} step(s) (budget=${discoveryPhase.budgetSteps}).`,
+            );
+        } else if (plan.length === 0) {
             console.log('[Episode]   (empty plan)');
         }
         for (const step of plan) {
@@ -701,10 +960,11 @@ async function main() {
 
         for (let cursor = 0; cursor < plan.length && execution.length < task.maxSteps; cursor++) {
             const step = plan[cursor]!;
+            const stepPhase: ExecutionPhase = step.executionPhase ?? 'planned';
             const stepBefore = await currentSummary(conn, readyTimeout);
             const startedTick = stepBefore.tick;
             console.log(`[Episode] Executing step ${step.stepIndex}: ${step.actionSchemaId ?? 'unknown'} - ${step.naturalLanguage}`);
-            const result = await executeStep(conn, step);
+            const result = await executeStep(conn, step, kb);
             const stepAfter = await currentSummary(conn, readyTimeout);
             const delta = diffStateSummaries(stepBefore, stepAfter);
             console.log(`[Episode] Result step ${step.stepIndex}: ${result.success ? 'ok' : 'failed'} - ${result.message}`);
@@ -718,7 +978,12 @@ async function main() {
                 before: stepBefore,
                 after: stepAfter,
                 delta,
+                phase: stepPhase,
+                actionSchemaId: step.actionSchemaId,
+                actionParams: step.actionParams,
             });
+            flushTransitionRecord(execution[execution.length - 1]!);
+            kb.observe(conn.sdk.getState());
             const executedStep = execution[execution.length - 1]!;
             const evidenceUpdate = applyEnvironmentEvidence({
                 task,
@@ -773,7 +1038,10 @@ async function main() {
                         : 'No symbolic recovery plan found from updated domain; falling back to LLM-authored recovery steps.',
                     plan: symbolicRecoveryPlan,
                 };
-                const recoveryPlan = symbolicRecoveryPlan.length > 0 ? symbolicRecoveryPlan : replan.plan;
+                const recoveryPlan =
+                    symbolicRecoveryPlan.length > 0
+                        ? symbolicRecoveryPlan
+                        : replan.plan.map(s => ({ ...s, executionPhase: 'replanned_llm' as const }));
                 if (recoveryPlan.length > 0) {
                     console.log(`[Episode] Agentic replan #${replanningCount}: ${replan.notes ?? 'no notes'}`);
                     for (const plannedStep of recoveryPlan) {
@@ -792,12 +1060,13 @@ async function main() {
                     stepIndex: step.stepIndex,
                     naturalLanguage: 'Exploration recovery: search for a reachable cooking source before retrying cooking.',
                     actionSchemaId: 'explore_for_cooking_source',
+                    executionPhase: 'recovery',
                 };
                 console.log(`[Episode] Triggering exploration recovery #${explorationCount}: ${result.message}`);
                 console.log(`[Episode] Executing exploration step: ${explorationStep.actionSchemaId} - ${explorationStep.naturalLanguage}`);
                 const explorationBefore = await currentSummary(conn, readyTimeout);
                 const explorationStartedTick = explorationBefore.tick;
-                const explorationResult = await executeStep(conn, explorationStep);
+                const explorationResult = await executeStep(conn, explorationStep, kb);
                 const explorationAfter = await currentSummary(conn, readyTimeout);
                 const explorationDelta = diffStateSummaries(explorationBefore, explorationAfter);
                 console.log(`[Episode] Result exploration step: ${explorationResult.success ? 'ok' : 'failed'} - ${explorationResult.message}`);
@@ -811,7 +1080,11 @@ async function main() {
                     before: explorationBefore,
                     after: explorationAfter,
                     delta: explorationDelta,
+                    phase: 'recovery',
+                    actionSchemaId: explorationStep.actionSchemaId,
+                    actionParams: explorationStep.actionParams,
                 });
+                flushTransitionRecord(execution[execution.length - 1]!);
                 const explorationEvidence = applyEnvironmentEvidence({
                     task,
                     domainModel: effectiveDomainModel,
@@ -836,6 +1109,7 @@ async function main() {
                         stepIndex: step.stepIndex,
                         naturalLanguage: 'Retry cooking after exploration recovery.',
                         actionSchemaId: 'use_item_on_cooking_source',
+                        executionPhase: 'recovery' as const,
                     }]));
                     continue;
                 }
@@ -849,6 +1123,7 @@ async function main() {
                     stepIndex: step.stepIndex,
                     naturalLanguage: `Replan after reachability failure: open a nearby door or gate, then continue with the remaining plan.`,
                     actionSchemaId: 'open_nearby_door',
+                    executionPhase: 'recovery',
                 };
                 replanningCount++;
                 console.log(`[Episode] Triggering replanning #${replanningCount}: ${result.message}`);
@@ -856,7 +1131,7 @@ async function main() {
 
                 const recoveryBefore = await currentSummary(conn, readyTimeout);
                 const recoveryStartedTick = recoveryBefore.tick;
-                const recoveryResult = await executeStep(conn, recoveryStep);
+                const recoveryResult = await executeStep(conn, recoveryStep, kb);
                 const recoveryAfter = await currentSummary(conn, readyTimeout);
                 const recoveryDelta = diffStateSummaries(recoveryBefore, recoveryAfter);
                 console.log(`[Episode] Result recovery step: ${recoveryResult.success ? 'ok' : 'failed'} - ${recoveryResult.message}`);
@@ -870,7 +1145,10 @@ async function main() {
                     before: recoveryBefore,
                     after: recoveryAfter,
                     delta: recoveryDelta,
+                    phase: 'recovery',
+                    actionSchemaId: recoveryStep.actionSchemaId,
                 });
+                flushTransitionRecord(execution[execution.length - 1]!);
                 const recoveryEvidence = applyEnvironmentEvidence({
                     task,
                     domainModel: effectiveDomainModel,
@@ -898,6 +1176,12 @@ async function main() {
         }
 
         const finalState = await currentSummary(conn, readyTimeout);
+        // Persist KB snapshots once per episode (deduped), merging into existing.
+        for (const path of kbPaths) {
+            const existing = KnowledgeBase.load(path);
+            existing.mergeFrom(kb);
+            existing.save(path);
+        }
         const finalPddl = buildPddlArtifact({
             task,
             state: finalState,
@@ -908,7 +1192,8 @@ async function main() {
         verifier = evaluateVerifiers(finalState, task.success, totalDelta);
 
         const trace: EpisodeTrace = {
-            episodeId: `${method}-${task.id}-${Date.now()}`,
+            episodeId,
+            tracePath: outPath,
             method,
             task,
             model: {
@@ -916,6 +1201,7 @@ async function main() {
                 name: modelName === 'none' ? planner.constructor.name : modelName,
             },
             plan,
+            discoveryPhase,
             agenticReplans,
             execution,
             metrics: {

@@ -555,11 +555,117 @@ The difference between methods should be what context they receive:
 - Static RAG: task + state + strict 2004 Graph RAG context, with lax fallback if needed.
 - Learned domain: task + state + RAG context + persistent learned action schemas + prior episode traces.
 
-The first planner boundary lives in `experiments/planner.ts`. It currently
-contains a deterministic cook-shrimp planner for validating the harness. PDDL is
-the right next layer once the small predicate/action set is stable: emit PDDL
-from `LearnedActionSchema[]`, call a planner, then execute the resulting plan
-through `bot.*` / `sdk.*`.
+The first planner boundary lives in `experiments/planner.ts`. It exposes both a
+scripted cook-shrimp planner (`ScriptedCookShrimpPlanner`) and the symbolic
+forward-search planner (`SymbolicDomainPlanner`). **`experiments/run-episode.ts`
+defaults to passing a learned domain into `createPlanner`, so `few_shot`,
+`static_rag`, `pddl`, and `learned_domain` episode runs all use the same
+symbolic planner unless you pass `--scripted-planner`** (only affects `few_shot`
+/ `static_rag`). See the comment block at the top of `planner.ts`.
+
+PDDL text export remains useful for inspection and external planners once the
+predicate/action set is stable.
+
+### Process exit codes, discovery bootstrap, and transition logs
+
+- **`run-episode` exits 0** when the driver completes normally **even if task verifiers fail**. Inspect `verifier.success` / `trace.metrics.success` in the JSON output file.
+- **`run-batch`** subprocess `ok: true` means the episode process exited cleanly; it does **not** guarantee verifier pass — check batch row `success` / trace summaries.
+- If **`symbolicPlan` finds no plan**, **`--discovery-on-empty-plan`** (default **on**) injects a **bounded deterministic discovery cycle** (explore → open door → cook for cook-shrimp tasks) so execution produces transitions and traces instead of stopping immediately. Disable with `--no-discovery-on-empty-plan`.
+- **Append-only transition logs** (JSONL): default **`runs/transitions/global.jsonl`**. Disable global append with `--no-transition-log-global`. Optional **`--transition-log-task`** writes additional rows under `<task-dir>/by-task/<taskId>.jsonl`, and **`--transition-log-trial PATH`** stores rows only for that file (for isolated experiments).
+- **Replay / consistency check** from logs vs task verifiers:
+
+```powershell
+bun experiments/replay-transition-log.ts --episode <EpisodeTrace.episodeId> --log runs/transitions/global.jsonl --task experiments/task-presets/cook-shrimp-alkharid.json --trace runs/traces/<same-run>.json
+```
+
+- **Symbolic delete semantics** (`item_removed` etc.) are covered by `bun test experiments/pddl-symbolic.test.ts`.
+
+### Structured schema reference (search-friendly)
+
+The experiment layer uses **grouped** structures for nearby entities to reduce redundancy and enable clean lookups like:
+
+- `"nearbyLocs"."Range"` (everything called Range)
+- `"nearbyLocs"."Rockslide".variants["474|"]` (a specific id/options variant)
+
+#### `StateSummary.nearbyLocs` / `nearbyNpcs`
+
+`nearbyLocs` is grouped by **name**, then by **variant** (`<id>|<optionsKey>`), then by instances:
+
+```json
+{
+  "nearbyLocs": {
+    "Rockslide": {
+      "name": "Rockslide",
+      "variants": {
+        "474|": {
+          "id": 474,
+          "options": [],
+          "instances": [
+            { "x": 3331, "z": 3176, "distance": 1 },
+            { "x": 3330, "z": 3174, "distance": 2 }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+`nearbyNpcs` is grouped by **name**, then by variant (`<combatLevel>|<optionsKey>`):
+
+```json
+{
+  "nearbyNpcs": {
+    "Shop assistant": {
+      "name": "Shop assistant",
+      "variants": {
+        "0|Talk-to|Trade": {
+          "combatLevel": 0,
+          "options": ["Talk-to", "Trade"],
+          "instances": [
+            { "index": 5577, "x": 3315, "z": 3181, "distance": 15, "inCombat": false, "hp": 0, "maxHp": 0 }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+#### `TransitionLogRecord.observedWorldObjects`
+
+For each logged step, transition rows include a compact, low-redundancy snapshot of raw world objects. This is grouped as:
+
+`kind -> name -> variantKey -> instances`
+
+```json
+{
+  "observedWorldObjects": {
+    "loc": {
+      "Rockslide": {
+        "level": 0,
+        "variants": {
+          "471|": {
+            "id": 471,
+            "options": [],
+            "instances": [
+              { "x": 3331, "z": 3170, "distance": 1 },
+              { "x": 3332, "z": 3168, "distance": 2 }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### Knowledge base (`runs/kb/*.json`)
+
+The KB is a **deduped persistent store** fed from raw SDK state each executed step:
+
+- Locs: grouped by **name**, then by **id** (no redundant per-id `name` field)
+- NPCs: grouped by **name**, then by **variant key** (`combatLevel|level|optionsKey`). Coordinates are intentionally **not** part of the key to avoid drift duplication.
 
 The initial symbolic layer is now split into:
 
@@ -636,6 +742,43 @@ Use a different starting checkpoint without editing the task JSON:
 
 ```powershell
 bun experiments/run-batch.ts experiments/task-presets/cook-shrimp-alkharid.json --bot McPlan --runs 5 --methods few_shot,static_rag,pddl,learned_domain --models none,gemma3:12b --server localhost --api http://localhost:8888 --rag --checkpoint runs/checkpoints/McPlan-cook-shrimp-alkharid-2.sav
+```
+
+Episode transition logging (forwarded to `run-episode.ts`):
+
+```powershell
+# Append per-task JSONL under <domain-dir>/transitions/by-task/<taskId>.jsonl
+--episode-transition-log-task
+
+# Also write one JSONL per batch trial under this directory
+--episode-transition-log-trial-dir runs/transitions/trials
+
+# Isolated trials without the global log
+--episode-no-transition-log-global --episode-transition-log-trial-dir runs/transitions/trials
+```
+
+Episode knowledge base (KB) logging + refinement context:
+
+- **Default behavior**: `run-episode.ts` writes/merges into **global KB** at `runs/kb/global.json` unless disabled.
+- These batch flags forward into `run-episode.ts` so you can isolate KB per-task or per-trial.
+- If you set `--episode-kb-task` or `--episode-kb-trial-dir`, the batch runner will also pass `--kb <path>` into `refine-domain.ts` so the LLM sees the KB during between-episode refinement.
+
+```powershell
+# Append per-task KB under <domain-dir>/kb/by-task/<taskId>.json
+--episode-kb-task
+
+# Override per-task KB directory (default: <domain-dir>/kb)
+--episode-kb-task-dir runs/domain-models/kb
+
+# Also write one KB JSON per batch trial under this directory.
+# Filenames include the method so multiple methods can run without bleeding.
+--episode-kb-trial-dir runs/kb/trials
+
+# Disable the global KB (use task/trial KB only).
+--episode-no-kb-global
+
+# Wipe global KB file before each trial (strong isolation; useful for ablations).
+--wipe-global-kb-each-trial
 ```
 
 Useful batch stability knobs:

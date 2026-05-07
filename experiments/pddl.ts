@@ -19,10 +19,27 @@ function actionApplicable(facts: Set<string>, action: LearnedActionSchema): bool
     return actionPreconditions(action).every(group => group.some(fact => facts.has(fact)));
 }
 
-function applyAction(facts: Set<string>, action: LearnedActionSchema): Set<string> {
+/**
+ * Forward-application of symbolic action effects for the in-process planner.
+ * Note: `item_removed` and several other effect kinds currently emit no facts in `effectToFacts`,
+ * so consumables like `has_item:*` are **not** deleted unless that mapping is extended (see tests).
+ */
+export function applySymbolicFacts(facts: Set<string>, action: LearnedActionSchema): Set<string> {
     const next = new Set(facts);
     for (const fact of actionEffects(action)) next.add(fact);
+    // Minimal delete semantics for inventory consumption (Priority 3).
+    // Remove `has_item:<item>` when an action has an `item_removed` effect.
+    for (const effect of action.effects) {
+        if (effect.kind !== 'item_removed') continue;
+        const item = normalizeFactName(effect.args.item);
+        if (!item) continue;
+        next.delete(`has_item:${item}`);
+    }
     return next;
+}
+
+function applyAction(facts: Set<string>, action: LearnedActionSchema): Set<string> {
+    return applySymbolicFacts(facts, action);
 }
 
 function goalsMet(facts: Set<string>, goals: Set<string>): boolean {
@@ -32,7 +49,12 @@ function goalsMet(facts: Set<string>, goals: Set<string>): boolean {
     return true;
 }
 
-export function symbolicPlan(task: TaskSpec, state: StateSummary, model: LearnedDomainModel): PlannerOutput {
+export function symbolicPlan(
+    task: TaskSpec,
+    state: StateSummary,
+    model: LearnedDomainModel,
+    expand?: { cookRepeatCap?: number },
+): PlannerOutput {
     const initial = stateFacts(state);
     const goals = goalFacts(task);
     const queue: Array<{ facts: Set<string>; plan: LearnedActionSchema[] }> = [{ facts: initial, plan: [] }];
@@ -46,7 +68,7 @@ export function symbolicPlan(task: TaskSpec, state: StateSummary, model: Learned
         seen.add(key);
 
         if (goalsMet(node.facts, goals)) {
-            return toPlannerOutput(node.plan, task.maxSteps, 'symbolic plan found');
+            return toPlannerOutput(node.plan, task.maxSteps, 'symbolic plan found', expand);
         }
 
         if (node.plan.length >= maxDepth) continue;
@@ -64,10 +86,22 @@ export function symbolicPlan(task: TaskSpec, state: StateSummary, model: Learned
     };
 }
 
-function toPlannerOutput(actions: LearnedActionSchema[], maxSteps: number, notes: string): PlannerOutput {
+export function toPlannerOutput(
+    actions: LearnedActionSchema[],
+    maxSteps: number,
+    notes: string,
+    expand?: { cookRepeatCap?: number },
+): PlannerOutput {
+    const cookCap = expand?.cookRepeatCap;
     const plan = actions.flatMap(action => {
         // For stochastic low-level RuneScape actions, keep bounded retries in the executable plan.
-        const attempts = action.id === 'use_item_on_cooking_source' ? Math.max(1, maxSteps) : 1;
+        const rawAttempts =
+            action.id === 'use_item_on_cooking_source'
+                ? typeof cookCap === 'number' && cookCap > 0
+                    ? Math.min(cookCap, maxSteps)
+                    : Math.max(1, maxSteps)
+                : 1;
+        const attempts = Math.max(1, Math.min(rawAttempts, maxSteps));
         return Array.from({ length: attempts }, (_, index) => ({
             stepIndex: index,
             naturalLanguage: `${index + 1}. ${action.name}`,

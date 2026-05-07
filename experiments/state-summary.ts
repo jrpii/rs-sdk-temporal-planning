@@ -5,6 +5,14 @@ function addCount(target: Record<string, number>, name: string, count: number): 
     target[name] = (target[name] ?? 0) + count;
 }
 
+function normalizeOptionKey(options: string[]): string {
+    return options.map(o => o.trim()).filter(Boolean).slice(0, 8).join('|');
+}
+
+function normalizeNameKey(name: string): string {
+    return String(name ?? '').trim();
+}
+
 function diffCounts(before: Record<string, number>, after: Record<string, number>): {
     added: Record<string, number>;
     removed: Record<string, number>;
@@ -49,6 +57,39 @@ export function summarizeState(state: BotWorldState): StateSummary {
 
     const player = state.player;
 
+    const nearbyLocs: StateSummary['nearbyLocs'] = {};
+    for (const loc of state.nearbyLocs.slice(0, 80)) {
+        const nameKey = normalizeNameKey(loc.name);
+        const options = (loc.options ?? []).slice(0, 8);
+        const variantKey = `${loc.id}|${normalizeOptionKey(options)}`;
+        nearbyLocs[nameKey] ??= { name: loc.name, variants: {} };
+        nearbyLocs[nameKey]!.variants[variantKey] ??= { id: loc.id, options, instances: [] };
+        nearbyLocs[nameKey]!.variants[variantKey]!.instances.push({
+            x: loc.x,
+            z: loc.z,
+            distance: loc.distance,
+        });
+    }
+
+    const nearbyNpcs: StateSummary['nearbyNpcs'] = {};
+    for (const npc of state.nearbyNpcs.slice(0, 60)) {
+        const nameKey = normalizeNameKey(npc.name);
+        const options = (npc.options ?? []).slice(0, 8);
+        const combatLevel = npc.combatLevel || undefined;
+        const variantKey = `${combatLevel ?? 0}|${normalizeOptionKey(options)}`;
+        nearbyNpcs[nameKey] ??= { name: npc.name, variants: {} };
+        nearbyNpcs[nameKey]!.variants[variantKey] ??= { combatLevel, options, instances: [] };
+        nearbyNpcs[nameKey]!.variants[variantKey]!.instances.push({
+            index: npc.index,
+            x: npc.x,
+            z: npc.z,
+            distance: npc.distance,
+            inCombat: npc.inCombat,
+            hp: npc.hp,
+            maxHp: npc.maxHp,
+        });
+    }
+
     return {
         tick: state.tick,
         inGame: state.inGame,
@@ -63,21 +104,14 @@ export function summarizeState(state: BotWorldState): StateSummary {
         skills,
         inventory,
         equipment: state.equipment.map(item => item.name),
-        nearbyNpcs: state.nearbyNpcs.slice(0, 20).map(npc => ({
-            name: npc.name,
-            distance: npc.distance,
-            options: npc.options,
-            combatLevel: npc.combatLevel || undefined,
-        })),
-        nearbyLocs: state.nearbyLocs.slice(0, 30).map(loc => ({
-            name: loc.name,
-            distance: loc.distance,
-            options: loc.options,
-        })),
+        nearbyNpcs,
+        nearbyLocs,
         groundItems: state.groundItems.slice(0, 30).map(item => ({
             name: item.name,
             count: item.count,
             distance: item.distance,
+            x: item.x,
+            z: item.z,
         })),
         ui: {
             dialogOpen: state.dialog.isOpen,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { safeModelName } from './domain-model';
 import type { EpisodeTrace, PlannerMethod, TaskSpec, VerifierResult } from './schemas';
@@ -10,6 +10,9 @@ Run repeated experiment episodes across methods and LLMs.
 
 Usage:
   bun experiments/run-batch.ts <task.json> --bot McPlan --runs 5 --methods few_shot,pddl,learned_domain --models none,gemma3:12b [--checkpoint runs/checkpoints/foo.sav] [--max-steps 10] [--max-replans 2] [--no-force-run] [--no-agentic-replan] [--no-agentic-explore]
+        [--episode-transition-log-task] [--episode-transition-log-task-dir DIR] [--episode-transition-log-trial-dir DIR] [--episode-no-transition-log-global]
+        [--episode-kb-task] [--episode-kb-task-dir DIR] [--episode-kb-trial-dir DIR] [--episode-no-kb-global]
+        [--wipe-global-kb-each-trial]
 
 This wraps, per trial:
   1. load-save.ts <bot> <task.startState.checkpointPath> --api <api>
@@ -52,7 +55,16 @@ function parseArgs() {
     let forceRun = true;
     let agenticReplan = true;
     let agenticExplore = true;
-    let maxReplans = 2;
+    let maxReplans = 3;
+    let episodeTransitionLogTask = false;
+    let episodeTransitionLogTaskDir = '';
+    let episodeTransitionLogTrialDir = '';
+    let episodeNoTransitionLogGlobal = false;
+    let episodeKbTask = false;
+    let episodeKbTaskDir = '';
+    let episodeKbTrialDir = '';
+    let episodeNoKbGlobal = false;
+    let wipeGlobalKbEachTrial = false;
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -81,6 +93,15 @@ function parseArgs() {
         else if (arg === '--agentic-explore') agenticExplore = true;
         else if (arg === '--no-agentic-explore') agenticExplore = false;
         else if (arg === '--max-replans') maxReplans = Number(args[++i] ?? maxReplans);
+        else if (arg === '--episode-transition-log-task') episodeTransitionLogTask = true;
+        else if (arg === '--episode-transition-log-task-dir') episodeTransitionLogTaskDir = args[++i] ?? '';
+        else if (arg === '--episode-transition-log-trial-dir') episodeTransitionLogTrialDir = args[++i] ?? '';
+        else if (arg === '--episode-no-transition-log-global') episodeNoTransitionLogGlobal = true;
+        else if (arg === '--episode-kb-task') episodeKbTask = true;
+        else if (arg === '--episode-kb-task-dir') episodeKbTaskDir = args[++i] ?? '';
+        else if (arg === '--episode-kb-trial-dir') episodeKbTrialDir = args[++i] ?? '';
+        else if (arg === '--episode-no-kb-global') episodeNoKbGlobal = true;
+        else if (arg === '--wipe-global-kb-each-trial') wipeGlobalKbEachTrial = true;
     }
 
     if (!taskPath || !botName || !Number.isFinite(runs) || runs < 1) usage();
@@ -108,6 +129,15 @@ function parseArgs() {
         agenticReplan,
         agenticExplore,
         maxReplans,
+        episodeTransitionLogTask,
+        episodeTransitionLogTaskDir,
+        episodeTransitionLogTrialDir,
+        episodeNoTransitionLogGlobal,
+        episodeKbTask,
+        episodeKbTaskDir,
+        episodeKbTrialDir,
+        episodeNoKbGlobal,
+        wipeGlobalKbEachTrial,
     };
 }
 
@@ -259,6 +289,9 @@ async function main() {
     mkdirSync(options.outDir, { recursive: true });
     mkdirSync(options.traceDir, { recursive: true });
     mkdirSync(options.domainDir, { recursive: true });
+    const defaultEpisodeTransitionTaskDir = join(options.domainDir, 'transitions');
+    const defaultEpisodeKbTaskDir = join(options.domainDir, 'kb');
+    const globalKbPath = join('runs', 'kb', 'global.json');
     mkdirSync(join(options.domainDir, 'state-snapshots'), { recursive: true });
 
     const domainByConfig = new Map<string, string>();
@@ -356,6 +389,15 @@ async function main() {
                 }
                 await waitForGatewayReady(options.gatewayHttp, options.botName, options.readyTimeout);
 
+                if (options.wipeGlobalKbEachTrial && existsSync(globalKbPath)) {
+                    try {
+                        unlinkSync(globalKbPath);
+                        console.log('[Batch] Wiped global KB before trial.');
+                    } catch {
+                        console.warn('[Batch] Failed to wipe global KB before trial.');
+                    }
+                }
+
                 let snapshotPath = '';
                 if (model !== 'none') {
                     snapshotPath = stateSnapshotPath(task, method, model, options.domainDir, trialIndex, run);
@@ -413,6 +455,44 @@ async function main() {
                     episodeCmd.push('--domain', domain);
                 }
 
+                if (options.episodeNoTransitionLogGlobal) {
+                    episodeCmd.push('--no-transition-log-global');
+                }
+                if (options.episodeTransitionLogTask) {
+                    episodeCmd.push(
+                        '--transition-log-task',
+                        '--transition-log-task-dir',
+                        options.episodeTransitionLogTaskDir || defaultEpisodeTransitionTaskDir,
+                    );
+                }
+                if (options.episodeTransitionLogTrialDir) {
+                    mkdirSync(options.episodeTransitionLogTrialDir, { recursive: true });
+                    const trialLogPath = join(
+                        options.episodeTransitionLogTrialDir,
+                        `${task.id}-trial-${trialIndex}-run-${run}.jsonl`,
+                    );
+                    episodeCmd.push('--transition-log-trial', trialLogPath);
+                }
+
+                if (options.episodeNoKbGlobal) {
+                    episodeCmd.push('--no-kb-global');
+                }
+                if (options.episodeKbTask) {
+                    episodeCmd.push(
+                        '--kb-task',
+                        '--kb-task-dir',
+                        options.episodeKbTaskDir || defaultEpisodeKbTaskDir,
+                    );
+                }
+                if (options.episodeKbTrialDir) {
+                    mkdirSync(options.episodeKbTrialDir, { recursive: true });
+                    const trialKbPath = join(
+                        options.episodeKbTrialDir,
+                        `${task.id}-${method}-trial-${trialIndex}-run-${run}.json`,
+                    );
+                    episodeCmd.push('--kb-trial', trialKbPath);
+                }
+
                 console.log('[Batch] Running episode...');
                 const episode = await runCommand(episodeCmd, process.cwd(), { printOutput: true });
                 const tracePath = latestTracePath(episode.output);
@@ -463,6 +543,16 @@ async function main() {
                         model,
                         '--api-base',
                         options.apiBase,
+                        ...(options.episodeKbTask || options.episodeKbTrialDir
+                            ? (() => {
+                                const kbTaskPath = join(options.episodeKbTaskDir || defaultEpisodeKbTaskDir, 'by-task', `${task.id}.json`);
+                                const kbTrialPath = options.episodeKbTrialDir
+                                    ? join(options.episodeKbTrialDir, `${task.id}-trial-${trialIndex}-run-${run}.json`)
+                                    : '';
+                                const kbPath = options.episodeKbTrialDir ? kbTrialPath : kbTaskPath;
+                                return kbPath ? ['--kb', kbPath] : [];
+                            })()
+                            : []),
                         '--out',
                         refinedDomain,
                     ]);

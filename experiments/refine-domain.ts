@@ -5,13 +5,14 @@ import { ACTION_DOCS, safeModelName, sanitizeLearnedDomainModel } from './domain
 import { exportPddl } from './pddl';
 import { chatCompletion, extractJsonObject } from './llm';
 import type { EpisodeTrace, LearnedDomainModel } from './schemas';
+import type { KnowledgeBaseData } from './knowledge-base';
 
 function usage(exitCode = 1): never {
     console.log(`
 Refine a learned domain model from an episode trace.
 
 Usage:
-  bun experiments/refine-domain.ts --domain runs/domain-models/model.json --trace runs/traces/episode.json --model gemma3:12b [--out runs/domain-models/refined.json]
+  bun experiments/refine-domain.ts --domain runs/domain-models/model.json --trace runs/traces/episode.json --model gemma3:12b [--kb runs/kb/global.json] [--out runs/domain-models/refined.json]
 
 The output can be fed back into run-episode.ts with --method pddl or learned_domain.
 `.trim());
@@ -27,6 +28,7 @@ function parseArgs() {
     let model = 'gemma3:12b';
     let apiBase = 'http://127.0.0.1:11434/v1';
     let outPath = '';
+    let kbPath = '';
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]!;
@@ -35,16 +37,58 @@ function parseArgs() {
         else if (arg === '--model') model = args[++i] ?? model;
         else if (arg === '--api-base') apiBase = args[++i] ?? apiBase;
         else if (arg === '--out') outPath = args[++i] ?? '';
+        else if (arg === '--kb') kbPath = args[++i] ?? '';
     }
 
     if (!domainPath || !tracePath) usage();
     if (!outPath) {
         outPath = join('runs', 'domain-models', `${Date.now()}-${safeModelName(model)}-refined.json`);
     }
-    return { domainPath, tracePath, model, apiBase, outPath };
+    return { domainPath, tracePath, model, apiBase, outPath, kbPath };
 }
 
-function refinementPrompt(domain: LearnedDomainModel, traceEnvelope: { trace: EpisodeTrace; verifier?: unknown }): string {
+function compactKbForPrompt(kb: KnowledgeBaseData): unknown {
+    const locNames = Object.keys(kb.locsByName ?? {});
+    const topLocs = locNames.slice(0, 60).map(name => {
+        const group = kb.locsByName[name]!;
+        const ids = Object.keys(group.byId ?? {});
+        return {
+            name,
+            ids: ids.slice(0, 10).map(id => {
+                const v = group.byId[id]!;
+                return {
+                    id: v.id,
+                    lastSeenTick: v.lastSeenTick,
+                    seenCount: v.seenCount,
+                    options: (v.options ?? []).slice(0, 8),
+                    positions: (v.positions ?? []).slice(0, 6),
+                };
+            }),
+        };
+    });
+    const npcNames = Object.keys(kb.npcsByName ?? {});
+    const topNpcs = npcNames.slice(0, 40).map(name => {
+        const group = kb.npcsByName[name]!;
+        const variantKeys = Object.keys(group.variants ?? {});
+        return {
+            name,
+            variants: variantKeys.slice(0, 6).map(k => {
+                const v = group.variants[k]!;
+                return {
+                    key: k,
+                    combatLevel: v.combatLevel,
+                    lastSeenTick: v.lastSeenTick,
+                    seenCount: v.seenCount,
+                    options: (v.options ?? []).slice(0, 8),
+                    positions: (v.positions ?? []).slice(0, 6),
+                };
+            }),
+        };
+    });
+    return { updatedAt: kb.updatedAt, topLocs, topNpcs };
+}
+
+function refinementPrompt(domain: LearnedDomainModel, traceEnvelope: { trace: EpisodeTrace; verifier?: unknown }, kb?: KnowledgeBaseData): string {
     const compactTrace = {
         task: traceEnvelope.trace.task,
         method: traceEnvelope.trace.method,
@@ -92,6 +136,8 @@ ${ACTION_DOCS}
 Previous domain model:
 ${JSON.stringify(domain, null, 2)}
 
+${kb ? `Persistent knowledge base snapshot (deduped observations across runs):\n${JSON.stringify(compactKbForPrompt(kb), null, 2)}\n` : ''}
+
 Episode trace and verifier:
 ${JSON.stringify(compactTrace, null, 2)}
 
@@ -103,6 +149,7 @@ Rules:
 - Use negativeEvidence for true failed preconditions/reachability/action mismatch.
 - If the trace shows a reachability failure followed by a recovery action such as opening a door/gate, add or refine an action schema for that recovery when executable.
 - If an agentic replan or exploration step solved a failure, encode that as symbolic action preconditions/effects and a "lessons" entry so the next episode's first plan can include it.
+- If the knowledge base contains stable facility coordinates (e.g. Range/Fire), encode them in "knownFacilities" so future episodes can exploit them without re-discovering.
 - Prefer observed environment evidence over wiki priors when they conflict.
 - If the trace shows repeated direct-action failure, consider whether a missing precondition, tool, location, or intermediate navigation action should be represented.
 - Update confidence values and notes based on observed success/failure.
@@ -110,16 +157,17 @@ Rules:
 }
 
 async function main() {
-    const { domainPath, tracePath, model, apiBase, outPath } = parseArgs();
+    const { domainPath, tracePath, model, apiBase, outPath, kbPath } = parseArgs();
     const domain = JSON.parse(readFileSync(domainPath, 'utf8')) as LearnedDomainModel;
     const traceEnvelope = JSON.parse(readFileSync(tracePath, 'utf8')) as { trace: EpisodeTrace; verifier?: unknown };
+    const kb = kbPath ? (JSON.parse(readFileSync(kbPath, 'utf8')) as KnowledgeBaseData) : undefined;
 
     const rawText = await chatCompletion({
         apiBase,
         model,
         messages: [
             { role: 'system', content: 'You refine symbolic planning domain models. Return strict JSON only.' },
-            { role: 'user', content: refinementPrompt(domain, traceEnvelope) },
+            { role: 'user', content: refinementPrompt(domain, traceEnvelope, kb) },
         ],
         temperature: 0.2,
     });

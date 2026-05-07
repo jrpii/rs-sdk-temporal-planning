@@ -2,6 +2,15 @@ import { defaultCookShrimpDomain } from './domain-model';
 import { symbolicPlan } from './pddl';
 import type { LearnedDomainModel, PlannerInput, PlannerMethod, PlannerOutput } from './schemas';
 
+/**
+ * Planner factory semantics:
+ *
+ * - `experiments/run-episode.ts` passes a concrete `LearnedDomainModel` into `createPlanner` unless
+ *   `--scripted-planner` is set with method `few_shot` or `static_rag`.
+ * - Whenever `domainModel` is passed, `SymbolicDomainPlanner` runs the in-process STRIPS-style forward search (`symbolicPlan` in `pddl.ts`).
+ * - Therefore `few_shot` / `static_rag` **episode runs default to symbolic planning**, not `ScriptedCookShrimpPlanner`,
+ *   despite the method name. Use `--scripted-planner` to force the scripted vertical-slice cook loop plan.
+ */
 export interface Planner {
     readonly method: PlannerMethod;
     plan(input: PlannerInput): Promise<PlannerOutput> | PlannerOutput;
@@ -65,7 +74,7 @@ export class SymbolicDomainPlanner implements Planner {
             ? { ...this.domainModel, actions: input.learnedActions }
             : this.domainModel;
 
-        const output = symbolicPlan(input.task, input.state, model);
+        const output = symbolicPlan(input.task, input.state, model, input.planExpand);
         return {
             ...output,
             verifierHints: input.task.success,

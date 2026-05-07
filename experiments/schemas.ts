@@ -103,6 +103,23 @@ export interface LearnedDomainModel {
     id: string;
     taskId?: string;
     description?: string;
+    /**
+     * Optional coordinate-grounded facilities/locations learned from KB + traces.
+     * This is intentionally minimal and task-agnostic: it stores *where* something is,
+     * not *why* it matters. Planning/execution may use it as a hint.
+     */
+    knownFacilities?: Array<{
+        /** Regex-like string used for matching (e.g. "Range|Fire"). */
+        namePattern: string;
+        x: number;
+        z: number;
+        level: number;
+        /** Optional stable loc id when known. */
+        locId?: number;
+        confidence: number;
+        provenance: Provenance[];
+        observedAtTick?: number;
+    }>;
     actions: LearnedActionSchema[];
     provenance: Provenance[];
     notes?: string[];
@@ -119,9 +136,37 @@ export interface StateSummary {
     skills: Record<string, { level: number; baseLevel: number; xp: number }>;
     inventory: Record<string, number>;
     equipment: string[];
-    nearbyNpcs: Array<{ name: string; distance: number; options: string[]; combatLevel?: number }>;
-    nearbyLocs: Array<{ name: string; distance: number; options: string[] }>;
-    groundItems: Array<{ name: string; count: number; distance: number }>;
+    /** Nearby NPCs grouped by name for search; variants split by combatLevel+options. */
+    nearbyNpcs: Record<string, {
+        name: string;
+        variants: Record<string, {
+            combatLevel?: number;
+            options: string[];
+            instances: Array<{
+                index: number;
+                x: number;
+                z: number;
+                distance: number;
+                inCombat: boolean;
+                hp?: number;
+                maxHp?: number;
+            }>;
+        }>;
+    }>;
+    /** Nearby locs grouped by name for search; variants split by id+options. */
+    nearbyLocs: Record<string, {
+        name: string;
+        variants: Record<string, {
+            id: number;
+            options: string[];
+            instances: Array<{
+                x: number;
+                z: number;
+                distance: number;
+            }>;
+        }>;
+    }>;
+    groundItems: Array<{ name: string; count: number; distance: number; x?: number; z?: number }>;
     ui: {
         dialogOpen: boolean;
         interfaceOpen: boolean;
@@ -200,6 +245,8 @@ export interface PlannerInput {
     state: StateSummary;
     learnedActions?: LearnedActionSchema[];
     retrievalContext?: string;
+    /** Passed to symbolic expansion (e.g. cap duplicated cook retries). */
+    planExpand?: { cookRepeatCap?: number };
 }
 
 export interface PlannerOutput {
@@ -209,12 +256,24 @@ export interface PlannerOutput {
     notes?: string;
 }
 
+/** High-level episode execution segment (for transition logs and traces). */
+export type ExecutionPhase =
+    | 'planned'
+    | 'discovery_initial'
+    | 'recovery'
+    | 'replanned_symbolic'
+    | 'replanned_llm';
+
 export interface PlanStep {
     stepIndex: number;
     naturalLanguage: string;
     actionSchemaId?: string;
+    /** Optional structured parameters for executors (kept small; logged in transitions). */
+    actionParams?: Record<string, unknown>;
     code?: string;
     expectedEffects?: DomainEffect[];
+    /** When set, copied onto ExecutionStep.phase for logging / traces. */
+    executionPhase?: ExecutionPhase;
 }
 
 export interface ExecutionStep {
@@ -226,6 +285,65 @@ export interface ExecutionStep {
     before: StateSummary;
     after: StateSummary;
     delta: StateDelta;
+    /** Segment label for logging (from PlanStep.executionPhase or inferred). */
+    phase?: ExecutionPhase;
+    /** Mirrors PlanStep.actionSchemaId when applicable (transition logs). */
+    actionSchemaId?: string;
+    /** Mirrors PlanStep.actionParams when applicable (transition logs). */
+    actionParams?: Record<string, unknown>;
+}
+
+/** Present when the symbolic planner returned no plan and discovery bootstrap ran. */
+export interface DiscoveryPhaseMeta {
+    reason: 'empty_initial_plan';
+    plannerNotes?: string;
+    budgetSteps: number;
+}
+
+/** One row in append-only transition logs (global / per-task / per-trial JSONL). */
+export interface TransitionLogRecord {
+    schemaVersion: 1;
+    episodeId: string;
+    tracePath: string;
+    taskId: string;
+    /** Minimal task copy for offline replay without the full trace JSON. */
+    taskSpecSnapshot: Pick<TaskSpec, 'id' | 'description' | 'maxSteps'> & { success: TaskSpec['success'] };
+    method: PlannerMethod;
+    modelName: string;
+    stepOrdinal: number;
+    phase: ExecutionPhase;
+    actionSchemaId?: string;
+    actionParams: Record<string, unknown>;
+    startedTick: number;
+    endedTick: number;
+    summaryBefore: StateSummary;
+    summaryAfter: StateSummary;
+    delta: StateDelta;
+    result: ActionResult;
+    verifierAfter: VerifierResult;
+    /** Delta from initial episode snapshot to summaryAfter (matches trace verifier inputs). */
+    cumulativeDeltaFromEpisodeStart: StateDelta;
+    /** Whether all task.success verifiers passed after this step. */
+    verifierProgressSuccess: boolean;
+    summaryBeforeHash?: string;
+    summaryAfterHash?: string;
+    /**
+     * Compact world-object observations for world-object memory / RAG (from raw SDK state after step).
+     *
+     * Grouped for searchability and minimal redundancy:
+     * kind -> name -> variantKey -> instances
+     */
+    observedWorldObjects?: {
+        loc?: Record<string, {
+            level: number;
+            variants: Record<string, {
+                id: number;
+                options: string[];
+                instances: Array<{ x: number; z: number; distance: number }>;
+            }>;
+        }>;
+    };
+    recordedAt: string;
 }
 
 export interface AgenticReplanEvent {
@@ -249,6 +367,8 @@ export interface AgenticReplanEvent {
 
 export interface EpisodeTrace {
     episodeId: string;
+    /** Output trace JSON path written by run-episode (for transition log correlation). */
+    tracePath?: string;
     method: PlannerMethod;
     task: TaskSpec;
     model?: {
@@ -258,6 +378,8 @@ export interface EpisodeTrace {
     };
     retrieval?: RetrievalTrace;
     plan: PlanStep[];
+    /** Symbolic planner produced no plan; synthetic discovery steps were injected. */
+    discoveryPhase?: DiscoveryPhaseMeta;
     agenticReplans?: AgenticReplanEvent[];
     execution: ExecutionStep[];
     metrics: {

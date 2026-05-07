@@ -75,8 +75,19 @@ function emptyState(): StateSummary {
         skills: { Cooking: { level: 1, baseLevel: 1, xp: 0 } },
         inventory: { 'Raw shrimps': 1 },
         equipment: [],
-        nearbyNpcs: [],
-        nearbyLocs: [{ name: 'Range', distance: 2, options: [] }],
+        nearbyNpcs: {},
+        nearbyLocs: {
+            Range: {
+                name: 'Range',
+                variants: {
+                    '0|': {
+                        id: 0,
+                        options: [],
+                        instances: [{ x: 0, z: 0, distance: 2 }],
+                    },
+                },
+            },
+        },
         groundItems: [],
         ui: { dialogOpen: false, interfaceOpen: false, shopOpen: false, bankOpen: false, modalOpen: false },
         recentMessages: [],
@@ -132,6 +143,9 @@ Return ONLY JSON matching this TypeScript shape:
   "provenance": [{ "source": "llm", "reference": "model name", "confidence": 0.0 }],
   "notes": ["uncertainties or stochastic outcomes"],
   "lessons": [],
+  "knownFacilities": [
+    { "namePattern": "Range|Fire", "x": 0, "z": 0, "level": 0, "locId": 0, "confidence": 0.0, "provenance": [{ "source": "environment", "reference": "KB or trace", "confidence": 0.0 }], "observedAtTick": 0 }
+  ],
   "actions": [{
     "id": "use_item_on_cooking_source",
     "name": "Use raw shrimps on cooking source",
@@ -185,7 +199,7 @@ function normalizeDomain(raw: unknown, task: TaskSpec, model: string): LearnedDo
         taskId: value.taskId || task.id,
         provenance: value.provenance?.length ? value.provenance : [{ source: 'llm', reference: model, confidence: 0.5 }],
         actions: value.actions?.length ? value.actions : fallback.actions,
-    }, task, fallback);
+    }, task, fallback, { includeRecoveryActions: true });
 }
 
 async function main() {

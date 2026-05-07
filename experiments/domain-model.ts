@@ -9,6 +9,172 @@ import type {
     VerifierSpec,
 } from './schemas';
 
+/** LLM output may include ids not in stricter types; filter before planning. */
+const KNOWN_PREDICATE_KINDS = new Set<string>([
+    'has_item',
+    'equipped_item',
+    'skill_at_least',
+    'near_loc',
+    'near_npc',
+    'at_position',
+    'bank_open',
+    'shop_open',
+    'dialog_state',
+    'interface_open',
+    'inventory_space',
+    'not_in_combat',
+    'reachable',
+    'varp_state',
+]);
+
+const KNOWN_EFFECT_KINDS = new Set<string>([
+    'item_added',
+    'item_removed',
+    'item_equipped',
+    'xp_gained',
+    'level_changed',
+    'near_loc',
+    'position_changed',
+    'dialog_opened',
+    'dialog_closed',
+    'interface_opened',
+    'interface_closed',
+    'bank_changed',
+    'shop_changed',
+    'combat_started',
+    'message_observed',
+    'reachable',
+    'varp_changed',
+]);
+
+function filterActionStructure(action: LearnedActionSchema): LearnedActionSchema {
+    return {
+        ...action,
+        preconditions: action.preconditions.filter(p => KNOWN_PREDICATE_KINDS.has(String(p.kind))),
+        effects: action.effects.filter(e => KNOWN_EFFECT_KINDS.has(String(e.kind))),
+    };
+}
+
+/** True if two normalized item names are trivial singular/plural variants (e.g. raw_shrimp vs raw_shrimps). */
+function sameItemAlias(a: string, b: string): boolean {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a + 's' === b) return true;
+    if (b + 's' === a) return true;
+    return false;
+}
+
+function stripVerifierAnchors(item: string): string {
+    return item.replace(/^\^|\$/g, '');
+}
+
+function fallbackInventoryItemNames(model: LearnedDomainModel): string[] {
+    const out: string[] = [];
+    for (const a of model.actions) {
+        for (const p of a.preconditions) {
+            if (p.kind === 'has_item' && p.args.item) out.push(String(p.args.item));
+        }
+        for (const e of a.effects) {
+            if ((e.kind === 'item_added' || e.kind === 'item_removed') && e.args.item) {
+                out.push(String(e.args.item));
+            }
+        }
+    }
+    return out;
+}
+
+function pickCanonicalItemName(
+    cluster: DomainPredicate[],
+    task: TaskSpec,
+    fallbackModel: LearnedDomainModel,
+): string {
+    const variants = cluster
+        .map(p => String(p.args.item ?? '').trim())
+        .filter(Boolean);
+    if (variants.length === 0) return 'unknown';
+
+    const goalNames = [
+        ...Object.keys(task.goalState?.inventoryContains ?? {}),
+        ...Object.keys(task.goalState?.inventoryGained ?? {}),
+    ].map(stripVerifierAnchors);
+
+    for (const goal of goalNames) {
+        const ng = normalizeFactName(goal);
+        for (const v of variants) {
+            if (sameItemAlias(ng, normalizeFactName(v))) return goal;
+        }
+    }
+
+    for (const fb of fallbackInventoryItemNames(fallbackModel)) {
+        const nf = normalizeFactName(fb);
+        for (const v of variants) {
+            if (sameItemAlias(nf, normalizeFactName(v))) return fb;
+        }
+    }
+
+    return variants.reduce((best, v) =>
+        normalizeFactName(v).length >= normalizeFactName(best).length ? v : best,
+    variants[0]!);
+}
+
+function clusterHasItemPredicates(preds: DomainPredicate[]): DomainPredicate[][] {
+    const hasItems = preds.filter(p => p.kind === 'has_item');
+    if (hasItems.length <= 1) return hasItems.map(p => [p]);
+
+    const clusters: DomainPredicate[][] = hasItems.map(p => [p]);
+    let merged = true;
+    while (merged) {
+        merged = false;
+        outer: for (let i = 0; i < clusters.length; i++) {
+            for (let j = i + 1; j < clusters.length; j++) {
+                const ni = normalizeFactName(String(clusters[i]![0]!.args.item ?? ''));
+                const nj = normalizeFactName(String(clusters[j]![0]!.args.item ?? ''));
+                if (sameItemAlias(ni, nj)) {
+                    clusters[i] = [...clusters[i]!, ...clusters[j]!];
+                    clusters.splice(j, 1);
+                    merged = true;
+                    break outer;
+                }
+            }
+        }
+    }
+    return clusters;
+}
+
+/** Merge duplicate has_item preconditions that only differ by trivial naming (LLM "Raw shrimp" vs game "Raw shrimps").
+ *  Otherwise each has_item becomes an AND group in symbolic planning and the action is never applicable. */
+function collapseDuplicateHasItemPreconditions(
+    action: LearnedActionSchema,
+    task: TaskSpec,
+    fallbackModel: LearnedDomainModel,
+): LearnedActionSchema {
+    const nonHas = action.preconditions.filter(p => p.kind !== 'has_item');
+    const hasItems = action.preconditions.filter(p => p.kind === 'has_item');
+    if (hasItems.length === 0) return action;
+
+    const mergedHas: DomainPredicate[] = [];
+    for (const cluster of clusterHasItemPredicates(action.preconditions)) {
+        if (cluster.length === 0) continue;
+        const item = pickCanonicalItemName(cluster, task, fallbackModel);
+        const count = Math.max(
+            ...cluster.map(p => (typeof p.args.count === 'number' ? p.args.count : 1) as number),
+        );
+        const confidence = Math.max(...cluster.map(p => p.confidence ?? 0));
+        const provenance = cluster.flatMap(p => p.provenance ?? []);
+        mergedHas.push({
+            kind: 'has_item',
+            args: { item, count },
+            confidence,
+            provenance: provenance.length ? provenance : human,
+        });
+    }
+
+    return {
+        ...action,
+        preconditions: [...nonHas, ...mergedHas],
+    };
+}
+
 export const EXECUTABLE_ACTION_IDS = [
     'use_item_on_cooking_source',
     'open_nearby_door',
@@ -99,8 +265,8 @@ export function stateFacts(summary: StateSummary): Set<string> {
         if (count > 0) facts.add(`has_item:${normalizeFactName(item)}`);
     }
 
-    for (const loc of summary.nearbyLocs) {
-        facts.add(`near_loc:${normalizeFactName(loc.name)}`);
+    for (const group of Object.values(summary.nearbyLocs)) {
+        facts.add(`near_loc:${normalizeFactName(group.name)}`);
     }
 
     for (const [skill, values] of Object.entries(summary.skills)) {
@@ -269,16 +435,28 @@ export function sanitizeLearnedDomainModel(
     fallback: LearnedDomainModel = defaultCookShrimpDomain(task.id),
     options: { includeRecoveryActions?: boolean } = {},
 ): LearnedDomainModel {
-    const executableActions = model.actions.filter(action => isExecutableActionId(action.id));
+    const executableActions = model.actions.filter(action => isExecutableActionId(action.id)).map(filterActionStructure);
     const mergedById = new Map<string, LearnedActionSchema>();
     const recoveryActions = options.includeRecoveryActions ? recoveryActionSchemas() : [];
-    for (const action of [...fallback.actions, ...executableActions, ...recoveryActions]) {
+    for (const action of [...fallback.actions.map(filterActionStructure), ...executableActions, ...recoveryActions]) {
         const existing = mergedById.get(action.id);
         mergedById.set(action.id, existing ? mergeAction(existing, action) : {
             ...action,
             negativeEvidence: action.negativeEvidence ?? [],
         });
     }
+
+    /** Shim executable recovery schemas into whatever the LLM emitted so symbolic planning can chain explore→cook. */
+    for (const recovery of recoveryActionSchemas()) {
+        const existing = mergedById.get(recovery.id);
+        if (existing) {
+            mergedById.set(recovery.id, mergeAction(existing, recovery));
+        }
+    }
+
+    const actionsWithCleanup = [...mergedById.values()]
+        .map(filterActionStructure)
+        .map(action => collapseDuplicateHasItemPreconditions(action, task, fallback));
 
     return {
         ...fallback,
@@ -287,7 +465,7 @@ export function sanitizeLearnedDomainModel(
         provenance: model.provenance?.length ? model.provenance : fallback.provenance,
         notes: [...(fallback.notes ?? []), ...(model.notes ?? [])],
         lessons: [...(fallback.lessons ?? []), ...(model.lessons ?? [])],
-        actions: [...mergedById.values()],
+        actions: actionsWithCleanup,
     };
 }
 
