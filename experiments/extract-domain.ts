@@ -146,6 +146,8 @@ ${retrievalContext ? `Retrieved 2004 wiki / Graph RAG context:\n${retrievalConte
 Use only the provided executable actions, the task JSON, ${state ? 'the live initial state,' : ''} ${retrievalContext ? 'retrieved context,' : ''} and your internal knowledge of 2004 RuneScape.
 Draft a compact symbolic domain model that predicts action preconditions and effects.
 If the live state suggests a reachability issue, closed door, missing item, missing tool, or wrong location, represent that as preconditions/actions/uncertainty instead of assuming the direct action can always execute.
+Model resource-harvesting actions (mining, fishing, woodcutting, similar "interact_loc" with options like Mine/Chop/Fish) as usually sending the resource directly to inventory (item_added) together with XP gain, not via ground items, unless the trace explicitly shows a ground drop and a successful pickup.
+Use pickup_ground_item primarily for items that are already visible in groundItems before the action (spawns, loot, drops), not as the default path for harvested resources.
 Do NOT invent facility coordinates. If you do not have real coordinates from the provided live initial state (or from retrievalContext), set "knownFacilities" to [].
 
 Return ONLY JSON matching this TypeScript shape (task-agnostic; use actionParams at execution-time for targeting):

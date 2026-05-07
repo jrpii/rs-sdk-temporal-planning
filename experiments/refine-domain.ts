@@ -153,7 +153,8 @@ Rules:
 - If the knowledge base contains stable facility coordinates (e.g. Range/Fire), encode them in "knownFacilities" so future episodes can exploit them without re-discovering.
 - Evidence-to-effects mapping (critical):
   - If a step is "interact_loc" with optionPattern matching "Mine" and delta.xpGained.Mining > 0, add an "xp_gained" effect with { skill: "Mining", minXp: 1 }.
-  - If a step is "interact_loc" with optionPattern matching "Mine" and delta.inventoryAdded includes "Iron ore", add an "item_added" effect with { item: "Iron ore", count: 1 }.
+  - If a step is "interact_loc" with optionPattern matching "Mine" and delta.inventoryAdded includes any "* ore" item and there is no successful "pickup_ground_item" step for that ore nearby in the trace, treat this as a direct inventory harvest and add an "item_added" effect for that ore (do not route it through ground items).
+  - For interact_loc in resource-harvesting tasks (mining, fishing, woodcutting), prefer modeling resource output as direct inventory + XP effects unless the trace explicitly shows the resource appearing on the ground and being picked up.
   - For interact_loc in general, prefer preconditions using "near_loc_option" when available: { kind: "near_loc_option", args: { loc: "<LocName>", option: "<Option>" } }.
 - Prefer observed environment evidence over wiki priors when they conflict.
 - If the trace shows repeated direct-action failure, consider whether a missing precondition, tool, location, or intermediate navigation action should be represented.

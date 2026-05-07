@@ -34,6 +34,44 @@ import type {
 import { diffStateSummaries, summarizeState } from './state-summary';
 import { evaluateVerifiers } from './verifier';
 
+function defaultOptionPatternForTask(task: TaskSpec): string | undefined {
+    const id = task.id.toLowerCase();
+    const desc = (task.description ?? '').toLowerCase();
+    const hay = `${id} ${desc}`;
+    if (/\bmine\b/.test(hay)) return 'Mine';
+    if (/\bfish\b/.test(hay)) return 'Fish';
+    if (/\bchop\b/.test(hay) || /\bwoodcut\b/.test(hay)) return 'Chop down';
+    if (/\bsmelt\b/.test(hay)) return 'Smelt';
+    if (/\btalk\b/.test(hay)) return 'Talk-to';
+    return undefined;
+}
+
+function fillMissingActionParams(task: TaskSpec, step: PlanStep): PlanStep {
+    if (!step.actionSchemaId) return step;
+    if (step.actionParams && Object.keys(step.actionParams).length > 0) return step;
+
+    const firstExploreTarget = task.taskHints?.explorationTargets?.[0];
+    const firstGoalItem = task.taskHints?.goalItems?.[0];
+    const optionPattern = defaultOptionPatternForTask(task);
+
+    if (step.actionSchemaId === 'explore_for_loc') {
+        return firstExploreTarget
+            ? { ...step, actionParams: { targetLocNamePattern: firstExploreTarget } }
+            : step;
+    }
+    if (step.actionSchemaId === 'pickup_ground_item') {
+        return firstGoalItem
+            ? { ...step, actionParams: { itemNamePattern: firstGoalItem } }
+            : step;
+    }
+    if (step.actionSchemaId === 'interact_loc') {
+        return (firstExploreTarget && optionPattern)
+            ? { ...step, actionParams: { locNamePattern: firstExploreTarget, optionPattern } }
+            : step;
+    }
+    return step;
+}
+
 function usage(exitCode = 1): never {
     console.log(`
 Run one experiment episode from a TaskSpec JSON file.
@@ -1090,7 +1128,7 @@ async function main() {
 
         console.log(`[Episode] Planner notes: ${plannerOutput.notes ?? 'none'}`);
         console.log('[Episode] Plan to execute:');
-        let plan = [...plannerOutput.plan.slice(0, task.maxSteps)];
+        let plan = [...plannerOutput.plan.slice(0, task.maxSteps)].map(step => fillMissingActionParams(task, step));
         let discoveryPhase: DiscoveryPhaseMeta | undefined;
         const symbolicPlanEmpty = plan.length === 0;
         if (symbolicPlanEmpty && discoveryOnEmptyPlan) {
